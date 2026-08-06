@@ -503,7 +503,8 @@ body.admin-page #love-admin-login-fab { display: none !important; }
           { id: 'album', label: '相册管理', icon: 'folder-heart' },
           { id: 'wishlist', label: '清单管理', icon: 'check-square' },
           { id: 'timeline', label: '点滴管理', icon: 'coffee' },
-          { id: 'letter', label: '信件管理', icon: 'mail' }
+          { id: 'letter', label: '信件管理', icon: 'mail' },
+          { id: 'backup', label: '备份与恢复', icon: 'save' }
         ];
 
         var menu = document.getElementById('admin-menu');
@@ -536,6 +537,12 @@ body.admin-page #love-admin-login-fab { display: none !important; }
           renderTab(id);
         }
 
+        function confirmSave(msg, callback) {
+          if (confirm(msg || '确定要保存修改吗？')) {
+            callback();
+          }
+        }
+
         function renderTab(id) {
           switch (id) {
             case 'site': renderSite(); break;
@@ -546,6 +553,7 @@ body.admin-page #love-admin-login-fab { display: none !important; }
             case 'wishlist': renderWishlist(); break;
             case 'timeline': renderTimeline(); break;
             case 'letter': renderLetter(); break;
+            case 'backup': renderBackup(); break;
           }
           if (window.lucide) lucide.createIcons();
         }
@@ -585,15 +593,17 @@ body.admin-page #love-admin-login-fab { display: none !important; }
             '</div>';
 
           document.getElementById('save-site').addEventListener('click', function () {
-            var site = LoveData.getSite();
-            var keys = ['homeTitle','homeSubtitle','footerTitle','footerWish','footerSign','leavingTitle','leavingSubtitle','albumTitle','albumSubtitle','listTitle','listSubtitle','thingsTitle','thingsSubtitle','aboutTitle','aboutSubtitle'];
-            keys.forEach(function (key) {
-              var el = document.getElementById('site-' + key);
-              if (el) site[key] = el.value.trim();
+            confirmSave('确定保存网站设置吗？', function () {
+              var site = LoveData.getSite();
+              var keys = ['homeTitle','homeSubtitle','footerTitle','footerWish','footerSign','leavingTitle','leavingSubtitle','albumTitle','albumSubtitle','listTitle','listSubtitle','thingsTitle','thingsSubtitle','aboutTitle','aboutSubtitle'];
+              keys.forEach(function (key) {
+                var el = document.getElementById('site-' + key);
+                if (el) site[key] = el.value.trim();
+              });
+              LoveData.setSite(site);
+              LoveData.applySiteText(document);
+              LoveAdmin.toast('网站设置已保存');
             });
-            LoveData.setSite(site);
-            LoveData.applySiteText(document);
-            LoveAdmin.toast('网站设置已保存');
           });
         }
 
@@ -616,11 +626,13 @@ body.admin-page #love-admin-login-fab { display: none !important; }
             '</div>';
 
           document.getElementById('save-password').addEventListener('click', function () {
-            var val = document.getElementById('new-password').value.trim();
-            if (!val) return;
-            LoveAdmin.setPassword(val);
-            LoveAdmin.toast('密码已保存');
-            renderPassword();
+            confirmSave('确定修改密码吗？', function () {
+              var val = document.getElementById('new-password').value.trim();
+              if (!val) return;
+              LoveAdmin.setPassword(val);
+              LoveAdmin.toast('密码已保存');
+              renderPassword();
+            });
           });
         }
 
@@ -659,9 +671,11 @@ body.admin-page #love-admin-login-fab { display: none !important; }
             });
           });
           document.getElementById('save-cover').addEventListener('click', function () {
-            LoveData.setCover(input.value.trim());
-            LoveAdmin.toast('封面已保存');
-            renderCover();
+            confirmSave('确定保存封面照片吗？', function () {
+              LoveData.setCover(input.value.trim());
+              LoveAdmin.toast('封面已保存');
+              renderCover();
+            });
           });
         }
 
@@ -925,15 +939,103 @@ body.admin-page #love-admin-login-fab { display: none !important; }
             '</div>';
 
           document.getElementById('save-letter').addEventListener('click', function () {
-            var updated = {
-              greeting: document.getElementById('letter-greeting').value.trim(),
-              signOff: document.getElementById('letter-sign').value.trim(),
-              dateText: document.getElementById('letter-date').value.trim(),
-              paragraphs: document.getElementById('letter-paragraphs').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean)
-            };
-            LoveData.saveLetter(updated);
-            LoveAdmin.toast('信件已保存');
-            renderLetter();
+            confirmSave('确定保存信件内容吗？', function () {
+              var updated = {
+                greeting: document.getElementById('letter-greeting').value.trim(),
+                signOff: document.getElementById('letter-sign').value.trim(),
+                dateText: document.getElementById('letter-date').value.trim(),
+                paragraphs: document.getElementById('letter-paragraphs').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean)
+              };
+              LoveData.saveLetter(updated);
+              LoveAdmin.toast('信件已保存');
+              renderLetter();
+            });
+          });
+        }
+
+        function renderBackup() {
+          content.innerHTML =
+            '<h2 class="h2" style="margin:0 0 4px;">备份与恢复</h2>' +
+            '<p class="caption" style="margin:0 0 24px;">导出所有数据备份，或从备份文件恢复</p>' +
+            '<div class="card" style="padding:24px; margin-bottom:24px;">' +
+              '<h3 class="h3" style="margin:0 0 12px;">导出备份</h3>' +
+              '<p class="body" style="margin:0 0 16px; color:var(--ink-2);">将当前所有数据（网站设置、留言、相册、清单、点滴、信件）导出为 JSON 备份文件。</p>' +
+              '<button id="export-backup" class="btn-primary">' +
+                '<i data-lucide="download" style="width:18px;height:18px;"></i>导出备份' +
+              '</button>' +
+            '</div>' +
+            '<div class="card" style="padding:24px; margin-bottom:24px;">' +
+              '<h3 class="h3" style="margin:0 0 12px;">恢复备份</h3>' +
+              '<p class="body" style="margin:0 0 16px; color:var(--ink-2);">选择之前导出的 JSON 备份文件进行恢复。恢复将覆盖当前所有数据，请谨慎操作。</p>' +
+              '<div class="admin-field">' +
+                '<label>选择备份文件</label>' +
+                '<input id="import-file" type="file" accept=".json" class="input" style="padding:10px 12px; height:auto;">' +
+              '</div>' +
+              '<button id="import-backup" class="btn-primary" style="background:var(--state-warning);">' +
+                '<i data-lucide="upload" style="width:18px;height:18px;"></i>恢复备份' +
+              '</button>' +
+              '<p id="import-status" class="caption" style="margin:12px 0 0; display:none;"></p>' +
+            '</div>' +
+            '<div class="card" style="padding:24px;">' +
+              '<h3 class="h3" style="margin:0 0 12px; color:var(--state-error);">重置数据</h3>' +
+              '<p class="body" style="margin:0 0 16px; color:var(--ink-2);">清除所有数据并恢复为默认内容。此操作不可撤销，建议先导出备份。</p>' +
+              '<button id="reset-data" class="btn-primary" style="background:var(--state-error);">' +
+                '<i data-lucide="alert-triangle" style="width:18px;height:18px;"></i>重置所有数据' +
+              '</button>' +
+            '</div>';
+
+          document.getElementById('export-backup').addEventListener('click', function () {
+            var data = LoveData.exportAllData();
+            var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'love-timer-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            LoveAdmin.toast('备份已导出');
+          });
+
+          var fileInput = document.getElementById('import-file');
+          document.getElementById('import-backup').addEventListener('click', function () {
+            var file = fileInput.files && fileInput.files[0];
+            if (!file) {
+              LoveAdmin.toast('请先选择备份文件');
+              return;
+            }
+            confirmSave('恢复备份将覆盖当前所有数据，确定继续吗？', function () {
+              var reader = new FileReader();
+              reader.onload = function (e) {
+                try {
+                  var json = JSON.parse(e.target.result);
+                  LoveData.importAllData(json);
+                  var status = document.getElementById('import-status');
+                  status.style.display = 'block';
+                  status.style.color = 'var(--state-success)';
+                  status.textContent = '备份恢复成功！页面将刷新以应用更改。';
+                  LoveAdmin.toast('备份恢复成功');
+                  setTimeout(function () { window.location.reload(); }, 1500);
+                } catch (err) {
+                  var status = document.getElementById('import-status');
+                  status.style.display = 'block';
+                  status.style.color = 'var(--state-error)';
+                  status.textContent = '恢复失败：' + err.message;
+                }
+              };
+              reader.readAsText(file);
+            });
+          });
+
+          document.getElementById('reset-data').addEventListener('click', function () {
+            confirmSave('⚠️ 此操作将清除所有数据并恢复默认内容，无法撤销！确定继续吗？', function () {
+              confirmSave('再次确认：真的要重置所有数据吗？', function () {
+                LoveData.resetAll();
+                LoveAdmin.toast('数据已重置，页面将刷新');
+                setTimeout(function () { window.location.reload(); }, 1500);
+              });
+            });
           });
         }
 

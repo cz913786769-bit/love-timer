@@ -386,6 +386,34 @@
     Object.keys(KEYS).forEach(function (k) { localStorage.removeItem(KEYS[k]); });
   }
 
+  function exportAllData() {
+    var data = {};
+    Object.keys(KEYS).forEach(function (k) {
+      var raw = localStorage.getItem(KEYS[k]);
+      if (raw) {
+        try { data[k] = JSON.parse(raw); } catch (e) { data[k] = raw; }
+      }
+    });
+    return {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      keys: KEYS,
+      data: data
+    };
+  }
+
+  function importAllData(json) {
+    if (!json || !json.data || !json.keys) {
+      throw new Error('备份文件格式不正确');
+    }
+    Object.keys(json.keys).forEach(function (k) {
+      var key = json.keys[k];
+      if (json.data[k] !== undefined) {
+        save(key, json.data[k]);
+      }
+    });
+  }
+
   window.LoveData = {
     KEYS: KEYS,
     DEFAULT_COVER: DEFAULT_COVER,
@@ -424,6 +452,8 @@
     getLetter: getLetter,
     saveLetter: saveLetter,
     resetAll: resetAll,
+    exportAllData: exportAllData,
+    importAllData: importAllData,
     generateId: generateId
   };
 })();

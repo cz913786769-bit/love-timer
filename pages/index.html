@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我们的小宇宙</title>
+    <style id="theme-vars">
+@import "tailwindcss";
+
+:root {
+  --love-background: #fff5f7;
+  --love-foreground: #4a3f41;
+  --love-card: #ffffff;
+  --love-card-foreground: #4a3f41;
+  --love-popover: #ffffff;
+  --love-popover-foreground: #4a3f41;
+  --love-primary: #f47298;
+  --love-primary-foreground: #ffffff;
+  --love-muted: #f9e8ed;
+  --love-muted-foreground: #8a7b7f;
+  --love-border: #f3d8e0;
+  --love-input: #ffffff;
+  --love-ring: #f47298;
+  --love-radius-small: 4px;
+  --love-radius-medium: 8px;
+  --love-radius-large: 16px;
+
+  --bg: #fff5f7;
+  --surface: #ffffff;
+  --surface-2: #fef0f3;
+  --ink: #4a3f41;
+  --ink-2: #6d5e62;
+  --ink-3: #9e8f94;
+  --line: #f3d8e0;
+  --brand: #f47298;
+  --brand-ink: #ffffff;
+  --brand-100: #ffe4eb;
+  --brand-200: #fec6d6;
+  --brand-300: #fda1bf;
+  --brand-400: #f97da7;
+  --brand-500: #f47298;
+  --brand-600: #d84e7a;
+  --brand-700: #b53761;
+  --state-success: #34c759;
+  --state-warning: #ff9500;
+  --state-error: #ff3b30;
+  --state-info: #5ac8fa;
+
+  --r-xs: 2px;
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 16px;
+  --r-pill: 9999px;
+  --shadow-1: 0 1px 2px rgba(74, 63, 65, 0.05), 0 1px 1px rgba(74, 63, 65, 0.03);
+  --shadow-2: 0 8px 24px -8px rgba(74, 63, 65, 0.15);
+  --shadow-3: 0 24px 60px -20px rgba(74, 63, 65, 0.22);
+
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 80px;
+  --s-9: 120px;
+
+  --font-display: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.dark {
+  --love-background: #181214;
+  --love-foreground: #f4e8ea;
+  --love-card: #221c1e;
+  --love-card-foreground: #f4e8ea;
+  --love-popover: #221c1e;
+  --love-popover-foreground: #f4e8ea;
+  --love-primary: #f47298;
+  --love-primary-foreground: #ffffff;
+  --love-muted: #2d2527;
+  --love-muted-foreground: #b5a7ab;
+  --love-border: #3b3134;
+  --love-input: #221c1e;
+  --love-ring: #f47298;
+
+  --bg: #181214;
+  --surface: #221c1e;
+  --surface-2: #2d2527;
+  --ink: #f4e8ea;
+  --ink-2: #d6c9cc;
+  --ink-3: #a89da0;
+  --line: #3b3134;
+  --brand: #f47298;
+  --brand-ink: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 6vw, 88px);
+  line-height: 1.02;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  word-break: keep-all;
+}
+
+.h1 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.5vw, 48px);
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  word-break: keep-all;
+}
+
+.h2 {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  word-break: keep-all;
+}
+
+.h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+}
+
+.body-l {
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.body {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.caption {
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: 0.005em;
+  color: var(--ink-3);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--brand);
+  color: var(--brand-ink);
+  border: none;
+  border-radius: var(--r-md);
+  padding: 12px 20px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 150ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.btn-primary:hover {
+  background-color: var(--brand-600);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 12px 20px;
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color 150ms cubic-bezier(0.2, 0.8, 0.2, 1), background-color 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.btn-secondary:hover {
+  border-color: var(--brand);
+  background-color: var(--brand-100);
+}
+
+.btn-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--brand);
+  border: none;
+  padding: 8px 0;
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.input {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  background-color: var(--love-input);
+  color: var(--love-foreground);
+  border: 1px solid var(--love-border);
+  border-radius: var(--r-md);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 150ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 2px var(--brand-200);
+}
+
+.input::placeholder {
+  color: var(--ink-3);
+}
+
+.card {
+  background-color: var(--surface);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: var(--r-pill);
+  background-color: var(--surface-2);
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.nav-link {
+  color: var(--ink-2);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.nav-link:hover,
+.nav-link[data-active="true"] {
+  color: var(--brand);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--love-background);
+    --color-foreground: var(--love-foreground);
+    --color-card: var(--love-card);
+    --color-card-foreground: var(--love-card-foreground);
+    --color-popover: var(--love-popover);
+    --color-popover-foreground: var(--love-popover-foreground);
+    --color-primary: var(--love-primary);
+    --color-primary-foreground: var(--love-primary-foreground);
+    --color-muted: var(--love-muted);
+    --color-muted-foreground: var(--love-muted-foreground);
+    --color-border: var(--love-border);
+    --color-input: var(--love-input);
+    --color-ring: var(--love-ring);
+    --radius-sm: var(--love-radius-small);
+    --radius-md: var(--love-radius-medium);
+    --radius-lg: var(--love-radius-large);
+  }
+  @layer base {
+    body { background: var(--love-background); color: var(--love-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--love-background); }
+      .text-background { color: var(--love-background); }
+      .border-background { border-color: var(--love-background); }
+      .ring-background { --tw-ring-color: var(--love-background); }
+      .bg-foreground { background-color: var(--love-foreground); }
+      .text-foreground { color: var(--love-foreground); }
+      .border-foreground { border-color: var(--love-foreground); }
+      .ring-foreground { --tw-ring-color: var(--love-foreground); }
+      .bg-card { background-color: var(--love-card); }
+      .text-card { color: var(--love-card); }
+      .border-card { border-color: var(--love-card); }
+      .ring-card { --tw-ring-color: var(--love-card); }
+      .bg-card-foreground { background-color: var(--love-card-foreground); }
+      .text-card-foreground { color: var(--love-card-foreground); }
+      .border-card-foreground { border-color: var(--love-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--love-card-foreground); }
+      .bg-popover { background-color: var(--love-popover); }
+      .text-popover { color: var(--love-popover); }
+      .border-popover { border-color: var(--love-popover); }
+      .ring-popover { --tw-ring-color: var(--love-popover); }
+      .bg-popover-foreground { background-color: var(--love-popover-foreground); }
+      .text-popover-foreground { color: var(--love-popover-foreground); }
+      .border-popover-foreground { border-color: var(--love-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--love-popover-foreground); }
+      .bg-primary { background-color: var(--love-primary); }
+      .text-primary { color: var(--love-primary); }
+      .border-primary { border-color: var(--love-primary); }
+      .ring-primary { --tw-ring-color: var(--love-primary); }
+      .bg-primary-foreground { background-color: var(--love-primary-foreground); }
+      .text-primary-foreground { color: var(--love-primary-foreground); }
+      .border-primary-foreground { border-color: var(--love-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--love-primary-foreground); }
+      .bg-muted { background-color: var(--love-muted); }
+      .text-muted { color: var(--love-muted); }
+      .border-muted { border-color: var(--love-muted); }
+      .ring-muted { --tw-ring-color: var(--love-muted); }
+      .bg-muted-foreground { background-color: var(--love-muted-foreground); }
+      .text-muted-foreground { color: var(--love-muted-foreground); }
+      .border-muted-foreground { border-color: var(--love-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--love-muted-foreground); }
+      .bg-border { background-color: var(--love-border); }
+      .text-border { color: var(--love-border); }
+      .border-border { border-color: var(--love-border); }
+      .ring-border { --tw-ring-color: var(--love-border); }
+      .bg-input { background-color: var(--love-input); }
+      .text-input { color: var(--love-input); }
+      .border-input { border-color: var(--love-input); }
+      .ring-input { --tw-ring-color: var(--love-input); }
+      .bg-ring { background-color: var(--love-ring); }
+      .text-ring { color: var(--love-ring); }
+      .border-ring { border-color: var(--love-ring); }
+      .ring-ring { --tw-ring-color: var(--love-ring); }
+    </style>
+    <style>
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      .tabular-nums { font-variant-numeric: tabular-nums; }
+      .glass {
+        background: rgba(255, 255, 255, 0.82);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+      }
+      .nav-card {
+        transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .nav-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px -12px rgba(74, 63, 65, 0.12);
+      }
+      [data-icon] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+        background-color: currentColor;
+      }
+    </style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+    <audio id="bg-music" src="../assets/music/there-is-romance.mp3" loop preload="auto"></audio>
+
+    <header style="position: sticky; top: 0; z-index: 50; background: rgba(255, 245, 247, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);">
+      <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between;">
+        <a href="index.html" data-dom-id="nav-index" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 20px;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 999px; background: var(--brand); color: var(--brand-ink);">
+            <i data-lucide="heart" style="width: 18px; height: 18px;"></i>
+          </span>
+          <span data-site-key="homeTitle">我们的小宇宙</span>
+        </a>
+        <nav style="display: flex; align-items: center; gap: 8px;">
+          <a href="index.html" data-dom-id="nav-index" class="nav-link" data-active="true" style="padding: 8px 14px; border-radius: var(--r-md);">首页</a>
+          <a href="leaving.html" data-dom-id="nav-leaving" class="nav-link" style="padding: 8px 14px; border-radius: var(--r-md);">留言板</a>
+          <a href="love-album.html" data-dom-id="nav-love-album" class="nav-link" style="padding: 8px 14px; border-radius: var(--r-md);">相册</a>
+          <a href="love-list.html" data-dom-id="nav-love-list" class="nav-link" style="padding: 8px 14px; border-radius: var(--r-md);">清单</a>
+          <a href="little-things.html" data-dom-id="nav-little-things" class="nav-link" style="padding: 8px 14px; border-radius: var(--r-md);">点滴</a>
+          <a href="about-us.html" data-dom-id="nav-about-us" class="nav-link" style="padding: 8px 14px; border-radius: var(--r-md);">关于我们</a>
+        </nav>
+        <button id="music-toggle" class="btn-secondary" style="padding: 8px 14px; font-size: 14px;" aria-label="播放背景音乐">
+          <i data-lucide="music" style="width: 16px; height: 16px;"></i>
+          <span id="music-label">播放音乐</span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="relative flex items-center justify-center overflow-hidden" style="min-height: calc(100vh - 72px);">
+        <img id="hero-cover" src="../assets/banner.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" style="opacity: 0.35;">
+        <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(255,245,247,0.35) 0%, rgba(255,245,247,0.88) 100%);"></div>
+
+        <button id="cover-edit-toggle" class="love-admin-only btn-secondary absolute top-6 right-6 z-20" style="padding: 8px 14px; font-size: 14px;">更换封面</button>
+
+        <form id="cover-edit-form" class="love-admin-form absolute top-6 right-6 z-20 card p-4" style="display: none; width: min(360px, calc(100vw - 48px));">
+          <div class="field" style="margin-bottom: 12px;">
+            <label for="cover-url" style="display: block; margin-bottom: 6px; font-size: 13px; color: var(--ink-2); font-weight: 500;">图片 URL</label>
+            <input id="cover-url" class="input" type="text" placeholder="输入图片地址" style="height: 40px; font-size: 14px;">
+          </div>
+          <div class="field" style="margin-bottom: 12px;">
+            <label for="cover-file" style="display: block; margin-bottom: 6px; font-size: 13px; color: var(--ink-2); font-weight: 500;">本地上传</label>
+            <input id="cover-file" type="file" accept="image/*" class="input" style="height: auto; padding: 8px 10px; font-size: 14px;">
+          </div>
+          <div class="actions" style="display: flex; gap: 8px;">
+            <button type="submit" class="btn-primary" style="padding: 8px 14px; font-size: 14px;">保存</button>
+            <button type="button" id="cover-edit-cancel" class="btn-secondary" style="padding: 8px 14px; font-size: 14px;">取消</button>
+          </div>
+        </form>
+
+        <div class="relative z-10 w-full px-6 py-16 flex flex-col items-center text-center" style="max-width: 960px;">
+          <div class="flex items-center justify-center mb-8" style="gap: 0;">
+            <div style="width: 96px; height: 96px; border-radius: 999px; background: var(--surface); border: 3px solid var(--brand-200); display: flex; align-items: center; justify-content: center; color: var(--brand); font-size: 24px; font-weight: 600; box-shadow: var(--shadow-2); z-index: 1;">陈卓卓</div>
+            <div style="width: 44px; height: 44px; border-radius: 999px; background: var(--brand); color: var(--brand-ink); display: flex; align-items: center; justify-content: center; margin: 0 -10px; z-index: 2; box-shadow: var(--shadow-1);">
+              <i data-lucide="heart" style="width: 22px; height: 22px;"></i>
+            </div>
+            <div style="width: 96px; height: 96px; border-radius: 999px; background: var(--surface); border: 3px solid var(--brand-200); display: flex; align-items: center; justify-content: center; color: var(--brand); font-size: 18px; font-weight: 600; box-shadow: var(--shadow-2); z-index: 1;">嘉嘉小星星</div>
+          </div>
+
+          <div class="glass w-full px-8 py-10 md:px-12 md:py-12" style="border-radius: var(--r-lg); box-shadow: var(--shadow-2);">
+            <p class="caption mb-4" style="color: var(--brand-600); font-weight: 500;">我们的故事，从 2026 年 4 月 12 日开始</p>
+            <h1 id="home-title" class="h1 mb-2" style="color: var(--ink);" data-site-key="homeTitle">我们的小宇宙</h1>
+            <p id="home-subtitle" class="body-l mb-8" style="color: var(--ink-2);" data-site-key="homeSubtitle">从第一次见面，到未来的每一天</p>
+
+            <div id="timer-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-6">
+              <div class="flex flex-col items-center">
+                <span id="days" class="display tabular-nums" style="color: var(--brand);">0</span>
+                <span class="caption" style="color: var(--ink-3);">天</span>
+              </div>
+              <div class="flex flex-col items-center">
+                <span id="hours" class="display tabular-nums" style="color: var(--brand);">0</span>
+                <span class="caption" style="color: var(--ink-3);">时</span>
+              </div>
+              <div class="flex flex-col items-center">
+                <span id="minutes" class="display tabular-nums" style="color: var(--brand);">0</span>
+                <span class="caption" style="color: var(--ink-3);">分</span>
+              </div>
+              <div class="flex flex-col items-center">
+                <span id="seconds" class="display tabular-nums" style="color: var(--brand);">0</span>
+                <span class="caption" style="color: var(--ink-3);">秒</span>
+              </div>
+            </div>
+
+            <p id="timer-subtitle" class="body-l" style="color: var(--ink-2);">这是我们一起走过的第 0 天 0 时 0 分 0 秒</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="w-full px-6 py-16" style="background: var(--bg);">
+        <div style="max-width: 1200px; margin: 0 auto;">
+          <div class="text-center mb-10">
+            <h2 class="h2 mb-3" style="color: var(--ink);">记录我们的爱</h2>
+            <p class="body" style="color: var(--ink-3);">每一个角落，都藏着属于我们的小幸福</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <a href="leaving.html" data-dom-id="cta-leaving" class="nav-card card p-6 text-left no-underline" style="color: var(--ink);">
+              <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                <i data-lucide="message-circle" style="width: 24px; height: 24px;"></i>
+              </div>
+              <h3 class="h3 mb-2">去留言</h3>
+              <p class="body" style="color: var(--ink-3);">写下想对彼此说的话，把温柔都收藏在这里。</p>
+            </a>
+
+            <a href="love-album.html" data-dom-id="cta-album" class="nav-card card p-6 text-left no-underline" style="color: var(--ink);">
+              <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                <i data-lucide="image" style="width: 24px; height: 24px;"></i>
+              </div>
+              <h3 class="h3 mb-2">看相册</h3>
+              <p class="body" style="color: var(--ink-3);">一张张合照，拼出我们走过的风景与笑容。</p>
+            </a>
+
+            <a href="love-list.html" data-dom-id="cta-list" class="nav-card card p-6 text-left no-underline" style="color: var(--ink);">
+              <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                <i data-lucide="check-square" style="width: 24px; height: 24px;"></i>
+              </div>
+              <h3 class="h3 mb-2">看清单</h3>
+              <p class="body" style="color: var(--ink-3);">打卡想一起做的事，让未来充满期待。</p>
+            </a>
+
+            <a href="little-things.html" data-dom-id="cta-little" class="nav-card card p-6 text-left no-underline" style="color: var(--ink);">
+              <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                <i data-lucide="coffee" style="width: 24px; height: 24px;"></i>
+              </div>
+              <h3 class="h3 mb-2">看点滴</h3>
+              <p class="body" style="color: var(--ink-3);">记录日常的小确幸，平凡日子里也有光。</p>
+            </a>
+
+            <a href="about-us.html" data-dom-id="cta-about" class="nav-card card p-6 text-left no-underline" style="color: var(--ink);">
+              <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                <i data-lucide="users" style="width: 24px; height: 24px;"></i>
+              </div>
+              <h3 class="h3 mb-2">关于我们</h3>
+              <p class="body" style="color: var(--ink-3);">从相遇到现在，慢慢讲述我们的故事。</p>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer style="background: var(--surface); border-top: 1px solid var(--line); padding: 48px 24px;">
+      <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center;">
+        <div style="display: flex; align-items: center; gap: 8px; color: var(--brand); font-weight: 600;">
+          <i data-lucide="heart" style="width: 18px; height: 18px;"></i>
+          <span data-site-key="footerTitle">我们的小宇宙</span>
+        </div>
+        <p data-site-key="footerWish" style="color: var(--ink-2); font-size: 15px; margin: 0; max-width: 640px;">祝你天天开心，快快乐乐，心有所想，皆有所成。</p>
+        <p data-site-key="footerSign" style="color: var(--ink-3); font-size: 13px; margin: 0;">陈卓卓 致 嘉嘉小星星</p>
+        <a id="footer-admin" data-dom-id="footer-admin" href="admin-login.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--ink-3);font-size:13px;text-decoration:none;padding:6px 12px;border:1px solid var(--line);border-radius:var(--r-md);transition:all .2s;">
+          <i data-lucide="settings" style="width:14px;height:14px;"></i>
+          <span>管理入口</span>
+        </a>
+      </div>
+    </footer>
+
+    <script>
+      (function () {
+        const start = new Date('2026-04-12T00:00:00').getTime();
+        const daysEl = document.getElementById('days');
+        const hoursEl = document.getElementById('hours');
+        const minutesEl = document.getElementById('minutes');
+        const secondsEl = document.getElementById('seconds');
+        const subtitleEl = document.getElementById('timer-subtitle');
+
+        function update() {
+          const now = Date.now();
+          const diff = Math.max(0, now - start);
+
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+          const minutes = Math.floor((diff / (1000 * 60)) % 60);
+          const seconds = Math.floor((diff / 1000) % 60);
+
+          daysEl.textContent = days;
+          hoursEl.textContent = String(hours).padStart(2, '0');
+          minutesEl.textContent = String(minutes).padStart(2, '0');
+          secondsEl.textContent = String(seconds).padStart(2, '0');
+
+          subtitleEl.textContent = '这是我们一起走过的第 ' + days + ' 天 ' + hours + ' 时 ' + minutes + ' 分 ' + seconds + ' 秒';
+        }
+
+        update();
+        setInterval(update, 1000);
+      })();
+
+      (function () {
+        const music = document.getElementById('bg-music');
+        const toggle = document.getElementById('music-toggle');
+        const label = document.getElementById('music-label');
+        music.volume = 0.15;
+
+        toggle.addEventListener('click', function () {
+          if (music.paused) {
+            music.play().then(function () {
+              label.textContent = '暂停音乐';
+            }).catch(function () {});
+          } else {
+            music.pause();
+            label.textContent = '播放音乐';
+          }
+        });
+      })();
+    </script>
+    <script src="../assets/js/admin-data.js"></script>
+    <script src="../assets/js/admin-core.js"></script>
+    <script>
+      (function () {
+        LoveData.applySiteText(document);
+        document.title = LoveData.getSite().homeTitle || '我们的小宇宙';
+
+        var coverImg = document.getElementById('hero-cover');
+        coverImg.src = LoveData.getCover();
+
+        var toggleEl = document.getElementById('cover-edit-toggle');
+        var formEl = document.getElementById('cover-edit-form');
+        var cancelEl = document.getElementById('cover-edit-cancel');
+        var urlInput = document.getElementById('cover-url');
+        var fileInput = document.getElementById('cover-file');
+
+        function openEdit() {
+          urlInput.value = coverImg.src;
+          formEl.style.display = 'block';
+        }
+
+        function closeEdit() {
+          formEl.style.display = 'none';
+          fileInput.value = '';
+        }
+
+        toggleEl.addEventListener('click', function () { openEdit(); });
+        cancelEl.addEventListener('click', function () { closeEdit(); });
+
+        fileInput.addEventListener('change', function () {
+          var file = this.files && this.files[0];
+          if (!file) return;
+          LoveData.readLocalImage(file, function (err, dataUrl) {
+            if (err) { LoveAdmin.toast(err.message); return; }
+            urlInput.value = dataUrl;
+          });
+        });
+
+        formEl.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var url = urlInput.value.trim();
+          if (!url) return;
+          LoveData.setCover(url);
+          coverImg.src = url;
+          closeEdit();
+          if (window.LoveAdmin && LoveAdmin.toast) LoveAdmin.toast('封面已更新');
+        });
+      })();
+    </script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

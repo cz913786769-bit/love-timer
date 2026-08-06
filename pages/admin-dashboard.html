@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台</title>
+    <style id="theme-vars">
+@import "tailwindcss";
+
+:root {
+  --love-background: #fff5f7;
+  --love-foreground: #4a3f41;
+  --love-card: #ffffff;
+  --love-card-foreground: #4a3f41;
+  --love-popover: #ffffff;
+  --love-popover-foreground: #4a3f41;
+  --love-primary: #f47298;
+  --love-primary-foreground: #ffffff;
+  --love-muted: #f9e8ed;
+  --love-muted-foreground: #8a7b7f;
+  --love-border: #f3d8e0;
+  --love-input: #ffffff;
+  --love-ring: #f47298;
+  --love-radius-small: 4px;
+  --love-radius-medium: 8px;
+  --love-radius-large: 16px;
+
+  --bg: #fff5f7;
+  --surface: #ffffff;
+  --surface-2: #fef0f3;
+  --ink: #4a3f41;
+  --ink-2: #6d5e62;
+  --ink-3: #9e8f94;
+  --line: #f3d8e0;
+  --brand: #f47298;
+  --brand-ink: #ffffff;
+  --brand-100: #ffe4eb;
+  --brand-200: #fec6d6;
+  --brand-300: #fda1bf;
+  --brand-400: #f97da7;
+  --brand-500: #f47298;
+  --brand-600: #d84e7a;
+  --brand-700: #b53761;
+  --state-success: #34c759;
+  --state-warning: #ff9500;
+  --state-error: #ff3b30;
+  --state-info: #5ac8fa;
+
+  --r-xs: 2px;
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 16px;
+  --r-pill: 9999px;
+  --shadow-1: 0 1px 2px rgba(74, 63, 65, 0.05), 0 1px 1px rgba(74, 63, 65, 0.03);
+  --shadow-2: 0 8px 24px -8px rgba(74, 63, 65, 0.15);
+  --shadow-3: 0 24px 60px -20px rgba(74, 63, 65, 0.22);
+
+  --font-display: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+
+.dark {
+  --love-background: #181214;
+  --love-foreground: #f4e8ea;
+  --love-card: #221c1e;
+  --love-card-foreground: #f4e8ea;
+  --love-popover: #221c1e;
+  --love-popover-foreground: #f4e8ea;
+  --love-primary: #f47298;
+  --love-primary-foreground: #ffffff;
+  --love-muted: #2d2527;
+  --love-muted-foreground: #b5a7ab;
+  --love-border: #3b3134;
+  --love-input: #221c1e;
+  --love-ring: #f47298;
+
+  --bg: #181214;
+  --surface: #221c1e;
+  --surface-2: #2d2527;
+  --ink: #f4e8ea;
+  --ink-2: #d6c9cc;
+  --ink-3: #a89da0;
+  --line: #3b3134;
+  --brand: #f47298;
+  --brand-ink: #ffffff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.h1 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.5vw, 48px);
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  word-break: keep-all;
+}
+
+.h2 {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  word-break: keep-all;
+}
+
+.h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 600;
+  word-break: keep-all;
+}
+
+.body {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.caption {
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: 0.005em;
+  color: var(--ink-3);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--brand);
+  color: var(--brand-ink);
+  border: none;
+  border-radius: var(--r-md);
+  padding: 12px 20px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 150ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.btn-primary:hover {
+  background-color: var(--brand-600);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 12px 20px;
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color 150ms cubic-bezier(0.2, 0.8, 0.2, 1), background-color 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.btn-secondary:hover {
+  border-color: var(--brand);
+  background-color: var(--brand-100);
+}
+
+.input {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  background-color: var(--love-input);
+  color: var(--love-foreground);
+  border: 1px solid var(--love-border);
+  border-radius: var(--r-md);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 150ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 2px var(--brand-200);
+}
+
+.input::placeholder { color: var(--ink-3); }
+
+.card {
+  background-color: var(--surface);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+}
+
+.nav-link {
+  color: var(--ink-2);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.nav-link:hover,
+.nav-link[data-active="true"] { color: var(--brand); }
+
+body.admin-page #love-admin-bar,
+body.admin-page #love-admin-login-fab { display: none !important; }
+
+.admin-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .admin-layout { grid-template-columns: 1fr; }
+}
+
+.admin-menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: none;
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.admin-menu-btn:hover { background: var(--surface-2); color: var(--ink); }
+.admin-menu-btn[data-active="true"] { background: var(--brand-100); color: var(--brand); }
+
+.admin-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-list-item:last-child { border-bottom: none; }
+
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: var(--brand-100);
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.admin-field { margin-bottom: 14px; }
+
+.admin-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
+.admin-field input,
+.admin-field textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.admin-field input:focus,
+.admin-field textarea:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 2px var(--brand-200);
+}
+
+.admin-field textarea { resize: vertical; min-height: 80px; }
+
+.admin-small-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--love-background);
+    --color-foreground: var(--love-foreground);
+    --color-card: var(--love-card);
+    --color-card-foreground: var(--love-card-foreground);
+    --color-popover: var(--love-popover);
+    --color-popover-foreground: var(--love-popover-foreground);
+    --color-primary: var(--love-primary);
+    --color-primary-foreground: var(--love-primary-foreground);
+    --color-muted: var(--love-muted);
+    --color-muted-foreground: var(--love-muted-foreground);
+    --color-border: var(--love-border);
+    --color-input: var(--love-input);
+    --color-ring: var(--love-ring);
+    --radius-sm: var(--love-radius-small);
+    --radius-md: var(--love-radius-medium);
+    --radius-lg: var(--love-radius-large);
+  }
+  @layer base {
+    body { background: var(--love-background); color: var(--love-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--love-background); }
+      .text-background { color: var(--love-background); }
+      .border-background { border-color: var(--love-background); }
+      .ring-background { --tw-ring-color: var(--love-background); }
+      .bg-foreground { background-color: var(--love-foreground); }
+      .text-foreground { color: var(--love-foreground); }
+      .border-foreground { border-color: var(--love-foreground); }
+      .ring-foreground { --tw-ring-color: var(--love-foreground); }
+      .bg-card { background-color: var(--love-card); }
+      .text-card { color: var(--love-card); }
+      .border-card { border-color: var(--love-card); }
+      .ring-card { --tw-ring-color: var(--love-card); }
+      .bg-card-foreground { background-color: var(--love-card-foreground); }
+      .text-card-foreground { color: var(--love-card-foreground); }
+      .border-card-foreground { border-color: var(--love-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--love-card-foreground); }
+      .bg-popover { background-color: var(--love-popover); }
+      .text-popover { color: var(--love-popover); }
+      .border-popover { border-color: var(--love-popover); }
+      .ring-popover { --tw-ring-color: var(--love-popover); }
+      .bg-popover-foreground { background-color: var(--love-popover-foreground); }
+      .text-popover-foreground { color: var(--love-popover-foreground); }
+      .border-popover-foreground { border-color: var(--love-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--love-popover-foreground); }
+      .bg-primary { background-color: var(--love-primary); }
+      .text-primary { color: var(--love-primary); }
+      .border-primary { border-color: var(--love-primary); }
+      .ring-primary { --tw-ring-color: var(--love-primary); }
+      .bg-primary-foreground { background-color: var(--love-primary-foreground); }
+      .text-primary-foreground { color: var(--love-primary-foreground); }
+      .border-primary-foreground { border-color: var(--love-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--love-primary-foreground); }
+      .bg-muted { background-color: var(--love-muted); }
+      .text-muted { color: var(--love-muted); }
+      .border-muted { border-color: var(--love-muted); }
+      .ring-muted { --tw-ring-color: var(--love-muted); }
+      .bg-muted-foreground { background-color: var(--love-muted-foreground); }
+      .text-muted-foreground { color: var(--love-muted-foreground); }
+      .border-muted-foreground { border-color: var(--love-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--love-muted-foreground); }
+      .bg-border { background-color: var(--love-border); }
+      .text-border { color: var(--love-border); }
+      .border-border { border-color: var(--love-border); }
+      .ring-border { --tw-ring-color: var(--love-border); }
+      .bg-input { background-color: var(--love-input); }
+      .text-input { color: var(--love-input); }
+      .border-input { border-color: var(--love-input); }
+      .ring-input { --tw-ring-color: var(--love-input); }
+      .bg-ring { background-color: var(--love-ring); }
+      .text-ring { color: var(--love-ring); }
+      .border-ring { border-color: var(--love-ring); }
+      .ring-ring { --tw-ring-color: var(--love-ring); }
+    </style>
+</head>
+<body class="admin-page min-h-screen font-sans antialiased" style="display:flex; flex-direction:column;">
+    <header style="position: sticky; top: 0; z-index: 50; background: rgba(255, 245, 247, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);">
+      <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between;">
+        <a href="index.html" data-dom-id="nav-index" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 20px;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 999px; background: var(--brand); color: var(--brand-ink);">
+            <i data-lucide="heart" style="width: 18px; height: 18px;"></i>
+          </span>
+          <span>管理后台</span>
+        </a>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:var(--r-pill); background:var(--surface-2); color:var(--ink-2); font-size:13px; font-weight:500;">
+            <i data-lucide="shield-check" style="width:14px;height:14px;"></i>
+            已登录
+          </span>
+          <button id="admin-logout" data-dom-id="admin-logout" class="btn-secondary" style="padding:8px 16px; font-size:14px;">
+            <i data-lucide="log-out" style="width:16px;height:16px;"></i>
+            退出登录
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main style="flex:1; padding: 32px 24px;">
+      <div style="max-width:1200px; margin:0 auto;">
+        <div class="admin-layout">
+          <aside class="card" style="padding:20px; height:fit-content;">
+            <h3 class="h3" style="margin:0 0 16px 4px;">管理菜单</h3>
+            <nav id="admin-menu" style="display:flex; flex-direction:column; gap:4px;"></nav>
+          </aside>
+
+          <section id="admin-content" class="card" style="padding:28px; min-height:480px;"></section>
+        </div>
+      </div>
+    </main>
+
+    <footer style="background: var(--surface); border-top: 1px solid var(--line); padding: 48px 24px;">
+      <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center;">
+        <div style="display: flex; align-items: center; gap: 8px; color: var(--brand); font-weight: 600;">
+          <i data-lucide="heart" style="width: 18px; height: 18px;"></i>
+          <span data-site-key="footerTitle">我们的小宇宙</span>
+        </div>
+        <p data-site-key="footerWish" style="color: var(--ink-2); font-size: 15px; margin: 0; max-width: 640px;">祝你天天开心，快快乐乐，心有所想，皆有所成。</p>
+        <p data-site-key="footerSign" style="color: var(--ink-3); font-size: 13px; margin: 0;">陈卓卓 致 嘉嘉小星星</p>
+      </div>
+    </footer>
+
+    <script src="../assets/js/admin-data.js"></script>
+    <script src="../assets/js/admin-core.js"></script>
+    <script>
+      (function () {
+        if (!window.LoveAdmin || !LoveAdmin.isLoggedIn()) {
+          window.location.href = 'admin-login.html';
+          return;
+        }
+
+        function esc(str) {
+          return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function fmtDate(iso) {
+          try { return new Date(iso).toLocaleString('zh-CN'); } catch (e) { return iso; }
+        }
+
+        var tabs = [
+          { id: 'site', label: '网站设置', icon: 'settings' },
+          { id: 'password', label: '修改密码', icon: 'lock' },
+          { id: 'cover', label: '封面照片', icon: 'image' },
+          { id: 'messages', label: '留言管理', icon: 'message-circle' },
+          { id: 'album', label: '相册管理', icon: 'folder-heart' },
+          { id: 'wishlist', label: '清单管理', icon: 'check-square' },
+          { id: 'timeline', label: '点滴管理', icon: 'coffee' },
+          { id: 'letter', label: '信件管理', icon: 'mail' }
+        ];
+
+        var menu = document.getElementById('admin-menu');
+        var content = document.getElementById('admin-content');
+        var currentTab = 'site';
+
+        function buildMenu() {
+          menu.innerHTML = tabs.map(function (t) {
+            return '<button class="admin-menu-btn" data-tab="' + esc(t.id) + '">' +
+              '<i data-lucide="' + esc(t.icon) + '" style="width:18px;height:18px;"></i>' +
+              esc(t.label) + '</button>';
+          }).join('');
+
+          menu.querySelectorAll('[data-tab]').forEach(function (btn) {
+            btn.addEventListener('click', function () { setTab(this.dataset.tab); });
+          });
+          updateMenuActive();
+        }
+
+        function updateMenuActive() {
+          menu.querySelectorAll('[data-tab]').forEach(function (btn) {
+            var active = btn.dataset.tab === currentTab;
+            btn.dataset.active = active;
+          });
+        }
+
+        function setTab(id) {
+          currentTab = id;
+          updateMenuActive();
+          renderTab(id);
+        }
+
+        function renderTab(id) {
+          switch (id) {
+            case 'site': renderSite(); break;
+            case 'password': renderPassword(); break;
+            case 'cover': renderCover(); break;
+            case 'messages': renderMessages(); break;
+            case 'album': renderAlbum(); break;
+            case 'wishlist': renderWishlist(); break;
+            case 'timeline': renderTimeline(); break;
+            case 'letter': renderLetter(); break;
+          }
+          if (window.lucide) lucide.createIcons();
+        }
+
+        function siteField(key, label, placeholder) {
+          var site = LoveData.getSite();
+          return '<div class="admin-field">' +
+            '<label>' + esc(label) + '</label>' +
+            '<input id="site-' + esc(key) + '" type="text" class="input" value="' + esc(site[key] || '') + '" placeholder="' + esc(placeholder || '') + '">' +
+            '</div>';
+        }
+
+        function renderSite() {
+          content.innerHTML =
+            '<h2 class="h2" style="margin:0 0 4px;">网站设置</h2>' +
+            '<p class="caption" style="margin:0 0 24px;">编辑首页标题、副标题与页脚文案</p>' +
+            '<div class="card" style="padding:24px; max-width:640px;">' +
+              '<h3 class="h3" style="margin:0 0 16px;">首页</h3>' +
+              siteField('homeTitle', '首页大标题', '我们的小宇宙') +
+              siteField('homeSubtitle', '首页副标题', '从第一次见面，到未来的每一天') +
+              '<h3 class="h3" style="margin:24px 0 16px;">页脚</h3>' +
+              siteField('footerTitle', '页脚标题', '我们的小宇宙') +
+              siteField('footerWish', '页脚祝福语', '祝你天天开心，快快乐乐，心有所想，皆有所成。') +
+              siteField('footerSign', '页脚署名', '陈卓卓 致 嘉嘉小星星') +
+              '<h3 class="h3" style="margin:24px 0 16px;">各页面标题</h3>' +
+              siteField('leavingTitle', '留言板标题', '甜蜜留言') +
+              siteField('leavingSubtitle', '留言板副标题', '留下一句想对 Ta 说的话吧。') +
+              siteField('albumTitle', '相册标题', '恋爱相册') +
+              siteField('albumSubtitle', '相册副标题', '把一起走过的日子，都收进这一页。') +
+              siteField('listTitle', '清单标题', '恋爱清单') +
+              siteField('listSubtitle', '清单副标题', '想和 Ta 一起完成的小事。') +
+              siteField('thingsTitle', '点滴标题', '点点滴滴') +
+              siteField('thingsSubtitle', '点滴副标题', '记录我们慢慢靠近的每一天。') +
+              siteField('aboutTitle', '关于我们标题', '关于我们') +
+              siteField('aboutSubtitle', '关于我们副标题', '从相遇到现在，慢慢讲述我们的故事。') +
+              '<button id="save-site" class="btn-primary" style="margin-top:8px;">保存设置</button>' +
+            '</div>';
+
+          document.getElementById('save-site').addEventListener('click', function () {
+            var site = LoveData.getSite();
+            var keys = ['homeTitle','homeSubtitle','footerTitle','footerWish','footerSign','leavingTitle','leavingSubtitle','albumTitle','albumSubtitle','listTitle','listSubtitle','thingsTitle','thingsSubtitle','aboutTitle','aboutSubtitle'];
+            keys.forEach(function (key) {
+              var el = document.getElementById('site-' + key);
+              if (el) site[key] = el.value.trim();
+            });
+            LoveData.setSite(site);
+            LoveData.applySiteText(document);
+            LoveAdmin.toast('网站设置已保存');
+          });
+        }
+
+        function renderPassword() {
+          var pwd = LoveAdmin.getPassword();
+          var masked = '•'.repeat(Math.min(pwd.length, 12));
+          content.innerHTML =
+            '<h2 class="h2" style="margin:0 0 4px;">修改密码</h2>' +
+            '<p class="caption" style="margin:0 0 24px;">修改后请牢记新的管理密码</p>' +
+            '<div class="card" style="padding:24px; max-width:480px;">' +
+              '<div class="admin-field">' +
+                '<label>当前密码</label>' +
+                '<input type="text" value="' + masked + '" disabled style="background:var(--surface-2); color:var(--ink-3);">' +
+              '</div>' +
+              '<div class="admin-field">' +
+                '<label>新密码</label>' +
+                '<input id="new-password" type="password" class="input" placeholder="输入新密码">' +
+              '</div>' +
+              '<button id="save-password" class="btn-primary">保存密码</button>' +
+            '</div>';
+
+          document.getElementById('save-password').addEventListener('click', function () {
+            var val = document.getElementById('new-password').value.trim();
+            if (!val) return;
+            LoveAdmin.setPassword(val);
+            LoveAdmin.toast('密码已保存');
+            renderPassword();
+          });
+        }
+
+        function renderCover() {
+          var url = LoveData.getCover();
+          content.innerHTML =
+            '<h2 class="h2" style="margin:0 0 4px;">封面照片</h2>' +
+            '<p class="caption" style="margin:0 0 24px;">从本地上传或输入图片地址，设置首页封面</p>' +
+            '<div class="card" style="padding:24px; max-width:640px;">' +
+              '<div style="margin-bottom:16px;">' +
+                '<img id="cover-preview" src="' + esc(url) + '" style="max-width:100%; max-height:260px; border-radius:var(--r-md); border:1px solid var(--line); display:block;" onerror="this.style.display=\'none\'">' +
+              '</div>' +
+              '<div class="admin-field">' +
+                '<label>图片 URL</label>' +
+                '<input id="cover-url" type="text" class="input" value="' + esc(url) + '" placeholder="输入图片地址">' +
+              '</div>' +
+              '<div class="admin-field">' +
+                '<label>本地上传</label>' +
+                '<input id="cover-file" type="file" accept="image/*" class="input" style="padding:10px 12px; height:auto;">' +
+              '</div>' +
+              '<button id="save-cover" class="btn-primary">保存封面</button>' +
+            '</div>';
+
+          var input = document.getElementById('cover-url');
+          var fileInput = document.getElementById('cover-file');
+          var preview = document.getElementById('cover-preview');
+          input.addEventListener('input', function () { preview.style.display = 'block'; preview.src = this.value; });
+          fileInput.addEventListener('change', function () {
+            var file = this.files && this.files[0];
+            if (!file) return;
+            LoveData.readLocalImage(file, function (err, dataUrl) {
+              if (err) { LoveAdmin.toast(err.message); return; }
+              preview.style.display = 'block';
+              preview.src = dataUrl;
+              input.value = dataUrl;
+            });
+          });
+          document.getElementById('save-cover').addEventListener('click', function () {
+            LoveData.setCover(input.value.trim());
+            LoveAdmin.toast('封面已保存');
+            renderCover();
+          });
+        }
+
+        function renderMessages() {
+          var msgs = LoveData.getMessages();
+          var html = '<h2 class="h2" style="margin:0 0 4px;">留言管理</h2>' +
+            '<p class="caption" style="margin:0 0 24px;">管理访客留言</p>';
+
+          if (!msgs.length) {
+            html += '<p class="caption">暂无留言</p>';
+          } else {
+            html += '<div class="card" style="padding:0 24px;">';
+            msgs.forEach(function (m) {
+              html +=
+                '<div class="admin-list-item">' +
+                  '<div style="flex:1; min-width:0;">' +
+                    '<div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; flex-wrap:wrap;">' +
+                      '<span class="admin-badge">' + esc(m.nickname || '匿名') + '</span>' +
+                      '<span class="caption">' + fmtDate(m.createdAt) + '</span>' +
+                    '</div>' +
+                    '<p class="body" style="margin:0; word-break:break-word;">' + esc(m.text) + '</p>' +
+                  '</div>' +
+                  '<button class="btn-secondary" data-del-msg="' + esc(m.id) + '" style="padding:8px 12px; font-size:13px; flex-shrink:0;">' +
+                    '<i data-lucide="trash-2" style="width:16px;height:16px;"></i>删除' +
+                  '</button>' +
+                '</div>';
+            });
+            html += '</div>';
+          }
+          content.innerHTML = html;
+
+          content.querySelectorAll('[data-del-msg]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              LoveData.deleteMessage(this.dataset.delMsg);
+              LoveAdmin.toast('留言已删除');
+              renderMessages();
+            });
+          });
+        }
+
+        function renderAlbum() {
+          var album = LoveData.getAlbum();
+          var html = '<h2 class="h2" style="margin:0 0 4px;">相册管理</h2>' +
+            '<p class="caption" style="margin:0 0 24px;">管理相册分组与照片</p>';
+
+          html +=
+            '<div class="card" style="padding:24px; margin-bottom:24px;">' +
+              '<h3 class="h3" style="margin:0 0 16px;">添加新分组</h3>' +
+              '<div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">' +
+                '<div class="admin-field" style="margin:0;"><label>日期</label><input id="new-group-date" type="date" class="input"></div>' +
+                '<div class="admin-field" style="margin:0;"><label>标题</label><input id="new-group-title" type="text" class="input" placeholder="例如：野餐 · 山野来信"></div>' +
+              '</div>' +
+              '<button id="add-group" class="btn-primary" style="margin-top:16px;">添加分组</button>' +
+            '</div>';
+
+          if (!album.length) {
+            html += '<p class="caption">暂无相册分组</p>';
+          }
+
+          album.forEach(function (g) {
+            html +=
+              '<div class="card" style="padding:24px; margin-bottom:16px;">' +
+                '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:12px;">' +
+                  '<div>' +
+                    '<h3 class="h3" style="margin:0 0 4px;">' + esc(g.title) + '</h3>' +
+                    '<p class="caption" style="margin:0;">' + esc(g.date) + ' · ' + (g.photos ? g.photos.length : 0) + ' 张照片</p>' +
+                  '</div>' +
+                  '<button class="btn-secondary" data-del-group="' + esc(g.id) + '" style="padding:8px 12px; font-size:13px; flex-shrink:0;">' +
+                    '<i data-lucide="trash-2" style="width:16px;height:16px;"></i>删除整组' +
+                  '</button>' +
+                '</div>';
+
+            if (g.photos && g.photos.length) {
+              html += '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:12px; margin-bottom:16px;">';
+              g.photos.forEach(function (p) {
+                html +=
+                  '<div style="border:1px solid var(--line); border-radius:var(--r-md); overflow:hidden;">' +
+                    '<img src="' + esc(p.src) + '" style="width:100%; height:96px; object-fit:cover; display:block;" loading="lazy" onerror="this.style.display=\'none\'">' +
+                    '<p class="caption" style="margin:0; padding:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + esc(p.caption) + '</p>' +
+                  '</div>';
+              });
+              html += '</div>';
+            }
+
+            html +=
+              '<div style="display:grid; grid-template-columns:1fr 1fr auto; gap:10px; align-items:end; border-top:1px solid var(--line); padding-top:14px;">' +
+                '<div class="admin-field" style="margin:0;"><label>照片地址</label><input type="text" class="input photo-src" data-group="' + esc(g.id) + '" placeholder="../assets/..."></div>' +
+                '<div class="admin-field" style="margin:0;"><label>说明</label><input type="text" class="input photo-caption" data-group="' + esc(g.id) + '" placeholder="照片说明"></div>' +
+                '<button class="btn-primary add-photo" data-group="' + esc(g.id) + '" style="padding:10px 14px; font-size:14px;">添加</button>' +
+              '</div>' +
+            '</div>';
+          });
+
+          content.innerHTML = html;
+
+          document.getElementById('add-group').addEventListener('click', function () {
+            var date = document.getElementById('new-group-date').value.trim();
+            var title = document.getElementById('new-group-title').value.trim();
+            if (!date || !title) return;
+            LoveData.addAlbumGroup({ date: date, title: title });
+            LoveAdmin.toast('分组已添加');
+            renderAlbum();
+          });
+
+          content.querySelectorAll('[data-del-group]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              if (confirm('确定删除该分组及其所有照片？')) {
+                LoveData.deleteAlbumGroup(this.dataset.delGroup);
+                LoveAdmin.toast('分组已删除');
+                renderAlbum();
+              }
+            });
+          });
+
+          content.querySelectorAll('.add-photo').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var gid = this.dataset.group;
+              var src = content.querySelector('.photo-src[data-group="' + gid + '"]').value.trim();
+              var caption = content.querySelector('.photo-caption[data-group="' + gid + '"]').value.trim();
+              if (!src) return;
+              LoveData.addPhoto(gid, { src: src, caption: caption });
+              LoveAdmin.toast('照片已添加');
+              renderAlbum();
+            });
+          });
+        }
+
+        function renderWishlist() {
+          var list = LoveData.getWishlist();
+          var html = '<h2 class="h2" style="margin:0 0 4px;">清单管理</h2>' +
+            '<p class="caption" style="margin:0 0 24px;">一起完成的小事</p>';
+
+          html +=
+            '<div class="card" style="padding:24px; margin-bottom:24px;">' +
+              '<div style="display:flex; gap:10px;">' +
+                '<input id="new-wish" type="text" class="input" placeholder="想一起做的事..." style="flex:1;">' +
+                '<button id="add-wish" class="btn-primary">添加</button>' +
+              '</div>' +
+            '</div>';
+
+          if (!list.length) {
+            html += '<p class="caption">暂无清单事项</p>';
+          } else {
+            html += '<div class="card" style="padding:0 24px;">';
+            list.forEach(function (item, idx) {
+              html +=
+                '<div class="admin-list-item" style="align-items:center;">' +
+                  '<label style="display:flex; align-items:center; gap:12px; flex:1; cursor:pointer;">' +
+                    '<input type="checkbox" data-wish-idx="' + idx + '" ' + (item.done ? 'checked' : '') + ' style="width:18px; height:18px; accent-color:var(--brand); flex-shrink:0;">' +
+                    '<span class="body" style="margin:0; ' + (item.done ? 'text-decoration:line-through; color:var(--ink-3);' : '') + ' word-break:break-word;">' + esc(item.text) + '</span>' +
+                  '</label>' +
+                  '<button class="btn-secondary" data-del-wish="' + idx + '" style="padding:8px 12px; font-size:13px; flex-shrink:0;">' +
+                    '<i data-lucide="trash-2" style="width:16px;height:16px;"></i>删除' +
+                  '</button>' +
+                '</div>';
+            });
+            html += '</div>';
+          }
+          content.innerHTML = html;
+
+          document.getElementById('add-wish').addEventListener('click', function () {
+            var text = document.getElementById('new-wish').value.trim();
+            if (!text) return;
+            LoveData.addWishlist(text);
+            LoveAdmin.toast('事项已添加');
+            renderWishlist();
+          });
+
+          content.querySelectorAll('[data-wish-idx]').forEach(function (cb) {
+            cb.addEventListener('change', function () {
+              LoveData.updateWishlist(Number(this.dataset.wishIdx), { done: this.checked });
+              LoveAdmin.toast(this.checked ? '已标记完成' : '已取消完成');
+              renderWishlist();
+            });
+          });
+
+          content.querySelectorAll('[data-del-wish]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              LoveData.deleteWishlist(Number(this.dataset.delWish));
+              LoveAdmin.toast('事项已删除');
+              renderWishlist();
+            });
+          });
+        }
+
+        function renderTimeline() {
+          var list = LoveData.getTimeline();
+          var html = '<h2 class="h2" style="margin:0 0 4px;">点滴管理</h2>' +
+            '<p class="caption" style="margin:0 0 24px;">记录日常小确幸</p>';
+
+          html +=
+            '<div class="card" style="padding:24px; margin-bottom:24px;">' +
+              '<h3 class="h3" style="margin:0 0 16px;">添加新点滴</h3>' +
+              '<div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">' +
+                '<div class="admin-field"><label>日期</label><input id="new-tl-date" type="date" class="input"></div>' +
+                '<div class="admin-field"><label>标签</label><input id="new-tl-tag" type="text" class="input" placeholder="例如：日常"></div>' +
+                '<div class="admin-field"><label>标题</label><input id="new-tl-title" type="text" class="input" placeholder="标题"></div>' +
+                '<div class="admin-field"><label>封面</label><input id="new-tl-cover" type="text" class="input" placeholder="图片地址"></div>' +
+                '<div class="admin-field" style="grid-column:1 / -1;"><label>内容</label><textarea id="new-tl-text" class="input" style="height:auto; min-height:100px; padding:12px 14px;" placeholder="写下这段回忆..."></textarea></div>' +
+              '</div>' +
+              '<button id="add-timeline" class="btn-primary" style="margin-top:8px;">添加点滴</button>' +
+            '</div>';
+
+          if (!list.length) {
+            html += '<p class="caption">暂无点滴记录</p>';
+          } else {
+            html += '<div class="card" style="padding:0 24px;">';
+            list.forEach(function (item) {
+              html +=
+                '<div class="admin-list-item">' +
+                  '<img src="' + esc(item.cover) + '" class="admin-small-img" loading="lazy" onerror="this.style.display=\'none\'">' +
+                  '<div style="flex:1; min-width:0;">' +
+                    '<div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; flex-wrap:wrap;">' +
+                      '<span class="admin-badge">' + esc(item.date) + '</span>' +
+                      '<span class="admin-badge" style="background:var(--surface-2); color:var(--ink-2);">' + esc(item.tag) + '</span>' +
+                      '<span class="body" style="font-weight:600;">' + esc(item.title) + '</span>' +
+                    '</div>' +
+                    '<p class="body" style="margin:0; color:var(--ink-2); word-break:break-word;">' + esc(item.text) + '</p>' +
+                  '</div>' +
+                  '<button class="btn-secondary" data-del-tl="' + esc(item.id) + '" style="padding:8px 12px; font-size:13px; flex-shrink:0;">' +
+                    '<i data-lucide="trash-2" style="width:16px;height:16px;"></i>删除' +
+                  '</button>' +
+                '</div>';
+            });
+            html += '</div>';
+          }
+          content.innerHTML = html;
+
+          document.getElementById('add-timeline').addEventListener('click', function () {
+            var date = document.getElementById('new-tl-date').value.trim();
+            var tag = document.getElementById('new-tl-tag').value.trim();
+            var title = document.getElementById('new-tl-title').value.trim();
+            var cover = document.getElementById('new-tl-cover').value.trim();
+            var text = document.getElementById('new-tl-text').value.trim();
+            if (!date || !title || !text) return;
+            LoveData.addTimeline({ date: date, tag: tag, title: title, cover: cover, text: text });
+            LoveAdmin.toast('点滴已添加');
+            renderTimeline();
+          });
+
+          content.querySelectorAll('[data-del-tl]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              LoveData.deleteTimeline(this.dataset.delTl);
+              LoveAdmin.toast('点滴已删除');
+              renderTimeline();
+            });
+          });
+        }
+
+        function renderLetter() {
+          var letter = LoveData.getLetter();
+          content.innerHTML =
+            '<h2 class="h2" style="margin:0 0 4px;">信件管理</h2>' +
+            '<p class="caption" style="margin:0 0 24px;">编辑给嘉嘉小星星的信</p>' +
+            '<div class="card" style="padding:24px;">' +
+              '<div class="admin-field"><label>称呼</label><input id="letter-greeting" type="text" class="input" value="' + esc(letter.greeting) + '"></div>' +
+              '<div class="admin-field"><label>落款</label><input id="letter-sign" type="text" class="input" value="' + esc(letter.signOff) + '"></div>' +
+              '<div class="admin-field"><label>日期文字</label><input id="letter-date" type="text" class="input" value="' + esc(letter.dateText) + '"></div>' +
+              '<div class="admin-field"><label>正文段落（每段一行）</label><textarea id="letter-paragraphs" class="input" style="height:auto; min-height:200px; padding:12px 14px;">' + esc((letter.paragraphs || []).join('\n')) + '</textarea></div>' +
+              '<button id="save-letter" class="btn-primary">保存信件</button>' +
+            '</div>';
+
+          document.getElementById('save-letter').addEventListener('click', function () {
+            var updated = {
+              greeting: document.getElementById('letter-greeting').value.trim(),
+              signOff: document.getElementById('letter-sign').value.trim(),
+              dateText: document.getElementById('letter-date').value.trim(),
+              paragraphs: document.getElementById('letter-paragraphs').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean)
+            };
+            LoveData.saveLetter(updated);
+            LoveAdmin.toast('信件已保存');
+            renderLetter();
+          });
+        }
+
+        document.getElementById('admin-logout').addEventListener('click', function () {
+          LoveAdmin.logout();
+          window.location.href = 'admin-login.html';
+        });
+
+        buildMenu();
+        renderTab(currentTab);
+        LoveData.applySiteText(document);
+        lucide.createIcons();
+      })();
+    </script>
+</body>
+</html>

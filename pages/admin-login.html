@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员登录</title>
+    <style id="theme-vars">
+@import "tailwindcss";
+
+:root {
+  --love-background: #fff5f7;
+  --love-foreground: #4a3f41;
+  --love-card: #ffffff;
+  --love-card-foreground: #4a3f41;
+  --love-popover: #ffffff;
+  --love-popover-foreground: #4a3f41;
+  --love-primary: #f47298;
+  --love-primary-foreground: #ffffff;
+  --love-muted: #f9e8ed;
+  --love-muted-foreground: #8a7b7f;
+  --love-border: #f3d8e0;
+  --love-input: #ffffff;
+  --love-ring: #f47298;
+  --love-radius-small: 4px;
+  --love-radius-medium: 8px;
+  --love-radius-large: 16px;
+
+  --bg: #fff5f7;
+  --surface: #ffffff;
+  --surface-2: #fef0f3;
+  --ink: #4a3f41;
+  --ink-2: #6d5e62;
+  --ink-3: #9e8f94;
+  --line: #f3d8e0;
+  --brand: #f47298;
+  --brand-ink: #ffffff;
+  --brand-100: #ffe4eb;
+  --brand-200: #fec6d6;
+  --brand-300: #fda1bf;
+  --brand-400: #f97da7;
+  --brand-500: #f47298;
+  --brand-600: #d84e7a;
+  --brand-700: #b53761;
+  --state-success: #34c759;
+  --state-warning: #ff9500;
+  --state-error: #ff3b30;
+  --state-info: #5ac8fa;
+
+  --r-xs: 2px;
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 16px;
+  --r-pill: 9999px;
+  --shadow-1: 0 1px 2px rgba(74, 63, 65, 0.05), 0 1px 1px rgba(74, 63, 65, 0.03);
+  --shadow-2: 0 8px 24px -8px rgba(74, 63, 65, 0.15);
+  --shadow-3: 0 24px 60px -20px rgba(74, 63, 65, 0.22);
+
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 80px;
+  --s-9: 120px;
+
+  --font-display: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.dark {
+  --love-background: #181214;
+  --love-foreground: #f4e8ea;
+  --love-card: #221c1e;
+  --love-card-foreground: #f4e8ea;
+  --love-popover: #221c1e;
+  --love-popover-foreground: #f4e8ea;
+  --love-primary: #f47298;
+  --love-primary-foreground: #ffffff;
+  --love-muted: #2d2527;
+  --love-muted-foreground: #b5a7ab;
+  --love-border: #3b3134;
+  --love-input: #221c1e;
+  --love-ring: #f47298;
+
+  --bg: #181214;
+  --surface: #221c1e;
+  --surface-2: #2d2527;
+  --ink: #f4e8ea;
+  --ink-2: #d6c9cc;
+  --ink-3: #a89da0;
+  --line: #3b3134;
+  --brand: #f47298;
+  --brand-ink: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.h1 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.5vw, 48px);
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  word-break: keep-all;
+}
+
+.h2 {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+  word-break: keep-all;
+}
+
+.h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+}
+
+.body {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.caption {
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: 0.005em;
+  color: var(--ink-3);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--brand);
+  color: var(--brand-ink);
+  border: none;
+  border-radius: var(--r-md);
+  padding: 12px 20px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 150ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.btn-primary:hover {
+  background-color: var(--brand-600);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 12px 20px;
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color 150ms cubic-bezier(0.2, 0.8, 0.2, 1), background-color 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.btn-secondary:hover {
+  border-color: var(--brand);
+  background-color: var(--brand-100);
+}
+
+.input {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  background-color: var(--love-input);
+  color: var(--love-foreground);
+  border: 1px solid var(--love-border);
+  border-radius: var(--r-md);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 150ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 2px var(--brand-200);
+}
+
+.input::placeholder {
+  color: var(--ink-3);
+}
+
+.card {
+  background-color: var(--surface);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+}
+
+.nav-link {
+  color: var(--ink-2);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.nav-link:hover,
+.nav-link[data-active="true"] {
+  color: var(--brand);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+body.admin-page #love-admin-bar,
+body.admin-page #love-admin-login-fab {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--love-background);
+    --color-foreground: var(--love-foreground);
+    --color-card: var(--love-card);
+    --color-card-foreground: var(--love-card-foreground);
+    --color-popover: var(--love-popover);
+    --color-popover-foreground: var(--love-popover-foreground);
+    --color-primary: var(--love-primary);
+    --color-primary-foreground: var(--love-primary-foreground);
+    --color-muted: var(--love-muted);
+    --color-muted-foreground: var(--love-muted-foreground);
+    --color-border: var(--love-border);
+    --color-input: var(--love-input);
+    --color-ring: var(--love-ring);
+    --radius-sm: var(--love-radius-small);
+    --radius-md: var(--love-radius-medium);
+    --radius-lg: var(--love-radius-large);
+  }
+  @layer base {
+    body { background: var(--love-background); color: var(--love-foreground); }
+    td, th { @apply break-words; word-break: break-all; word-break: auto-phrase; }
+    th { @apply whitespace-nowrap; }
+  }
+    </style>
+    <style id="semantic-token-fallback">
+      .bg-background { background-color: var(--love-background); }
+      .text-background { color: var(--love-background); }
+      .border-background { border-color: var(--love-background); }
+      .ring-background { --tw-ring-color: var(--love-background); }
+      .bg-foreground { background-color: var(--love-foreground); }
+      .text-foreground { color: var(--love-foreground); }
+      .border-foreground { border-color: var(--love-foreground); }
+      .ring-foreground { --tw-ring-color: var(--love-foreground); }
+      .bg-card { background-color: var(--love-card); }
+      .text-card { color: var(--love-card); }
+      .border-card { border-color: var(--love-card); }
+      .ring-card { --tw-ring-color: var(--love-card); }
+      .bg-card-foreground { background-color: var(--love-card-foreground); }
+      .text-card-foreground { color: var(--love-card-foreground); }
+      .border-card-foreground { border-color: var(--love-card-foreground); }
+      .ring-card-foreground { --tw-ring-color: var(--love-card-foreground); }
+      .bg-popover { background-color: var(--love-popover); }
+      .text-popover { color: var(--love-popover); }
+      .border-popover { border-color: var(--love-popover); }
+      .ring-popover { --tw-ring-color: var(--love-popover); }
+      .bg-popover-foreground { background-color: var(--love-popover-foreground); }
+      .text-popover-foreground { color: var(--love-popover-foreground); }
+      .border-popover-foreground { border-color: var(--love-popover-foreground); }
+      .ring-popover-foreground { --tw-ring-color: var(--love-popover-foreground); }
+      .bg-primary { background-color: var(--love-primary); }
+      .text-primary { color: var(--love-primary); }
+      .border-primary { border-color: var(--love-primary); }
+      .ring-primary { --tw-ring-color: var(--love-primary); }
+      .bg-primary-foreground { background-color: var(--love-primary-foreground); }
+      .text-primary-foreground { color: var(--love-primary-foreground); }
+      .border-primary-foreground { border-color: var(--love-primary-foreground); }
+      .ring-primary-foreground { --tw-ring-color: var(--love-primary-foreground); }
+      .bg-muted { background-color: var(--love-muted); }
+      .text-muted { color: var(--love-muted); }
+      .border-muted { border-color: var(--love-muted); }
+      .ring-muted { --tw-ring-color: var(--love-muted); }
+      .bg-muted-foreground { background-color: var(--love-muted-foreground); }
+      .text-muted-foreground { color: var(--love-muted-foreground); }
+      .border-muted-foreground { border-color: var(--love-muted-foreground); }
+      .ring-muted-foreground { --tw-ring-color: var(--love-muted-foreground); }
+      .bg-border { background-color: var(--love-border); }
+      .text-border { color: var(--love-border); }
+      .border-border { border-color: var(--love-border); }
+      .ring-border { --tw-ring-color: var(--love-border); }
+      .bg-input { background-color: var(--love-input); }
+      .text-input { color: var(--love-input); }
+      .border-input { border-color: var(--love-input); }
+      .ring-input { --tw-ring-color: var(--love-input); }
+      .bg-ring { background-color: var(--love-ring); }
+      .text-ring { color: var(--love-ring); }
+      .border-ring { border-color: var(--love-ring); }
+      .ring-ring { --tw-ring-color: var(--love-ring); }
+    </style>
+</head>
+<body class="admin-page min-h-screen font-sans antialiased" style="display:flex;flex-direction:column;">
+    <header style="position: sticky; top: 0; z-index: 50; background: rgba(255, 245, 247, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);">
+      <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between;">
+        <a href="index.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 20px;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 999px; background: var(--brand); color: var(--brand-ink);">
+            <i data-lucide="heart" style="width: 18px; height: 18px;"></i>
+          </span>
+          我们的小宇宙
+        </a>
+        <nav style="display: flex; align-items: center; gap: 8px;">
+          <a href="index.html" data-dom-id="nav-index" class="nav-link" style="padding: 8px 14px; border-radius: var(--r-md);">返回首页</a>
+        </nav>
+      </div>
+    </header>
+
+    <main style="flex:1; display:flex; align-items:center; justify-content:center; padding: 48px 24px;">
+      <div class="card" style="width:100%; max-width:420px; padding: 40px 32px; text-align:center;">
+        <div style="width: 64px; height: 64px; border-radius: 999px; background: var(--brand-100); color: var(--brand); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+          <i data-lucide="lock" style="width: 28px; height: 28px;"></i>
+        </div>
+        <h1 class="h2" style="margin: 0 0 8px;">管理员登录</h1>
+        <p class="body" style="color: var(--ink-3); margin: 0 0 28px;">请输入管理密码，进入后台管理中心</p>
+
+        <form id="login-form" style="display:flex; flex-direction:column; gap:16px; text-align:left;">
+          <div>
+            <label class="caption" style="display:block; margin-bottom:6px; color:var(--ink-2); font-weight:500;">管理密码</label>
+            <input id="password" type="password" class="input" placeholder="请输入密码" autocomplete="current-password" required>
+          </div>
+          <p id="error" class="caption" style="color:var(--state-error); margin:0; display:none;">密码不正确</p>
+          <button id="login-submit" data-dom-id="login-submit" type="submit" class="btn-primary" style="width:100%;">
+            <i data-lucide="log-in" style="width: 18px; height: 18px;"></i>
+            登录
+          </button>
+        </form>
+      </div>
+    </main>
+
+    <footer style="background: var(--surface); border-top: 1px solid var(--line); padding: 48px 24px;">
+      <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center;">
+        <div style="display: flex; align-items: center; gap: 8px; color: var(--brand); font-weight: 600;">
+          <i data-lucide="heart" style="width: 18px; height: 18px;"></i>
+          <span data-site-key="footerTitle">我们的小宇宙</span>
+        </div>
+        <p data-site-key="footerWish" style="color: var(--ink-2); font-size: 15px; margin: 0; max-width: 640px;">祝你天天开心，快快乐乐，心有所想，皆有所成。</p>
+        <p data-site-key="footerSign" style="color: var(--ink-3); font-size: 13px; margin: 0;">陈卓卓 致 嘉嘉小星星</p>
+      </div>
+    </footer>
+
+    <script src="../assets/js/admin-data.js"></script>
+    <script src="../assets/js/admin-core.js"></script>
+    <script>
+      (function () {
+        if (window.LoveAdmin && LoveAdmin.isLoggedIn()) {
+          window.location.href = 'admin-dashboard.html';
+          return;
+        }
+
+        var form = document.getElementById('login-form');
+        var input = document.getElementById('password');
+        var error = document.getElementById('error');
+
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          error.style.display = 'none';
+          var pwd = input.value.trim();
+          if (!pwd) return;
+
+          if (window.LoveAdmin && LoveAdmin.login(pwd)) {
+            window.location.href = 'admin-dashboard.html';
+          } else {
+            error.textContent = '密码不正确';
+            error.style.display = 'block';
+            input.value = '';
+            input.focus();
+          }
+        });
+
+        lucide.createIcons();
+      })();
+    </script>
+    <script>LoveData.applySiteText(document);</script>
+</body>
+</html>

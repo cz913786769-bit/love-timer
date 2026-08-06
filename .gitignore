@@ -1,0 +1,16 @@
+# TraeDesign generated metadata (not needed for deployment)
+.preflight/
+partials/
+generation-tree.json
+runtime-orchestration-summary.json
+runtime-dispatch-manifest.json
+validation-report.json
+love-timer.design
+colors_and_type.css
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

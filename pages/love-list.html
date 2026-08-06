@@ -250,6 +250,32 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+@media (max-width: 768px) {
+  header > div {
+    padding: 0 12px;
+    gap: 8px;
+  }
+  header > div > a:first-of-type .logo-text {
+    display: none;
+  }
+  header > div > nav {
+    overflow-x: auto;
+    white-space: nowrap;
+    flex-shrink: 1;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  header > div > nav::-webkit-scrollbar {
+    display: none;
+  }
+  header > div > nav a {
+    white-space: nowrap;
+  }
+  header > div > button#music-toggle > span#music-label {
+    display: none;
+  }
+}
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -388,13 +414,14 @@ body {
     </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
+    <audio id="bg-music" src="../assets/music/there-is-romance.mp3" loop preload="auto"></audio>
     <header style="position: sticky; top: 0; z-index: 50; background: rgba(255, 245, 247, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);">
       <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between;">
         <a href="index.html" data-dom-id="nav-index" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 20px;">
           <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 999px; background: var(--brand); color: var(--brand-ink);">
             <i data-lucide="heart" style="width: 18px; height: 18px;"></i>
           </span>
-          我们的小宇宙
+          <span class="logo-text">我们的小宇宙</span>
         </a>
         <nav style="display: flex; align-items: center; gap: 8px;">
           <a href="index.html" data-dom-id="nav-index" class="nav-link" style="padding: 8px 14px; border-radius: var(--r-md);">首页</a>
@@ -404,6 +431,11 @@ body {
           <a href="little-things.html" data-dom-id="nav-little-things" class="nav-link" style="padding: 8px 14px; border-radius: var(--r-md);">点滴</a>
           <a href="about-us.html" data-dom-id="nav-about-us" class="nav-link" style="padding: 8px 14px; border-radius: var(--r-md);">关于我们</a>
         </nav>
+        <button id="music-toggle" class="btn-secondary" style="padding: 8px 14px; font-size: 14px;" aria-label="播放背景音乐">
+          <i id="music-icon" data-lucide="music" style="width: 16px; height: 16px;"></i>
+          <i id="music-icon-off" data-lucide="volume-x" style="display:none; width: 16px; height: 16px;"></i>
+          <span id="music-label">播放音乐</span>
+        </button>
       </div>
     </header>
 
@@ -463,6 +495,7 @@ body {
       </div>
     </footer>
 
+    <script src="../assets/js/music.js"></script>
     <script src="../assets/js/admin-data.js"></script>
     <script src="../assets/js/admin-core.js"></script>
     <script>

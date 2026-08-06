@@ -263,6 +263,32 @@ body.admin-page #love-admin-login-fab {
     transition-duration: 0.01ms !important;
   }
 }
+
+@media (max-width: 768px) {
+  header > div {
+    padding: 0 12px;
+    gap: 8px;
+  }
+  header > div > a:first-of-type .logo-text {
+    display: none;
+  }
+  header > div > nav {
+    overflow-x: auto;
+    white-space: nowrap;
+    flex-shrink: 1;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  header > div > nav::-webkit-scrollbar {
+    display: none;
+  }
+  header > div > nav a {
+    white-space: nowrap;
+  }
+  header > div > button#music-toggle > span#music-label {
+    display: none;
+  }
+}
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -353,7 +379,7 @@ body.admin-page #love-admin-login-fab {
           <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 999px; background: var(--brand); color: var(--brand-ink);">
             <i data-lucide="heart" style="width: 18px; height: 18px;"></i>
           </span>
-          我们的小宇宙
+          <span class="logo-text">我们的小宇宙</span>
         </a>
         <nav style="display: flex; align-items: center; gap: 8px;">
           <a href="index.html" data-dom-id="nav-index" class="nav-link" style="padding: 8px 14px; border-radius: var(--r-md);">返回首页</a>

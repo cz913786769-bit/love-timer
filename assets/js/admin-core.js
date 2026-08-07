@@ -5,6 +5,8 @@
   var ACCOUNTS_KEY = 'love-admin-accounts';
   var SESSION_KEY = 'love-admin-session';
   var VALID_SIDES = ['left', 'right'];
+  var IS_IN_IFRAME = window.self !== window.top;
+  var ADMIN_FLOAT_POS = IS_IN_IFRAME ? 'left:20px' : 'right:20px';
   var DEFAULT_ACCOUNTS = {
     left: { password: 'qixi2026', nickname: '嘉嘉小星星', avatar: '../assets/avatars/jiajia.png' },
     right: { password: 'qixi2026', nickname: '陈卓卓', avatar: '../assets/avatars/chenzhuozhuo.png' }
@@ -277,7 +279,7 @@
     var account = getCurrentAccount();
     var bar = document.createElement('div');
     bar.id = 'love-admin-bar';
-    bar.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:90;display:flex;gap:8px;align-items:center;';
+    bar.style.cssText = 'position:fixed;bottom:20px;' + ADMIN_FLOAT_POS + ';z-index:90;display:flex;gap:8px;align-items:center;';
 
     var avatarHtml = '';
     if (account && account.avatar) {
@@ -285,12 +287,15 @@
     }
 
     bar.innerHTML =
-      (account ? '<span style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--r-pill);background:var(--surface-2);color:var(--ink-2);font-size:13px;font-weight:500;">' + avatarHtml + esc(account.nickname) + '</span>' : '') +
+      (account ? '<span class="love-admin-account" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--r-pill);background:var(--surface-2);color:var(--ink-2);font-size:13px;font-weight:500;">' + avatarHtml + '<span class="love-admin-account-text">' + esc(account.nickname) + '</span></span>' : '') +
       '<a href="admin-dashboard.html" class="btn-primary" style="box-shadow:var(--shadow-2);">' +
         '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>' +
-        '管理后台' +
+        '<span class="love-admin-bar-label">管理后台</span>' +
       '</a>' +
-      '<button id="love-admin-logout" class="btn-secondary" style="box-shadow:var(--shadow-2);">退出登录</button>';
+      '<button id="love-admin-logout" class="btn-secondary" style="box-shadow:var(--shadow-2);">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>' +
+        '<span class="love-admin-logout-text">退出登录</span>' +
+      '</button>';
     document.body.appendChild(bar);
 
     bar.querySelector('#love-admin-logout').addEventListener('click', function () {
@@ -312,10 +317,10 @@
     var fab = document.createElement('button');
     fab.id = 'love-admin-login-fab';
     fab.className = 'btn-secondary';
-    fab.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:90;box-shadow:var(--shadow-2);display:flex;align-items:center;gap:6px;';
+    fab.style.cssText = 'position:fixed;bottom:20px;' + ADMIN_FLOAT_POS + ';z-index:90;box-shadow:var(--shadow-2);display:flex;align-items:center;gap:6px;';
     fab.innerHTML =
       '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' +
-      '管理登录';
+      '<span class="love-admin-login-text">管理登录</span>';
     fab.addEventListener('click', function () { showLoginModal(); });
     document.body.appendChild(fab);
     return fab;
@@ -392,7 +397,14 @@
       '.love-admin-form textarea { resize: vertical; min-height: 80px; }' +
       '.love-admin-form .actions { display: flex; gap: 8px; }' +
       '.creator-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ink-3); padding: 2px 8px; background: var(--surface-2); border-radius: var(--r-pill); white-space: nowrap; }' +
-      '.creator-badge img { width: 16px; height: 16px; border-radius: 50%; object-fit: cover; border: 1px solid var(--brand-200); }';
+      '.creator-badge img { width: 16px; height: 16px; border-radius: 50%; object-fit: cover; border: 1px solid var(--brand-200); }' +
+      '@media (max-width: 768px) {' +
+        '#love-admin-bar { gap: 6px; }' +
+        '.love-admin-account { padding: 4px !important; }' +
+        '.love-admin-account-text, .love-admin-bar-label, .love-admin-logout-text, .love-admin-login-text { display: none; }' +
+        '#love-admin-bar .btn-primary, #love-admin-bar .btn-secondary, #love-admin-login-fab { padding: 8px !important; }' +
+        '#love-admin-bar svg, #love-admin-login-fab svg { margin-right: 0 !important; }' +
+      '}';
     document.head.appendChild(style);
   }
 

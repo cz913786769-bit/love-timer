@@ -349,6 +349,19 @@ body.admin-page #love-admin-login-fab { display: none !important; }
   }
 }
 
+@media (max-width: 992px) {
+  header > div {
+    padding: 0 16px;
+    gap: 10px;
+  }
+  header > div > div:last-of-type #admin-logout .logout-text {
+    display: none;
+  }
+  header > div > div:last-of-type #admin-logout {
+    padding: 8px !important;
+  }
+}
+
 @media (max-width: 768px) {
   header > div {
     padding: 0 12px;
@@ -357,21 +370,20 @@ body.admin-page #love-admin-login-fab { display: none !important; }
   header > div > a:first-of-type .logo-text {
     display: none;
   }
-  header > div > nav {
-    overflow-x: auto;
-    white-space: nowrap;
-    flex-shrink: 1;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  header > div > div:last-of-type {
+    gap: 8px;
   }
-  header > div > nav::-webkit-scrollbar {
+  header > div > div:last-of-type #admin-account-name {
     display: none;
   }
-  header > div > nav a {
-    white-space: nowrap;
+  header > div > div:last-of-type #admin-account-badge {
+    padding: 6px !important;
   }
-  header > div > button#music-toggle > span#music-label {
+  header > div > div:last-of-type #admin-logout .logout-text {
     display: none;
+  }
+  header > div > div:last-of-type #admin-logout {
+    padding: 8px !important;
   }
 
   /* 性能优化：移动端降低毛玻璃模糊半径，减少 GPU 开销 */
@@ -472,21 +484,21 @@ body.admin-page #love-admin-login-fab { display: none !important; }
 </head>
 <body class="admin-page min-h-screen font-sans antialiased" style="display:flex; flex-direction:column;">
     <header style="position: sticky; top: 0; z-index: 50; background: rgba(255, 245, 247, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);">
-      <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between;">
-        <a href="index.html" data-dom-id="nav-index" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 20px;">
+      <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: nowrap;">
+        <a href="index.html" data-dom-id="nav-index" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 20px; flex-shrink: 0;">
           <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 999px; background: var(--brand); color: var(--brand-ink);">
             <i data-lucide="heart" style="width: 18px; height: 18px;"></i>
           </span>
           <span class="logo-text">管理后台</span>
         </a>
-        <div style="display:flex; align-items:center; gap:12px;">
-          <span id="admin-account-badge" style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:var(--r-pill); background:var(--surface-2); color:var(--ink-2); font-size:13px; font-weight:500;">
-            <i data-lucide="shield-check" style="width:14px;height:14px;"></i>
+        <div style="display:flex; align-items:center; gap:12px; flex: 1; min-width: 0; justify-content: flex-end;">
+          <span id="admin-account-badge" style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:var(--r-pill); background:var(--surface-2); color:var(--ink-2); font-size:13px; font-weight:500; flex-shrink: 0; white-space: nowrap; overflow: hidden;">
+            <i data-lucide="shield-check" style="width:14px;height:14px; flex-shrink: 0;"></i>
             <span id="admin-account-name">已登录</span>
           </span>
-          <button id="admin-logout" data-dom-id="admin-logout" class="btn-secondary" style="padding:8px 16px; font-size:14px;">
+          <button id="admin-logout" data-dom-id="admin-logout" class="btn-secondary" style="padding:8px 16px; font-size:14px; flex-shrink: 0; white-space: nowrap;">
             <i data-lucide="log-out" style="width:16px;height:16px;"></i>
-            退出登录
+            <span class="logout-text">退出登录</span>
           </button>
         </div>
       </div>

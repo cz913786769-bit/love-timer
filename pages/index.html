@@ -233,28 +233,29 @@ body {
 
 /* 音乐播放按钮：更精致的细边框 + 轻阴影 */
 #music-toggle {
-  border: 1px solid rgba(244, 114, 152, 0.28);
-  background: rgba(255, 255, 255, 0.55);
-  box-shadow: 0 1px 2px rgba(244, 114, 152, 0.06), 0 2px 8px rgba(244, 114, 152, 0.05);
+  border: 1px solid rgba(244, 114, 152, 0.35);
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 1px 2px rgba(244, 114, 152, 0.05);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+  flex-shrink: 0;
   transition: border-color 200ms cubic-bezier(0.2, 0.8, 0.2, 1), background-color 200ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 #music-toggle:hover {
-  border-color: rgba(244, 114, 152, 0.5);
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 2px 4px rgba(244, 114, 152, 0.1), 0 6px 16px rgba(244, 114, 152, 0.08);
+  border-color: rgba(244, 114, 152, 0.65);
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 2px 6px rgba(244, 114, 152, 0.1);
 }
 
 .dark #music-toggle {
-  background: rgba(34, 28, 30, 0.55);
-  border-color: rgba(244, 114, 152, 0.22);
+  background: rgba(34, 28, 30, 0.35);
+  border-color: rgba(244, 114, 152, 0.28);
 }
 
 .dark #music-toggle:hover {
-  background: rgba(34, 28, 30, 0.8);
-  border-color: rgba(244, 114, 152, 0.42);
+  background: rgba(34, 28, 30, 0.65);
+  border-color: rgba(244, 114, 152, 0.5);
 }
 
 .btn-text {
@@ -335,15 +336,16 @@ body {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
   header > div {
-    padding: 0 12px;
-    gap: 8px;
+    padding: 0 16px;
+    gap: 10px;
   }
   header > div > a:first-of-type .logo-text {
     display: none;
   }
   header > div > nav {
+    justify-content: flex-start;
     overflow-x: auto;
     white-space: nowrap;
     flex-shrink: 1;
@@ -358,6 +360,13 @@ body {
   }
   header > div > button#music-toggle > span#music-label {
     display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  header > div {
+    padding: 0 12px;
+    gap: 8px;
   }
 
   /* 性能优化：移动端降低毛玻璃模糊半径，减少 GPU 开销 */
@@ -564,14 +573,14 @@ body {
     <audio id="bg-music" src="../assets/music/there-is-romance.mp3" loop preload="auto"></audio>
 
     <header style="position: sticky; top: 0; z-index: 50; background: rgba(255, 245, 247, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);">
-      <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between;">
-        <a href="index.html" data-dom-id="nav-index" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 20px;">
+      <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: nowrap;">
+        <a href="index.html" data-dom-id="nav-index" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 20px; flex-shrink: 0;">
           <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 999px; background: var(--brand); color: var(--brand-ink);">
             <i data-lucide="heart" style="width: 18px; height: 18px;"></i>
           </span>
           <span class="logo-text">我们的小宇宙</span>
         </a>
-        <nav style="display: flex; align-items: center; gap: 8px;">
+        <nav style="display: flex; align-items: center; justify-content: center; gap: 8px; flex: 1; min-width: 0; overflow: hidden;">
           <a href="index.html" data-dom-id="nav-index" class="nav-link" data-active="true" style="padding: 8px 14px; border-radius: var(--r-md);">首页</a>
           <a href="leaving.html" data-dom-id="nav-leaving" class="nav-link" style="padding: 8px 14px; border-radius: var(--r-md);">留言板</a>
           <a href="love-album.html" data-dom-id="nav-love-album" class="nav-link" style="padding: 8px 14px; border-radius: var(--r-md);">相册</a>

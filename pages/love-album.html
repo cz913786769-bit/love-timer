@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>恋爱相册 - 我们的小宇宙</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="preconnect" href="https://unpkg.com" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://unpkg.com" />
     <style id="theme-vars">
 @import "tailwindcss";
 
@@ -276,10 +280,23 @@ body {
   header > div > button#music-toggle > span#music-label {
     display: none;
   }
+
+  /* 性能优化：移动端降低毛玻璃模糊半径，减少 GPU 开销 */
+  header,
+  .glass,
+  .album-group-header {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+  }
+
+  /* 性能优化：移动端禁用 fixed 背景，避免滚动时重绘卡顿 */
+  #hero-section {
+    background-attachment: scroll !important;
+  }
 }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js" defer></script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
     <style type="text/tailwindcss">
   @theme inline {
     --color-background: var(--love-background);
@@ -374,6 +391,10 @@ body {
         mask-position: center;
         background-color: currentColor;
       }
+      .album-group {
+        content-visibility: auto;
+        contain-intrinsic-size: auto 500px;
+      }
       .album-thumb {
         position: relative;
         cursor: pointer;
@@ -452,16 +473,69 @@ body {
       .album-thumb img {
         flex: 1;
       }
+      .album-group-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding: 14px 16px;
+        background: rgba(255, 255, 255, 0.82);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: var(--r-lg);
+        box-shadow: var(--shadow-1);
+      }
+      .album-group-header .tag {
+        flex-shrink: 0;
+        background: var(--brand-100);
+        color: var(--brand-700);
+        font-weight: 600;
+      }
+      .album-group-header h2 {
+        color: var(--ink) !important;
+        text-shadow: none;
+        margin: 0;
+      }
       .album-thumb-caption {
-        padding: 8px 10px;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 2rem 10px 10px;
         font-size: 13px;
-        color: var(--ink-2);
-        background: var(--surface);
+        font-weight: 600;
+        color: #fff;
         text-align: center;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        border-top: 1px solid var(--line);
+        text-shadow: 0 1px 8px rgba(0, 0, 0, 0.75), 0 0 16px rgba(0, 0, 0, 0.4);
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.3) 50%, transparent);
+        border-radius: 0 0 var(--r-md) var(--r-md);
+        border-top: none;
+      }
+      @media (max-width: 640px) {
+        .album-group-header {
+          padding: 12px;
+          gap: 10px;
+        }
+        .album-group-header > div:first-child {
+          flex-wrap: wrap;
+          gap: 8px;
+          width: 100%;
+        }
+        .album-group-header .tag {
+          height: auto;
+          padding: 4px 10px;
+          font-size: 12px;
+        }
+        .album-group-header h2 {
+          font-size: 17px;
+          line-height: 1.3;
+        }
       }
     </style>
 </head>
@@ -535,14 +609,14 @@ body {
         </div>
         <p data-site-key="footerWish" style="color: var(--ink-2); font-size: 15px; margin: 0; max-width: 640px;">祝你天天开心，快快乐乐，心有所想，皆有所成。</p>
         <p data-site-key="footerSign" style="color: var(--ink-3); font-size: 13px; margin: 0;">陈卓卓 致 嘉嘉小星星</p>
-        <a id="footer-admin" data-dom-id="footer-admin" href="admin-login.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--ink-3);font-size:13px;text-decoration:none;padding:6px 12px;border:1px solid var(--line);border-radius:var(--r-md);transition:all .2s;">
+        <a id="footer-admin" data-dom-id="footer-admin" href="admin-login.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--ink-3);font-size:13px;text-decoration:none;padding:8px 16px;border:1px solid var(--line);border-radius:var(--r-pill);background:var(--surface-2);transition:all .2s;">
           <i data-lucide="settings" style="width:14px;height:14px;"></i>
           <span>管理入口</span>
         </a>
       </div>
     </footer>
 
-    <script src="../assets/js/music.js?v=20260807"></script>
+    <script src="../assets/js/music.js?v=20260807a"></script>
     <script src="../assets/js/admin-data.js?v=20260807"></script>
     <script src="../assets/js/admin-core.js?v=20260807"></script>
     <script>
@@ -555,6 +629,7 @@ body {
         var addGroupToggle = document.getElementById('add-group-toggle');
         var addGroupForm = document.getElementById('add-group-form');
         var cancelAddGroup = document.getElementById('cancel-add-group');
+        var savedScrollY = 0;
 
         function escapeHtml(str) {
           return String(str || '').replace(/[&<>"']/g, function (m) {
@@ -578,13 +653,23 @@ body {
           lightbox.classList.remove('active');
           lightboxImg.src = '';
           document.body.style.overflow = '';
+          var targetY = savedScrollY;
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              document.documentElement.style.scrollBehavior = 'auto';
+              window.scrollTo(0, targetY);
+              requestAnimationFrame(function () {
+                document.documentElement.style.scrollBehavior = '';
+              });
+            });
+          });
         }
 
         function renderAlbum() {
           var album = window.LoveData.getAlbum();
           albumContainer.innerHTML = album.map(function (group) {
             return '<div class="album-group love-admin-row" data-group-id="' + escapeHtml(group.id) + '">' +
-              '<div class="flex flex-wrap items-center justify-between gap-3 mb-5">' +
+              '<div class="album-group-header">' +
                 '<div class="flex items-center gap-3">' +
                   '<span class="tag">' + escapeHtml(group.date) + '</span>' +
                   '<h2 class="h3" style="color: var(--ink);">' + escapeHtml(group.title) + '</h2>' +
@@ -613,9 +698,13 @@ body {
               '</div>' +
               '<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">' +
                 group.photos.map(function (photo) {
+                  var webpSrc = escapeHtml(photo.src).replace(/\.jpg$/, '.webp');
                   return '<div class="album-thumb love-admin-row" data-group-id="' + escapeHtml(group.id) + '" data-src="' + escapeHtml(photo.src) + '">' +
                     '<div class="aspect-[4/3] overflow-hidden" style="border-radius: var(--r-md) var(--r-md) 0 0;">' +
-                      '<img src="' + escapeHtml(photo.src) + '" alt="' + escapeHtml(photo.caption || '') + '" data-caption="' + escapeHtml(photo.caption || '') + '" style="width:100%;height:100%;object-fit:cover;">' +
+                      '<picture>' +
+                        '<source srcset="' + webpSrc + '" type="image/webp">' +
+                        '<img src="' + escapeHtml(photo.src) + '" alt="' + escapeHtml(photo.caption || '') + '" data-caption="' + escapeHtml(photo.caption || '') + '" data-webp-src="' + webpSrc + '" loading="lazy" decoding="async" fetchpriority="low" width="400" height="300" style="width:100%;height:100%;object-fit:cover;">' +
+                      '</picture>' +
                     '</div>' +
                     '<div class="album-thumb-caption">' + escapeHtml(photo.caption || '') + '</div>' +
                     '<button type="button" class="love-admin-actions love-admin-btn danger delete-photo" style="position:absolute;top:6px;right:6px;z-index:2;" data-group-id="' + escapeHtml(group.id) + '" data-src="' + escapeHtml(photo.src) + '">删除</button>' +
@@ -688,7 +777,8 @@ body {
           if (e.target.closest('.delete-photo')) return;
           var img = thumb.querySelector('img');
           if (!img) return;
-          lightboxImg.src = img.src;
+          savedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+          lightboxImg.src = img.dataset.webpSrc || img.src;
           lightboxImg.alt = img.alt;
           lightboxCaption.textContent = img.dataset.caption || img.alt;
           lightbox.classList.add('active');
@@ -729,6 +819,6 @@ body {
     <script>lucide.createIcons();</script>
     <script>LoveData.applySiteText(document);</script>
 <script>document.addEventListener('DOMContentLoaded',function(){var c=LoveData.getCover();if(c){var h=document.getElementById('hero-section');if(h)h.style.background='linear-gradient(rgba(255,245,247,0.15), rgba(255,245,247,0.15)), url('+c+') center/cover no-repeat fixed';}});</script>
-    <script src="../assets/js/cover-contrast.js?v=20260807"></script>
+    <script src="../assets/js/cover-contrast.js?v=20260807d"></script>
 </body>
 </html>

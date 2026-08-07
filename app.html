@@ -58,6 +58,40 @@
       white-space: nowrap;
     }
 
+    /* 首次播放提示 */
+    #music-hint {
+      position: fixed;
+      bottom: 86px;
+      right: 24px;
+      z-index: 9998;
+      max-width: 220px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--ink);
+      border-radius: var(--r-lg);
+      font-size: 13px;
+      line-height: 1.4;
+      box-shadow: var(--shadow-2);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    #music-hint.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    #music-hint::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      right: 20px;
+      width: 12px;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      transform: rotate(45deg);
+    }
+
     @media (max-width: 768px) {
       #music-toggle {
         bottom: 16px;
@@ -67,6 +101,12 @@
       }
       #music-label {
         display: none;
+      }
+      #music-hint {
+        bottom: 72px;
+        right: 16px;
+        max-width: 180px;
+        font-size: 12px;
       }
     }
   </style>
@@ -85,11 +125,13 @@
     </svg>
     <!-- 暂停图标 -->
     <svg id="music-icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
-      <line x1="1" y1="1" x2="23" y2="23"/>
-      <path d="M9 9v3m0 4v0"/>
+      <rect x="6" y="4" width="4" height="16" rx="1"/>
+      <rect x="14" y="4" width="4" height="16" rx="1"/>
     </svg>
     <span id="music-label">播放音乐</span>
   </button>
+
+  <div id="music-hint">点击任意位置，开启背景音乐</div>
 
   <script>
   /* ──── 恋爱小站 - 音乐播放器（壳层，音频元素永不销毁）──── */
@@ -101,6 +143,7 @@
     var label = document.getElementById('music-label');
     var iconOn = document.getElementById('music-icon-on');
     var iconOff = document.getElementById('music-icon-off');
+    var hint = document.getElementById('music-hint');
     var frame = document.getElementById('content-frame');
 
     if (!music || !toggle || !label || !frame) return;
@@ -117,13 +160,19 @@
     var loadFailed = false;
     var isPending = false;
     var userInteracted = false;
+    var hintTimer = null;
+    var lastSavedTime = 0;
+    var SAVE_INTERVAL = 5000;      /* 每 5 秒写入一次播放进度，减少 localStorage 压力 */
 
     /* ── 状态持久化 ── */
 
-    function saveTime() {
-      if (!music.paused && music.currentTime > 0) {
-        localStorage.setItem(KEY_TIME, Math.floor(music.currentTime));
-      }
+    function saveTime(force) {
+      if (music.paused && !force) return;
+      if (music.currentTime <= 0) return;
+      var now = Date.now();
+      if (!force && now - lastSavedTime < SAVE_INTERVAL) return;
+      lastSavedTime = now;
+      localStorage.setItem(KEY_TIME, Math.floor(music.currentTime));
     }
 
     function wasEnabled() {
@@ -243,15 +292,34 @@
 
     /* ── 全局首次交互：点击页面任意位置激活音乐 ── */
 
+    function showHint() {
+      if (!hint || userInteracted) return;
+      hint.classList.add('visible');
+      clearTimeout(hintTimer);
+      hintTimer = setTimeout(function () {
+        hint.classList.remove('visible');
+      }, 4500);
+    }
+
+    function hideHint() {
+      if (!hint) return;
+      clearTimeout(hintTimer);
+      hint.classList.remove('visible');
+    }
+
     function onFirstInteraction() {
       if (userInteracted) return;
       userInteracted = true;
+      hideHint();
       localStorage.setItem(KEY_ENABLED, '1');
       tryPlay();
     }
 
     document.addEventListener('click', onFirstInteraction);
     document.addEventListener('touchstart', onFirstInteraction);
+
+    // 页面加载后短暂显示播放提示
+    setTimeout(showHint, 800);
 
     /* ── 页面加载时恢复 ── */
 

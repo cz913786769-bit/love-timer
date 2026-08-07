@@ -22,13 +22,18 @@ if (window.top === window.self) (function () {
   var loadFailed = false;
   var isPending = false;
   var userInteracted = false;
+  var lastSavedTime = 0;
+  var SAVE_INTERVAL = 5000;      /* 每 5 秒写入一次播放进度，减少 localStorage 压力 */
 
   /* ── 状态持久化 ── */
 
-  function saveTime() {
-    if (!music.paused && music.currentTime > 0) {
-      localStorage.setItem(KEY_TIME, Math.floor(music.currentTime));
-    }
+  function saveTime(force) {
+    if (music.paused && !force) return;
+    if (music.currentTime <= 0) return;
+    var now = Date.now();
+    if (!force && now - lastSavedTime < SAVE_INTERVAL) return;
+    lastSavedTime = now;
+    localStorage.setItem(KEY_TIME, Math.floor(music.currentTime));
   }
 
   function wasEnabled() {

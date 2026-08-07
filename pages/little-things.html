@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>点点滴滴 - 我们的小宇宙</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="preconnect" href="https://unpkg.com" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://unpkg.com" />
     <style id="theme-vars">
 @import "tailwindcss";
 
@@ -276,6 +280,19 @@ body {
   header > div > button#music-toggle > span#music-label {
     display: none;
   }
+
+  /* 性能优化：移动端降低毛玻璃模糊半径，减少 GPU 开销 */
+  header,
+  .glass,
+  .album-group-header {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+  }
+
+  /* 性能优化：移动端禁用 fixed 背景，避免滚动时重绘卡顿 */
+  #hero-section {
+    background-attachment: scroll !important;
+  }
 }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
@@ -487,14 +504,14 @@ body {
         </div>
         <p data-site-key="footerWish" style="color: var(--ink-2); font-size: 15px; margin: 0; max-width: 640px;">祝你天天开心，快快乐乐，心有所想，皆有所成。</p>
         <p data-site-key="footerSign" style="color: var(--ink-3); font-size: 13px; margin: 0;">陈卓卓 致 嘉嘉小星星</p>
-        <a id="footer-admin" data-dom-id="footer-admin" href="admin-login.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--ink-3);font-size:13px;text-decoration:none;padding:6px 12px;border:1px solid var(--line);border-radius:var(--r-md);transition:all .2s;">
+        <a id="footer-admin" data-dom-id="footer-admin" href="admin-login.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--ink-3);font-size:13px;text-decoration:none;padding:8px 16px;border:1px solid var(--line);border-radius:var(--r-pill);background:var(--surface-2);transition:all .2s;">
           <i data-lucide="settings" style="width:14px;height:14px;"></i>
           <span>管理入口</span>
         </a>
       </div>
     </footer>
 
-    <script src="../assets/js/music.js?v=20260807"></script>
+    <script src="../assets/js/music.js?v=20260807a"></script>
     <script src="../assets/js/admin-data.js?v=20260807"></script>
     <script src="../assets/js/admin-core.js?v=20260807"></script>
     <script>
@@ -629,6 +646,6 @@ body {
     <script>lucide.createIcons();</script>
     <script>LoveData.applySiteText(document);</script>
 <script>document.addEventListener('DOMContentLoaded',function(){var c=LoveData.getCover();if(c){var h=document.getElementById('hero-section');if(h)h.style.background='linear-gradient(rgba(255,245,247,0.15), rgba(255,245,247,0.15)), url('+c+') center/cover no-repeat fixed';}});</script>
-    <script src="../assets/js/cover-contrast.js?v=20260807"></script>
+    <script src="../assets/js/cover-contrast.js?v=20260807d"></script>
 </body>
 </html>

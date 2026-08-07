@@ -7,6 +7,10 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>我们的小宇宙</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="preconnect" href="https://unpkg.com" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://unpkg.com" />
     <style id="theme-vars">
 @import "tailwindcss";
 
@@ -329,6 +333,19 @@ body {
   header > div > button#music-toggle > span#music-label {
     display: none;
   }
+
+  /* 性能优化：移动端降低毛玻璃模糊半径，减少 GPU 开销 */
+  header,
+  .glass,
+  .album-group-header {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+  }
+
+  /* 性能优化：移动端禁用 fixed 背景，避免滚动时重绘卡顿 */
+  main > section:nth-of-type(2) {
+    background-attachment: scroll !important;
+  }
 }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
@@ -454,14 +471,27 @@ body {
         .h2 {
           font-size: clamp(24px, 6vw, 30px);
         }
-        /* 计时器数字在手机上缩小，确保不溢出卡片 */
+        /* 计时器数字在手机上适当放大，同时保证不溢出卡片 */
+        #timer-grid {
+          gap: 6px;
+        }
+        #timer-grid > div {
+          padding: 6px 2px;
+          background: rgba(255, 255, 255, 0.55);
+          border-radius: var(--r-md);
+        }
         #timer-grid .display {
-          font-size: clamp(24px, 6.5vw, 36px);
-          line-height: 1.1;
+          font-size: clamp(32px, 10vw, 48px);
+          line-height: 1;
           letter-spacing: -0.02em;
         }
         #timer-grid .caption {
-          font-size: 11px;
+          font-size: 12px;
+          font-weight: 500;
+          color: var(--ink-2);
+        }
+        #timer-subtitle {
+          font-size: 15px;
         }
       }
     </style>
@@ -495,7 +525,7 @@ body {
 
     <main>
       <section class="relative flex items-center justify-center overflow-hidden" style="min-height: calc(100vh - 72px);">
-        <img id="hero-cover" src="../assets/banner.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" style="opacity: 0.75;">
+        <img id="hero-cover" src="../assets/banner.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" style="opacity: 0.75;" fetchpriority="high" decoding="async">
         <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(255,245,247,0.02) 0%, rgba(255,245,247,0.12) 100%);"></div>
 
         <button id="cover-edit-toggle" class="love-admin-only btn-secondary absolute top-6 right-6 z-20" style="padding: 8px 14px; font-size: 14px;">更换封面</button>
@@ -623,7 +653,7 @@ body {
         </div>
         <p data-site-key="footerWish" style="color: var(--ink-2); font-size: 15px; margin: 0; max-width: 640px;">祝你天天开心，快快乐乐，心有所想，皆有所成。</p>
         <p data-site-key="footerSign" style="color: var(--ink-3); font-size: 13px; margin: 0;">陈卓卓 致 嘉嘉小星星</p>
-        <a id="footer-admin" data-dom-id="footer-admin" href="admin-login.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--ink-3);font-size:13px;text-decoration:none;padding:6px 12px;border:1px solid var(--line);border-radius:var(--r-md);transition:all .2s;">
+        <a id="footer-admin" data-dom-id="footer-admin" href="admin-login.html" style="display:inline-flex;align-items:center;gap:6px;color:var(--ink-3);font-size:13px;text-decoration:none;padding:8px 16px;border:1px solid var(--line);border-radius:var(--r-pill);background:var(--surface-2);transition:all .2s;">
           <i data-lucide="settings" style="width:14px;height:14px;"></i>
           <span>管理入口</span>
         </a>
@@ -661,7 +691,7 @@ body {
       })();
 
     </script>
-    <script src="../assets/js/music.js?v=20260807"></script>
+    <script src="../assets/js/music.js?v=20260807a"></script>
     <script src="../assets/js/admin-data.js?v=20260807"></script>
     <script src="../assets/js/admin-core.js?v=20260807"></script>
     <script>
@@ -720,13 +750,12 @@ body {
         var nameLeft = document.getElementById('name-left');
         var nameRight = document.getElementById('name-right');
 
-        var cacheBuster = '?t=' + Date.now();
         if (avatars.left && avatars.left.avatar && leftImg) {
-          leftImg.src = avatars.left.avatar + cacheBuster;
+          leftImg.src = avatars.left.avatar;
           leftImg.style.display = '';
         }
         if (avatars.right && avatars.right.avatar && rightImg) {
-          rightImg.src = avatars.right.avatar + cacheBuster;
+          rightImg.src = avatars.right.avatar;
           rightImg.style.display = '';
         }
         if (nameLeft && avatars.left) nameLeft.textContent = avatars.left.nickname;
@@ -734,7 +763,6 @@ body {
       })();
     </script>
     <script>lucide.createIcons();</script>
-    <script>LoveData.applySiteText(document);</script>
-    <script src="../assets/js/cover-contrast.js?v=20260807c"></script>
+    <script src="../assets/js/cover-contrast.js?v=20260807d"></script>
 </body>
 </html>

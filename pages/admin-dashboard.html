@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理后台</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="preconnect" href="https://unpkg.com" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://unpkg.com" />
     <style id="theme-vars">
 @import "tailwindcss";
 
@@ -342,6 +346,19 @@ body.admin-page #love-admin-login-fab { display: none !important; }
   }
   header > div > button#music-toggle > span#music-label {
     display: none;
+  }
+
+  /* 性能优化：移动端降低毛玻璃模糊半径，减少 GPU 开销 */
+  header,
+  .glass,
+  .album-group-header {
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+  }
+
+  /* 性能优化：移动端禁用 fixed 背景，避免滚动时重绘卡顿 */
+  #hero-section {
+    background-attachment: scroll !important;
   }
 }
     </style>

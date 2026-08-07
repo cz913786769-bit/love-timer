@@ -454,6 +454,15 @@ body {
         .h2 {
           font-size: clamp(24px, 6vw, 30px);
         }
+        /* 计时器数字在手机上缩小，确保不溢出卡片 */
+        #timer-grid .display {
+          font-size: clamp(24px, 6.5vw, 36px);
+          line-height: 1.1;
+          letter-spacing: -0.02em;
+        }
+        #timer-grid .caption {
+          font-size: 11px;
+        }
       }
     </style>
 </head>
@@ -525,12 +534,12 @@ body {
             </div>
           </div>
 
-          <div class="glass w-full px-8 py-10 md:px-12 md:py-12" style="border-radius: var(--r-lg); box-shadow: var(--shadow-2);">
+          <div class="glass w-full px-4 py-6 sm:px-6 sm:py-8 md:px-12 md:py-12" style="border-radius: var(--r-lg); box-shadow: var(--shadow-2);">
             <p class="caption mb-4" data-contrast-text="caption" style="color: #444; text-shadow: none; font-weight: 500;">我们的故事，从 2026 年 4 月 12 日开始</p>
             <h1 id="home-title" class="h1 mb-2" data-contrast-text="title" style="color: #000; text-shadow: none;" data-site-key="homeTitle">我们的小宇宙</h1>
             <p id="home-subtitle" class="body-l mb-8" data-contrast-text="subtitle" style="color: #222; text-shadow: none;" data-site-key="homeSubtitle">从第一次见面，到未来的每一天</p>
 
-            <div id="timer-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-6">
+            <div id="timer-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6">
               <div class="flex flex-col items-center">
                 <span id="days" class="display tabular-nums" style="color: var(--brand);">0</span>
                 <span class="caption" style="color: var(--ink-3);">天</span>
@@ -549,7 +558,7 @@ body {
               </div>
             </div>
 
-            <p id="timer-subtitle" class="body-l" data-contrast-text="body" style="color: #222; text-shadow: none;">这是我们一起走过的第 0 天 0 时 0 分 0 秒</p>
+            <p id="timer-subtitle" class="body-l" style="color: var(--ink-2);">这是我们一起走过的第 0 天 0 时 0 分 0 秒</p>
           </div>
         </div>
       </section>
@@ -726,6 +735,6 @@ body {
     </script>
     <script>lucide.createIcons();</script>
     <script>LoveData.applySiteText(document);</script>
-    <script src="../assets/js/cover-contrast.js?v=20260807"></script>
+    <script src="../assets/js/cover-contrast.js?v=20260807c"></script>
 </body>
 </html>

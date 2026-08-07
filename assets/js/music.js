@@ -1,5 +1,6 @@
-/* 恋爱小站 - 背景音乐跨页面控制 */
-(function () {
+/* 恋爱小站 - 背景音乐跨页面无缝播放 */
+/* 如果在 iframe 内运行（壳层已接管），则不执行 */
+if (window.top === window.self) (function () {
   'use strict';
 
   var music = document.getElementById('bg-music');
@@ -9,23 +10,41 @@
   var iconOff = document.getElementById('music-icon-off');
   if (!music || !toggle || !label) return;
 
-  music.volume = 0.35;
+  var KEY_ENABLED = 'love-music-enabled';
+  var KEY_TIME = 'love-music-time';
+  var KEY_VOLUME = 'love-music-volume';
+
+  music.loop = true;
+  music.preload = 'auto';
+  music.volume = parseFloat(localStorage.getItem(KEY_VOLUME)) || 0.35;
   music.muted = false;
 
-  var KEY_ENABLED = 'love-music-enabled';
-  var KEY_PLAYING = 'love-music-playing';
   var loadFailed = false;
   var isPending = false;
+  var userInteracted = false;
 
-  function isHome() {
-    var path = window.location.pathname;
-    return path.endsWith('index.html') || path.endsWith('/') || path.endsWith('/pages/');
+  /* ── 状态持久化 ── */
+
+  function saveTime() {
+    if (!music.paused && music.currentTime > 0) {
+      localStorage.setItem(KEY_TIME, Math.floor(music.currentTime));
+    }
   }
 
-  function updateIcon(paused) {
+  function wasEnabled() {
+    return localStorage.getItem(KEY_ENABLED) === '1';
+  }
+
+  function getSavedTime() {
+    return parseInt(localStorage.getItem(KEY_TIME), 10) || 0;
+  }
+
+  /* ── UI 更新 ── */
+
+  function updateIcon() {
     if (!iconOn || !iconOff) return;
-    iconOn.style.display = paused ? 'none' : '';
-    iconOff.style.display = paused ? '' : 'none';
+    iconOn.style.display = music.paused ? 'none' : '';
+    iconOff.style.display = music.paused ? '' : 'none';
   }
 
   function updateLabel() {
@@ -33,98 +52,46 @@
       label.textContent = '音乐加载失败';
       toggle.setAttribute('aria-label', '音乐加载失败');
       toggle.style.opacity = '0.7';
-      updateIcon(music.paused);
-      return;
+    } else if (music.paused) {
+      label.textContent = '播放音乐';
+      toggle.setAttribute('aria-label', '播放背景音乐');
+      toggle.style.opacity = '1';
+    } else {
+      label.textContent = '暂停音乐';
+      toggle.setAttribute('aria-label', '暂停背景音乐');
+      toggle.style.opacity = '1';
     }
-    label.textContent = music.paused ? '播放音乐' : '暂停音乐';
-    toggle.setAttribute('aria-label', music.paused ? '播放背景音乐' : '暂停背景音乐');
-    toggle.style.opacity = '1';
-    updateIcon(music.paused);
+    updateIcon();
   }
 
-  function setPlaying(playing) {
-    sessionStorage.setItem(KEY_PLAYING, playing ? '1' : '0');
-  }
-
-  function isPlaying() {
-    return sessionStorage.getItem(KEY_PLAYING) === '1';
-  }
-
-  function isEnabled() {
-    return sessionStorage.getItem(KEY_ENABLED) === '1';
-  }
-
-  function enableMusic() {
-    // 只有第一次点击导航链接时才自动开启音乐；
-    // 之后切换页面保持用户当前的播放/暂停状态
-    if (!isEnabled()) {
-      sessionStorage.setItem(KEY_ENABLED, '1');
-      sessionStorage.setItem(KEY_PLAYING, '1');
-    }
-  }
+  /* ── 播放控制 ── */
 
   function tryPlay() {
     if (loadFailed || isPending) return;
+    if (!music.paused) return; // 已经在播放，不重复操作
     isPending = true;
-    // 乐观更新：先显示暂停状态，避免等待音频缓冲时按钮无反馈
-    label.textContent = '暂停音乐';
-    toggle.setAttribute('aria-label', '暂停背景音乐');
-    updateIcon(false);
 
     music.play().then(function () {
-      setPlaying(true);
-      sessionStorage.setItem(KEY_ENABLED, '1');
+      localStorage.setItem(KEY_ENABLED, '1');
       isPending = false;
       updateLabel();
-    }).catch(function (err) {
-      // 自动播放受限或用户未交互时，恢复播放状态
-      setPlaying(false);
+      saveTime();
+    }).catch(function () {
       isPending = false;
       updateLabel();
-      if (typeof console !== 'undefined' && console.warn) {
-        console.warn('[love-music] 播放失败:', err && err.message ? err.message : err);
-      }
     });
   }
 
-  // 监听音频加载错误（文件缺失、路径错误、格式不支持等）
-  music.addEventListener('error', function () {
-    loadFailed = true;
-    setPlaying(false);
-    isPending = false;
+  function pauseMusic() {
+    saveTime();
+    music.pause();
     updateLabel();
-  });
-
-  // 音频可以播放时，重置失败标记
-  music.addEventListener('canplay', function () {
-    if (loadFailed) {
-      loadFailed = false;
-      updateLabel();
-    }
-  });
-
-  // 初始化按钮文字
-  updateLabel();
-
-  // 首次打开首页不自动播放；
-  // 从子页面返回首页、或进入其他页面时，如果用户已开启音乐，则继续自动播放
-  if (isEnabled() && isPlaying()) {
-    tryPlay();
   }
 
-  // 点击任意导航链接时启用音乐，跳转后继续播放
-  document.querySelectorAll('a[href$=".html"]').forEach(function (link) {
-    link.addEventListener('click', function () {
-      enableMusic();
-    });
-  });
-
-  // 按钮切换播放/暂停
-  toggle.addEventListener('click', function () {
-    if (isPending) return; // 防止播放 Promise 期间重复点击导致状态错乱
+  function toggleMusic() {
+    if (isPending) return;
 
     if (loadFailed) {
-      // 如果之前加载失败，尝试重新加载一次
       music.load();
       loadFailed = false;
       updateLabel();
@@ -135,12 +102,99 @@
     if (music.paused) {
       tryPlay();
     } else {
-      music.pause();
-      setPlaying(false);
+      pauseMusic();
+    }
+  }
+
+  /* ── 事件监听 ── */
+
+  music.addEventListener('error', function () {
+    loadFailed = true;
+    isPending = false;
+    updateLabel();
+  });
+
+  music.addEventListener('canplay', function () {
+    if (loadFailed) {
+      loadFailed = false;
       updateLabel();
     }
   });
 
-  music.addEventListener('play', updateLabel);
-  music.addEventListener('pause', updateLabel);
+  music.addEventListener('play', function () {
+    updateLabel();
+    saveTime();
+  });
+  music.addEventListener('pause', function () {
+    updateLabel();
+    saveTime();
+  });
+
+  // 每秒保存播放位置，确保切换页面时精确定位
+  music.addEventListener('timeupdate', function () {
+    saveTime();
+  });
+
+  music.addEventListener('volumechange', function () {
+    localStorage.setItem(KEY_VOLUME, music.volume);
+  });
+
+  // 音乐按钮切换（阻止冒泡到全局点击）
+  toggle.addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleMusic();
+  });
+
+  /* ── 全局首次交互：点击页面任意位置激活音乐 ── */
+
+  function onFirstInteraction() {
+    if (userInteracted) return;
+    userInteracted = true;
+    localStorage.setItem(KEY_ENABLED, '1');
+    tryPlay();
+  }
+
+  document.addEventListener('click', onFirstInteraction, { once: false });
+  document.addEventListener('touchstart', onFirstInteraction, { once: false });
+
+  /* ── 页面加载时恢复 ── */
+
+  updateLabel();
+
+  // 如果之前已启用音乐，自动恢复播放位置并继续播放
+  if (wasEnabled()) {
+    var savedTime = getSavedTime();
+
+    // 设置音频起始位置
+    function seekToSaved() {
+      if (savedTime > 0 && music.duration > 0 && Math.abs(music.currentTime - savedTime) > 2) {
+        music.currentTime = savedTime;
+      }
+    }
+
+    if (music.readyState >= 1) {
+      seekToSaved();
+    } else {
+      music.addEventListener('loadedmetadata', function once() {
+        seekToSaved();
+        music.removeEventListener('loadedmetadata', once);
+      });
+    }
+    music.addEventListener('canplay', function once() {
+      seekToSaved();
+      music.removeEventListener('canplay', once);
+    });
+
+    // 切换页面时自动恢复播放
+    tryPlay();
+  }
+
+  // 暴露 API
+  window.LoveMusic = {
+    toggle: toggleMusic,
+    isPlaying: function () { return !music.paused; },
+    getCurrentTime: function () { return music.currentTime; }
+  };
+
 })();

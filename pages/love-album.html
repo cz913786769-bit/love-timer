@@ -492,11 +492,11 @@ body {
     </header>
 
     <main>
-      <section class="w-full px-6 py-16" style="background: var(--bg);">
+      <section id="hero-section" class="w-full px-6 py-16" style="background: linear-gradient(rgba(255,245,247,0.15), rgba(255,245,247,0.15)), url('../assets/banner.jpg') center/cover no-repeat fixed;">
         <div style="max-width: 1200px; margin: 0 auto;">
           <div class="text-center mb-12">
-            <h1 class="h1 mb-3" style="color: var(--ink);" data-site-key="albumTitle">恋爱相册</h1>
-            <p class="body" style="color: var(--ink-3);" data-site-key="albumSubtitle">每一张照片，都是我们一起走过的证据。</p>
+            <h1 class="h1 mb-3" data-contrast-text="title" style="color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.5);" data-site-key="albumTitle">恋爱相册</h1>
+            <p class="body" data-contrast-text="subtitle" style="color: rgba(255,255,255,0.9); text-shadow: 0 1px 3px rgba(0,0,0,0.4);" data-site-key="albumSubtitle">每一张照片，都是我们一起走过的证据。</p>
             <button id="add-group-toggle" class="love-admin-only btn-primary" style="margin-top: 16px;">添加照片组</button>
             <div class="love-admin-only block" style="max-width: 480px; margin: 16px auto 0; text-align: left;">
               <form id="add-group-form" class="love-admin-form album-form">
@@ -542,9 +542,9 @@ body {
       </div>
     </footer>
 
-    <script src="../assets/js/music.js"></script>
-    <script src="../assets/js/admin-data.js"></script>
-    <script src="../assets/js/admin-core.js"></script>
+    <script src="../assets/js/music.js?v=20260807"></script>
+    <script src="../assets/js/admin-data.js?v=20260807"></script>
+    <script src="../assets/js/admin-core.js?v=20260807"></script>
     <script>
       (function () {
         var lightbox = document.getElementById('lightbox');
@@ -562,6 +562,18 @@ body {
           });
         }
 
+        function creatorBadge(group) {
+          if (!group.createdBy) return '';
+          var acc = window.LoveAdmin.getAccount(group.createdBy);
+          if (!acc) return '';
+          var avatarHtml = '';
+          if (acc.avatar) {
+            avatarHtml = '<div style="width:16px;height:16px;border-radius:50%;overflow:hidden;border:1px solid var(--brand-200);flex-shrink:0;"><img src="' + escapeHtml(acc.avatar) + '" style="width:100%;height:100%;object-fit:cover;"></div>';
+          }
+          var timeStr = group.createdAt ? ' · ' + new Date(group.createdAt).toLocaleString('zh-CN') : '';
+          return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-2);padding:2px 8px;background:var(--surface-2);border-radius:var(--r-pill);">' + avatarHtml + escapeHtml(acc.nickname) + timeStr + '</span>';
+        }
+
         function closeLightbox() {
           lightbox.classList.remove('active');
           lightboxImg.src = '';
@@ -576,6 +588,7 @@ body {
                 '<div class="flex items-center gap-3">' +
                   '<span class="tag">' + escapeHtml(group.date) + '</span>' +
                   '<h2 class="h3" style="color: var(--ink);">' + escapeHtml(group.title) + '</h2>' +
+                  creatorBadge(group) +
                 '</div>' +
                 '<div class="love-admin-actions album-group-actions">' +
                   '<button type="button" class="love-admin-btn toggle-add-photo" data-group-id="' + escapeHtml(group.id) + '">添加照片</button>' +
@@ -715,5 +728,7 @@ body {
     </script>
     <script>lucide.createIcons();</script>
     <script>LoveData.applySiteText(document);</script>
+<script>document.addEventListener('DOMContentLoaded',function(){var c=LoveData.getCover();if(c){var h=document.getElementById('hero-section');if(h)h.style.background='linear-gradient(rgba(255,245,247,0.15), rgba(255,245,247,0.15)), url('+c+') center/cover no-repeat fixed';}});</script>
+    <script src="../assets/js/cover-contrast.js?v=20260807"></script>
 </body>
 </html>

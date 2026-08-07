@@ -440,11 +440,11 @@ body {
     </header>
 
     <main>
-      <section class="w-full px-6 py-16" style="background: var(--bg);">
+      <section id="hero-section" class="w-full px-6 py-16" style="background: linear-gradient(rgba(255,245,247,0.15), rgba(255,245,247,0.15)), url('../assets/banner.jpg') center/cover no-repeat fixed;">
         <div style="max-width: 800px; margin: 0 auto;">
           <div class="text-center mb-10">
-            <h1 class="h1 mb-3" style="color: var(--ink);" data-site-key="listTitle">恋爱清单</h1>
-            <p class="body" style="color: var(--ink-3);" data-site-key="listSubtitle">记下我们想一起完成的小事，完成一个，就打上一个勾。</p>
+            <h1 class="h1 mb-3" data-contrast-text="title" style="color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.5);" data-site-key="listTitle">恋爱清单</h1>
+            <p class="body" data-contrast-text="subtitle" style="color: rgba(255,255,255,0.9); text-shadow: 0 1px 3px rgba(0,0,0,0.4);" data-site-key="listSubtitle">记下我们想一起完成的小事，完成一个，就打上一个勾。</p>
           </div>
 
           <div class="love-admin-only block mb-8">
@@ -495,9 +495,9 @@ body {
       </div>
     </footer>
 
-    <script src="../assets/js/music.js"></script>
-    <script src="../assets/js/admin-data.js"></script>
-    <script src="../assets/js/admin-core.js"></script>
+    <script src="../assets/js/music.js?v=20260807"></script>
+    <script src="../assets/js/admin-data.js?v=20260807"></script>
+    <script src="../assets/js/admin-core.js?v=20260807"></script>
     <script>
       (function () {
         const wishlistEl = document.getElementById('wishlist');
@@ -514,6 +514,18 @@ body {
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;');
+        }
+
+        function creatorBadge(item) {
+          if (!item.createdBy) return '';
+          var acc = LoveAdmin.getAccount(item.createdBy);
+          if (!acc) return '';
+          var avatarHtml = '';
+          if (acc.avatar) {
+            avatarHtml = '<div style="width:16px;height:16px;border-radius:50%;overflow:hidden;border:1px solid var(--brand-200);flex-shrink:0;"><img src="' + escapeHtml(acc.avatar) + '" style="width:100%;height:100%;object-fit:cover;"></div>';
+          }
+          var timeStr = item.createdAt ? ' · ' + new Date(item.createdAt).toLocaleString('zh-CN') : '';
+          return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-2);padding:2px 8px;background:var(--surface-2);border-radius:var(--r-pill);">' + avatarHtml + escapeHtml(acc.nickname) + timeStr + '</span>';
         }
 
         function render() {
@@ -535,6 +547,7 @@ body {
               '<label style="display: flex; align-items: center; gap: 16px; flex: 1; cursor: pointer;">' +
                 '<input type="checkbox" class="wishlist-check" data-index="' + index + '"' + (item.done ? ' checked' : '') + '>' +
                 '<span class="wishlist-text body" style="color: var(--ink); font-weight: 500;">' + escapeHtml(item.text) + '</span>' +
+                creatorBadge(item) +
               '</label>' +
               '<button type="button" class="love-admin-only btn-secondary" data-action="delete" data-index="' + index + '" style="padding: 6px 12px; font-size: 13px; flex-shrink: 0;">删除</button>';
             wishlistEl.appendChild(itemEl);
@@ -575,8 +588,26 @@ body {
           }
         }
 
+        function doAddWish() {
+          if (window.LoveAdmin && LoveAdmin.isLoggedIn && LoveAdmin.isLoggedIn()) {
+            if (addWishPanel) addWishPanel.style.display = 'block';
+            newWishInput.focus();
+          } else if (window.LoveAdmin && LoveAdmin.ensureLoggedIn) {
+            LoveAdmin.ensureLoggedIn(function () {
+              if (addWishPanel) addWishPanel.style.display = 'block';
+              newWishInput.focus();
+            });
+          }
+        }
+
         if (addWishBtn) {
-          addWishBtn.addEventListener('click', addWish);
+          addWishBtn.addEventListener('click', function () {
+            if (window.LoveAdmin && LoveAdmin.isLoggedIn && LoveAdmin.isLoggedIn()) {
+              addWish();
+            } else if (window.LoveAdmin && LoveAdmin.ensureLoggedIn) {
+              LoveAdmin.ensureLoggedIn(addWish);
+            }
+          });
         }
         if (newWishInput) {
           newWishInput.addEventListener('keydown', function (e) {
@@ -585,17 +616,7 @@ body {
         }
 
         if (addWishTrigger) {
-          addWishTrigger.addEventListener('click', function () {
-            if (window.LoveAdmin && LoveAdmin.isLoggedIn && LoveAdmin.isLoggedIn()) {
-              if (addWishPanel) addWishPanel.style.display = 'block';
-              newWishInput.focus();
-            } else if (window.LoveAdmin && LoveAdmin.ensureLoggedIn) {
-              LoveAdmin.ensureLoggedIn(function () {
-                if (addWishPanel) addWishPanel.style.display = 'block';
-                newWishInput.focus();
-              });
-            }
-          });
+          addWishTrigger.addEventListener('click', doAddWish);
         }
 
         render();
@@ -603,5 +624,7 @@ body {
     </script>
     <script>lucide.createIcons();</script>
     <script>LoveData.applySiteText(document);</script>
+<script>document.addEventListener('DOMContentLoaded',function(){var c=LoveData.getCover();if(c){var h=document.getElementById('hero-section');if(h)h.style.background='linear-gradient(rgba(255,245,247,0.15), rgba(255,245,247,0.15)), url('+c+') center/cover no-repeat fixed';}});</script>
+    <script src="../assets/js/cover-contrast.js?v=20260807"></script>
 </body>
 </html>

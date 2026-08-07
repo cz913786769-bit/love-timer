@@ -247,7 +247,7 @@ body.admin-page #love-admin-login-fab { display: none !important; }
 }
 
 .admin-menu-btn:hover { background: var(--surface-2); color: var(--ink); }
-.admin-menu-btn[data-active="true"] { background: var(--brand-100); color: var(--brand); }
+.admin-menu-btn[data-active="true"] { background: var(--brand-100); color: var(--brand-700); }
 
 .admin-list-item {
   display: flex;
@@ -437,9 +437,9 @@ body.admin-page #love-admin-login-fab { display: none !important; }
           <span class="logo-text">管理后台</span>
         </a>
         <div style="display:flex; align-items:center; gap:12px;">
-          <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:var(--r-pill); background:var(--surface-2); color:var(--ink-2); font-size:13px; font-weight:500;">
+          <span id="admin-account-badge" style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:var(--r-pill); background:var(--surface-2); color:var(--ink-2); font-size:13px; font-weight:500;">
             <i data-lucide="shield-check" style="width:14px;height:14px;"></i>
-            已登录
+            <span id="admin-account-name">已登录</span>
           </span>
           <button id="admin-logout" data-dom-id="admin-logout" class="btn-secondary" style="padding:8px 16px; font-size:14px;">
             <i data-lucide="log-out" style="width:16px;height:16px;"></i>
@@ -473,11 +473,21 @@ body.admin-page #love-admin-login-fab { display: none !important; }
       </div>
     </footer>
 
-    <script src="../assets/js/admin-data.js"></script>
-    <script src="../assets/js/admin-core.js"></script>
+    <script src="../assets/js/admin-data.js?v=20260807"></script>
+    <script src="../assets/js/admin-core.js?v=20260807"></script>
     <script>
       (function () {
         if (!window.LoveAdmin || !LoveAdmin.isLoggedIn()) {
+          window.location.href = 'admin-login.html';
+          return;
+        }
+
+        /* 当前账户信息 */
+        var currentAccount = LoveAdmin.getCurrentAccount();
+        var currentIdentity = LoveAdmin.getCurrentIdentity();
+
+        if (!currentAccount) {
+          LoveAdmin.logout();
           window.location.href = 'admin-login.html';
           return;
         }
@@ -495,9 +505,21 @@ body.admin-page #love-admin-login-fab { display: none !important; }
           try { return new Date(iso).toLocaleString('zh-CN'); } catch (e) { return iso; }
         }
 
+        function creatorBadge(identity) {
+          if (!identity) return '';
+          var acc = LoveAdmin.getAccount(identity);
+          if (!acc) return '';
+          var avatarHtml = '';
+          if (acc.avatar) {
+            avatarHtml = '<div style="width:18px;height:18px;border-radius:50%;overflow:hidden;border:1px solid var(--brand-200);flex-shrink:0;"><img src="' + esc(acc.avatar) + '" style="width:100%;height:100%;object-fit:cover;"></div>';
+          }
+          return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--ink-3);">' + avatarHtml + esc(acc.nickname) + '</span>';
+        }
+
         var tabs = [
           { id: 'site', label: '网站设置', icon: 'settings' },
           { id: 'password', label: '修改密码', icon: 'lock' },
+          { id: 'avatars', label: '头像管理', icon: 'user-circle' },
           { id: 'cover', label: '封面照片', icon: 'image' },
           { id: 'messages', label: '留言管理', icon: 'message-circle' },
           { id: 'album', label: '相册管理', icon: 'folder-heart' },
@@ -547,6 +569,7 @@ body.admin-page #love-admin-login-fab { display: none !important; }
           switch (id) {
             case 'site': renderSite(); break;
             case 'password': renderPassword(); break;
+            case 'avatars': renderAvatars(); break;
             case 'cover': renderCover(); break;
             case 'messages': renderMessages(); break;
             case 'album': renderAlbum(); break;
@@ -608,11 +631,16 @@ body.admin-page #love-admin-login-fab { display: none !important; }
         }
 
         function renderPassword() {
-          var pwd = LoveAdmin.getPassword();
+          var acc = currentAccount || LoveAdmin.getCurrentAccount();
+          if (!acc) {
+            content.innerHTML = '<h2 class="h2" style="margin:0 0 4px;">修改密码</h2><p class="caption" style="color:var(--state-error);">账户信息丢失，请刷新页面重试。</p>';
+            return;
+          }
+          var pwd = acc.password || '';
           var masked = '•'.repeat(Math.min(pwd.length, 12));
           content.innerHTML =
             '<h2 class="h2" style="margin:0 0 4px;">修改密码</h2>' +
-            '<p class="caption" style="margin:0 0 24px;">修改后请牢记新的管理密码</p>' +
+            '<p class="caption" style="margin:0 0 24px;">修改 <strong>' + esc(acc.nickname) + '</strong> 的登录密码</p>' +
             '<div class="card" style="padding:24px; max-width:480px;">' +
               '<div class="admin-field">' +
                 '<label>当前密码</label>' +
@@ -629,10 +657,81 @@ body.admin-page #love-admin-login-fab { display: none !important; }
             confirmSave('确定修改密码吗？', function () {
               var val = document.getElementById('new-password').value.trim();
               if (!val) return;
-              LoveAdmin.setPassword(val);
+              LoveAdmin.updateAccount(currentIdentity, { password: val });
+              currentAccount = LoveAdmin.getCurrentAccount();
               LoveAdmin.toast('密码已保存');
               renderPassword();
             });
+          });
+        }
+
+        function renderAvatars() {
+          var acc = currentAccount || LoveAdmin.getCurrentAccount();
+          if (!acc) {
+            content.innerHTML = '<h2 class="h2" style="margin:0 0 4px;">头像管理</h2><p class="caption" style="color:var(--state-error);">账户信息丢失，请刷新页面重试。</p>';
+            return;
+          }
+          var hasAvatar = acc.avatar && acc.avatar.length > 0;
+          content.innerHTML =
+            '<h2 class="h2" style="margin:0 0 4px;">头像管理</h2>' +
+            '<p class="caption" style="margin:0 0 24px;">管理 <strong>' + esc(acc.nickname) + '</strong> 的头像和昵称。照片上传后会自动裁剪为圆形。</p>' +
+            '<div class="card" style="padding:24px; max-width:480px;">' +
+              '<div style="margin-bottom:20px;display:flex;align-items:center;gap:16px;">' +
+                '<div id="avatar-preview" style="width:100px;height:100px;border-radius:50%;overflow:hidden;border:3px solid var(--brand-200);background:var(--brand-100);flex-shrink:0;">' +
+                  (hasAvatar ? '<img src="' + acc.avatar + '" style="width:100%;height:100%;object-fit:cover;">' : '<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:var(--brand);font-size:28px;font-weight:600;">' + esc(acc.nickname.charAt(0)) + '</span>') +
+                '</div>' +
+                '<div>' +
+                  '<p style="margin:0 0 8px;font-weight:600;color:var(--ink);">' + esc(acc.nickname) + '</p>' +
+                  '<p class="caption" style="margin:0;">上传新照片替换当前头像</p>' +
+                '</div>' +
+              '</div>' +
+              '<div class="admin-field">' +
+                '<label>昵称</label>' +
+                '<input id="avatar-nickname" type="text" class="input" value="' + esc(acc.nickname) + '" placeholder="输入昵称">' +
+              '</div>' +
+              '<div class="admin-field">' +
+                '<label>上传照片</label>' +
+                '<input id="avatar-file" type="file" accept="image/*" class="input" style="height:auto;padding:8px 10px;">' +
+              '</div>' +
+              '<button id="save-avatar" class="btn-primary">保存</button>' +
+            '</div>';
+
+          document.getElementById('save-avatar').addEventListener('click', function () {
+            var fileInput = document.getElementById('avatar-file');
+            var nickname = document.getElementById('avatar-nickname').value.trim();
+            var file = fileInput.files[0];
+
+            function doSave(dataUrl) {
+              var updates = {};
+              if (nickname) updates.nickname = nickname;
+              if (dataUrl) updates.avatar = dataUrl;
+              LoveAdmin.updateAccount(currentIdentity, updates);
+              currentAccount = LoveAdmin.getCurrentAccount();
+              LoveAdmin.toast('头像和昵称已保存');
+              renderAvatars();
+            }
+
+            if (file) {
+              LoveData.readLocalImage(file, function (err, dataUrl) {
+                if (err) { LoveAdmin.toast(err.message); return; }
+                // 裁剪为正方形
+                var img = new Image();
+                img.onload = function () {
+                  var size = Math.min(img.width, img.height);
+                  var sx = (img.width - size) / 2;
+                  var sy = (img.height - size) / 2;
+                  var canvas = document.createElement('canvas');
+                  canvas.width = 200;
+                  canvas.height = 200;
+                  var ctx = canvas.getContext('2d');
+                  ctx.drawImage(img, sx, sy, size, size, 0, 0, 200, 200);
+                  doSave(canvas.toDataURL('image/jpeg', 0.85));
+                };
+                img.src = dataUrl;
+              });
+            } else {
+              doSave(null);
+            }
           });
         }
 
@@ -694,6 +793,7 @@ body.admin-page #love-admin-login-fab { display: none !important; }
                   '<div style="flex:1; min-width:0;">' +
                     '<div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; flex-wrap:wrap;">' +
                       '<span class="admin-badge">' + esc(m.nickname || '匿名') + '</span>' +
+                      (m.identity ? creatorBadge(m.identity) : '') +
                       '<span class="caption">' + fmtDate(m.createdAt) + '</span>' +
                     '</div>' +
                     '<p class="body" style="margin:0; word-break:break-word;">' + esc(m.text) + '</p>' +
@@ -1039,16 +1139,100 @@ body.admin-page #love-admin-login-fab { display: none !important; }
           });
         }
 
+        // 退出登录
         document.getElementById('admin-logout').addEventListener('click', function () {
           LoveAdmin.logout();
           window.location.href = 'admin-login.html';
         });
 
+        // 账号切换下拉菜单
+        (function () {
+          var badge = document.getElementById('admin-account-badge');
+          if (!badge) return;
+
+          // 设置点击切换
+          badge.style.cursor = 'pointer';
+          badge.style.position = 'relative';
+
+          // 创建下拉菜单 DOM
+          var dropdown = document.createElement('div');
+          dropdown.id = 'account-dropdown';
+          dropdown.style.cssText = 'display:none;position:absolute;top:100%;right:0;margin-top:8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:0 4px 20px rgba(0,0,0,0.08);z-index:100;min-width:200px;overflow:hidden;';
+          badge.parentNode.style.position = 'relative';
+          badge.parentNode.appendChild(dropdown);
+
+          var accounts = [
+            { id: 'left', nickname: '嘉嘉小星星', identity: 'left' },
+            { id: 'right', nickname: '陈卓卓', identity: 'right' }
+          ];
+
+          function renderDropdown() {
+            dropdown.innerHTML = accounts.map(function (a) {
+              var isActive = currentIdentity === a.identity;
+              var accData = LoveAdmin.getAccount(a.identity);
+              var avatarHtml = '';
+              if (accData && accData.avatar) {
+                avatarHtml = '<div style="width:28px;height:28px;border-radius:50%;overflow:hidden;border:1px solid var(--brand-200);flex-shrink:0;"><img src="' + esc(accData.avatar) + '" style="width:100%;height:100%;object-fit:cover;"></div>';
+              } else {
+                avatarHtml = '<div style="width:28px;height:28px;border-radius:50%;background:var(--brand-100);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--brand);font-weight:600;font-size:14px;">' + esc(a.nickname.charAt(0)) + '</div>';
+              }
+              return '<div class="account-dropdown-item" data-switch="' + esc(a.identity) + '" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;' + (isActive ? 'background:var(--brand-100);font-weight:600;' : '') + '">' +
+                avatarHtml +
+                '<span style="font-size:14px;color:var(--ink);">' + esc(a.nickname) + '</span>' +
+                (isActive ? '<span style="margin-left:auto;font-size:11px;color:var(--brand);">当前</span>' : '') +
+              '</div>';
+            }).join('');
+          }
+
+          renderDropdown();
+
+          badge.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var isOpen = dropdown.style.display === 'block';
+            dropdown.style.display = isOpen ? 'none' : 'block';
+            if (!isOpen) renderDropdown();
+          });
+
+          dropdown.addEventListener('click', function (e) {
+            var item = e.target.closest('[data-switch]');
+            if (!item) return;
+            var targetIdentity = item.dataset.switch;
+            if (targetIdentity === currentIdentity) {
+              dropdown.style.display = 'none';
+              return;
+            }
+            LoveAdmin.switchAccount(targetIdentity);
+            window.location.reload();
+          });
+
+          document.addEventListener('click', function () {
+            dropdown.style.display = 'none';
+          });
+        })();
+
+        // 显示当前账户信息
+        (function () {
+          var badge = document.getElementById('admin-account-badge');
+          if (!badge || !currentAccount) return;
+          var html = '';
+          if (currentAccount.avatar) {
+            html += '<div style="width:20px;height:20px;border-radius:50%;overflow:hidden;border:1px solid var(--brand-200);flex-shrink:0;"><img src="' + esc(currentAccount.avatar) + '" style="width:100%;height:100%;object-fit:cover;"></div>';
+          } else {
+            html += '<i data-lucide="shield-check" style="width:14px;height:14px;"></i>';
+          }
+          html += '<span>' + esc(currentAccount.nickname) + '</span>';
+          html += '<i data-lucide="chevron-down" style="width:12px;height:12px;margin-left:2px;opacity:0.5;"></i>';
+          badge.innerHTML = html;
+          if (window.lucide) lucide.createIcons();
+        })();
+
         buildMenu();
-        renderTab(currentTab);
+        renderTab('site');
+
         LoveData.applySiteText(document);
         lucide.createIcons();
       })();
-    </script>
+
+</script>
 </body>
 </html>

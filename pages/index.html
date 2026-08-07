@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>我们的小宇宙</title>
     <style id="theme-vars">
 @import "tailwindcss";
@@ -483,8 +486,8 @@ body {
 
     <main>
       <section class="relative flex items-center justify-center overflow-hidden" style="min-height: calc(100vh - 72px);">
-        <img id="hero-cover" src="../assets/banner.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" style="opacity: 0.35;">
-        <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(255,245,247,0.35) 0%, rgba(255,245,247,0.88) 100%);"></div>
+        <img id="hero-cover" src="../assets/banner.jpg" alt="" class="absolute inset-0 w-full h-full object-cover" style="opacity: 0.75;">
+        <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(255,245,247,0.02) 0%, rgba(255,245,247,0.12) 100%);"></div>
 
         <button id="cover-edit-toggle" class="love-admin-only btn-secondary absolute top-6 right-6 z-20" style="padding: 8px 14px; font-size: 14px;">更换封面</button>
 
@@ -504,18 +507,28 @@ body {
         </form>
 
         <div class="relative z-10 w-full px-6 py-16 flex flex-col items-center text-center" style="max-width: 960px;">
-          <div class="flex items-center justify-center mb-8" style="gap: 0;">
-            <div style="width: 96px; height: 96px; border-radius: 999px; background: var(--surface); border: 3px solid var(--brand-200); display: flex; align-items: center; justify-content: center; color: var(--brand); font-size: 24px; font-weight: 600; box-shadow: var(--shadow-2); z-index: 1;">陈卓卓</div>
-            <div style="width: 44px; height: 44px; border-radius: 999px; background: var(--brand); color: var(--brand-ink); display: flex; align-items: center; justify-content: center; margin: 0 -10px; z-index: 2; box-shadow: var(--shadow-1);">
+          <div class="flex items-start justify-center mb-8" style="gap: 0;">
+            <div class="flex flex-col items-center" style="min-width: 96px;">
+              <div id="avatar-left" style="width: 96px; height: 96px; border-radius: 50%; background: var(--brand-100); border: 3px solid var(--brand-200); overflow: hidden; box-shadow: var(--shadow-2); flex-shrink: 0;">
+                <img id="avatar-left-img" src="" alt="嘉嘉小星星" style="width:100%;height:100%;object-fit:cover;display:none;" onerror="var p=this.parentElement;p.style.background='var(--brand-100)';this.style.display='none';var s=p.querySelector('span');if(!s){p.innerHTML+='<span style=display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:var(--brand);font-size:18px;font-weight:600>嘉嘉小星星</span>';}">
+              </div>
+              <span id="name-left" style="margin-top: 10px; font-size: 15px; font-weight: 600; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">嘉嘉小星星</span>
+            </div>
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--brand); color: var(--brand-ink); display: flex; align-items: center; justify-content: center; margin: 26px -10px 0; z-index: 2; box-shadow: var(--shadow-1); flex-shrink: 0;">
               <i data-lucide="heart" style="width: 22px; height: 22px;"></i>
             </div>
-            <div style="width: 96px; height: 96px; border-radius: 999px; background: var(--surface); border: 3px solid var(--brand-200); display: flex; align-items: center; justify-content: center; color: var(--brand); font-size: 18px; font-weight: 600; box-shadow: var(--shadow-2); z-index: 1;">嘉嘉小星星</div>
+            <div class="flex flex-col items-center" style="min-width: 96px;">
+              <div id="avatar-right" style="width: 96px; height: 96px; border-radius: 50%; background: var(--brand-100); border: 3px solid var(--brand-200); overflow: hidden; box-shadow: var(--shadow-2); flex-shrink: 0;">
+                <img id="avatar-right-img" src="" alt="陈卓卓" style="width:100%;height:100%;object-fit:cover;display:none;" onerror="var p=this.parentElement;p.style.background='var(--brand-100)';this.style.display='none';var s=p.querySelector('span');if(!s){p.innerHTML+='<span style=display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:var(--brand);font-size:24px;font-weight:600>陈卓卓</span>';}">
+              </div>
+              <span id="name-right" style="margin-top: 10px; font-size: 15px; font-weight: 600; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">陈卓卓</span>
+            </div>
           </div>
 
           <div class="glass w-full px-8 py-10 md:px-12 md:py-12" style="border-radius: var(--r-lg); box-shadow: var(--shadow-2);">
-            <p class="caption mb-4" style="color: var(--brand-600); font-weight: 500;">我们的故事，从 2026 年 4 月 12 日开始</p>
-            <h1 id="home-title" class="h1 mb-2" style="color: var(--ink);" data-site-key="homeTitle">我们的小宇宙</h1>
-            <p id="home-subtitle" class="body-l mb-8" style="color: var(--ink-2);" data-site-key="homeSubtitle">从第一次见面，到未来的每一天</p>
+            <p class="caption mb-4" data-contrast-text="caption" style="color: #444; text-shadow: none; font-weight: 500;">我们的故事，从 2026 年 4 月 12 日开始</p>
+            <h1 id="home-title" class="h1 mb-2" data-contrast-text="title" style="color: #000; text-shadow: none;" data-site-key="homeTitle">我们的小宇宙</h1>
+            <p id="home-subtitle" class="body-l mb-8" data-contrast-text="subtitle" style="color: #222; text-shadow: none;" data-site-key="homeSubtitle">从第一次见面，到未来的每一天</p>
 
             <div id="timer-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-6">
               <div class="flex flex-col items-center">
@@ -536,21 +549,21 @@ body {
               </div>
             </div>
 
-            <p id="timer-subtitle" class="body-l" style="color: var(--ink-2);">这是我们一起走过的第 0 天 0 时 0 分 0 秒</p>
+            <p id="timer-subtitle" class="body-l" data-contrast-text="body" style="color: #222; text-shadow: none;">这是我们一起走过的第 0 天 0 时 0 分 0 秒</p>
           </div>
         </div>
       </section>
 
-      <section class="w-full px-6 py-16" style="background: var(--bg);">
+      <section class="w-full px-6 py-16" style="background: linear-gradient(rgba(255,245,247,0.15), rgba(255,245,247,0.15)), url('../assets/banner.jpg') center/cover no-repeat fixed;">
         <div style="max-width: 1200px; margin: 0 auto;">
           <div class="text-center mb-10">
-            <h2 class="h2 mb-3" style="color: var(--ink);">记录我们的爱</h2>
-            <p class="body" style="color: var(--ink-3);">每一个角落，都藏着属于我们的小幸福</p>
+            <h2 class="h2 mb-3" data-contrast-text="title" style="color: #000; text-shadow: none;">记录我们的爱</h2>
+            <p class="body" data-contrast-text="subtitle" style="color: #222; text-shadow: none;">每一个角落，都藏着属于我们的小幸福</p>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <a href="leaving.html" data-dom-id="cta-leaving" class="nav-card card p-6 text-left no-underline" style="color: var(--ink);">
-              <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+              <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand-700); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                 <i data-lucide="message-circle" style="width: 24px; height: 24px;"></i>
               </div>
               <h3 class="h3 mb-2">去留言</h3>
@@ -558,7 +571,7 @@ body {
             </a>
 
             <a href="love-album.html" data-dom-id="cta-album" class="nav-card card p-6 text-left no-underline" style="color: var(--ink);">
-              <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+              <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand-700); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                 <i data-lucide="image" style="width: 24px; height: 24px;"></i>
               </div>
               <h3 class="h3 mb-2">看相册</h3>
@@ -566,7 +579,7 @@ body {
             </a>
 
             <a href="love-list.html" data-dom-id="cta-list" class="nav-card card p-6 text-left no-underline" style="color: var(--ink);">
-              <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+              <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand-700); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                 <i data-lucide="check-square" style="width: 24px; height: 24px;"></i>
               </div>
               <h3 class="h3 mb-2">看清单</h3>
@@ -574,7 +587,7 @@ body {
             </a>
 
             <a href="little-things.html" data-dom-id="cta-little" class="nav-card card p-6 text-left no-underline" style="color: var(--ink);">
-              <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+              <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand-700); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                 <i data-lucide="coffee" style="width: 24px; height: 24px;"></i>
               </div>
               <h3 class="h3 mb-2">看点滴</h3>
@@ -582,7 +595,7 @@ body {
             </a>
 
             <a href="about-us.html" data-dom-id="cta-about" class="nav-card card p-6 text-left no-underline" style="color: var(--ink);">
-              <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+              <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand-700); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                 <i data-lucide="users" style="width: 24px; height: 24px;"></i>
               </div>
               <h3 class="h3 mb-2">关于我们</h3>
@@ -639,9 +652,9 @@ body {
       })();
 
     </script>
-    <script src="../assets/js/music.js"></script>
-    <script src="../assets/js/admin-data.js"></script>
-    <script src="../assets/js/admin-core.js"></script>
+    <script src="../assets/js/music.js?v=20260807"></script>
+    <script src="../assets/js/admin-data.js?v=20260807"></script>
+    <script src="../assets/js/admin-core.js?v=20260807"></script>
     <script>
       (function () {
         LoveData.applySiteText(document);
@@ -689,6 +702,30 @@ body {
         });
       })();
     </script>
+    <script>
+      /* 加载头像 */
+      (function () {
+        var avatars = LoveAdmin.getAccounts();
+        var leftImg = document.getElementById('avatar-left-img');
+        var rightImg = document.getElementById('avatar-right-img');
+        var nameLeft = document.getElementById('name-left');
+        var nameRight = document.getElementById('name-right');
+
+        var cacheBuster = '?t=' + Date.now();
+        if (avatars.left && avatars.left.avatar && leftImg) {
+          leftImg.src = avatars.left.avatar + cacheBuster;
+          leftImg.style.display = '';
+        }
+        if (avatars.right && avatars.right.avatar && rightImg) {
+          rightImg.src = avatars.right.avatar + cacheBuster;
+          rightImg.style.display = '';
+        }
+        if (nameLeft && avatars.left) nameLeft.textContent = avatars.left.nickname;
+        if (nameRight && avatars.right) nameRight.textContent = avatars.right.nickname;
+      })();
+    </script>
     <script>lucide.createIcons();</script>
+    <script>LoveData.applySiteText(document);</script>
+    <script src="../assets/js/cover-contrast.js?v=20260807"></script>
 </body>
 </html>

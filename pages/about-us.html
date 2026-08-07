@@ -411,16 +411,16 @@ body {
     </header>
 
     <main>
-      <section class="w-full px-6 py-16" style="background: var(--bg);">
+      <section id="hero-section" class="w-full px-6 py-16" style="background: linear-gradient(rgba(255,245,247,0.15), rgba(255,245,247,0.15)), url('../assets/banner.jpg') center/cover no-repeat fixed;">
         <div style="max-width: 800px; margin: 0 auto;">
           <div class="text-center mb-10">
-            <h1 class="h1 mb-3" style="color: var(--ink);" data-site-key="aboutTitle">关于我们</h1>
-            <p class="body" style="color: var(--ink-3);" data-site-key="aboutSubtitle">从第一次见面，到未来的每一天。</p>
+            <h1 class="h1 mb-3" data-contrast-text="title" style="color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.5);" data-site-key="aboutTitle">关于我们</h1>
+            <p class="body" data-contrast-text="subtitle" style="color: rgba(255,255,255,0.9); text-shadow: 0 1px 3px rgba(0,0,0,0.4);" data-site-key="aboutSubtitle">从第一次见面，到未来的每一天。</p>
           </div>
 
           <div class="card p-8 md:p-12">
             <div class="text-center mb-10">
-              <div style="display: inline-flex; align-items: center; justify-content: center; width: 72px; height: 72px; border-radius: 999px; background: var(--brand-100); color: var(--brand); margin-bottom: 16px;">
+              <div style="display: inline-flex; align-items: center; justify-content: center; width: 72px; height: 72px; border-radius: 999px; background: var(--brand-100); color: var(--brand-700); margin-bottom: 16px;">
                 <i data-lucide="mail-heart" style="width: 32px; height: 32px;"></i>
               </div>
               <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
@@ -480,9 +480,9 @@ body {
       </div>
     </footer>
 
-    <script src="../assets/js/music.js"></script>
-    <script src="../assets/js/admin-data.js"></script>
-    <script src="../assets/js/admin-core.js"></script>
+    <script src="../assets/js/music.js?v=20260807"></script>
+    <script src="../assets/js/admin-data.js?v=20260807"></script>
+    <script src="../assets/js/admin-core.js?v=20260807"></script>
     <script>
       (function () {
         var viewEl = document.getElementById('letter-view');
@@ -548,5 +548,7 @@ body {
     </script>
     <script>lucide.createIcons();</script>
     <script>LoveData.applySiteText(document);</script>
+<script>document.addEventListener('DOMContentLoaded',function(){var c=LoveData.getCover();if(c){var h=document.getElementById('hero-section');if(h)h.style.background='linear-gradient(rgba(255,245,247,0.15), rgba(255,245,247,0.15)), url('+c+') center/cover no-repeat fixed';}});</script>
+    <script src="../assets/js/cover-contrast.js?v=20260807"></script>
 </body>
 </html>

@@ -9,7 +9,13 @@
     album: 'love-data-album',
     wishlist: 'love-data-wishlist',
     timeline: 'love-data-timeline',
-    letter: 'love-data-letter'
+    letter: 'love-data-letter',
+    avatars: 'love-data-avatars'
+  };
+
+  var DEFAULT_AVATARS = {
+    left: { name: '嘉嘉小星星', dataUrl: '../assets/avatars/jiajia.png' },
+    right: { name: '陈卓卓', dataUrl: '../assets/avatars/chenzhuozhuo.png' }
   };
 
   var DEFAULT_COVER = '../assets/banner.jpg';
@@ -250,6 +256,18 @@
     return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
   }
 
+  function getAvatars() { return LoveAdmin.getAccounts(); }
+  function setAvatars(avatars) { LoveAdmin.saveAccounts(avatars); }
+  function setAvatar(side, dataUrl) {
+    LoveAdmin.updateAccount(side, { avatar: dataUrl });
+    return LoveAdmin.getAccounts();
+  }
+  function getAvatar(side) {
+    return LoveAdmin.getAccount(side);
+  }
+
+  function getCurrentIdentity() { return LoveAdmin.getCurrentIdentity(); }
+
   function getCover() { return load(KEYS.cover, DEFAULT_COVER); }
   function setCover(src) { save(KEYS.cover, src); }
 
@@ -270,7 +288,8 @@
   function getMessages() { return load(KEYS.messages, DEFAULT_MESSAGES); }
   function addMessage(nickname, text) {
     var list = getMessages();
-    list.push({ id: generateId('msg'), nickname: nickname, text: text, createdAt: new Date().toISOString() });
+    var identity = LoveAdmin.isLoggedIn() ? LoveAdmin.getCurrentIdentity() : null;
+    list.push({ id: generateId('msg'), nickname: nickname, text: text, identity: identity, createdAt: new Date().toISOString() });
     save(KEYS.messages, list);
     return list;
   }
@@ -286,6 +305,8 @@
     var album = getAlbum();
     group.id = generateId('album');
     if (!group.photos) group.photos = [];
+    group.createdBy = LoveAdmin.isLoggedIn() ? LoveAdmin.getCurrentIdentity() : null;
+    group.createdAt = new Date().toISOString();
     album.push(group);
     saveAlbum(album);
     return album;
@@ -327,7 +348,7 @@
   function saveWishlist(list) { save(KEYS.wishlist, list); }
   function addWishlist(text) {
     var list = getWishlist();
-    list.push({ text: text, done: false });
+    list.push({ text: text, done: false, createdBy: LoveAdmin.isLoggedIn() ? LoveAdmin.getCurrentIdentity() : null, createdAt: new Date().toISOString() });
     saveWishlist(list);
     return list;
   }
@@ -351,6 +372,8 @@
   function addTimeline(item) {
     var list = getTimeline();
     item.id = generateId('t');
+    item.createdBy = LoveAdmin.isLoggedIn() ? LoveAdmin.getCurrentIdentity() : null;
+    item.createdAt = new Date().toISOString();
     list.push(item);
     saveTimeline(list);
     return list;
@@ -423,6 +446,12 @@
     DEFAULT_WISHLIST: DEFAULT_WISHLIST,
     DEFAULT_TIMELINE: DEFAULT_TIMELINE,
     DEFAULT_LETTER: DEFAULT_LETTER,
+    DEFAULT_AVATARS: DEFAULT_AVATARS,
+    getAvatars: getAvatars,
+    setAvatars: setAvatars,
+    setAvatar: setAvatar,
+    getAvatar: getAvatar,
+    getCurrentIdentity: getCurrentIdentity,
     getCover: getCover,
     setCover: setCover,
     getSite: getSite,

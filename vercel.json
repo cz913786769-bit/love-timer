@@ -1,7 +1,10 @@
 {
   "rewrites": [
     { "source": "/assets/:path*", "destination": "/assets/:path*" },
-    { "source": "/", "destination": "/pages/index.html" },
+    { "source": "/", "destination": "/app.html" },
+    { "source": "/app.html", "destination": "/app.html" },
+    { "source": "/qrcode.html", "destination": "/qrcode.html" },
+    { "source": "/pages/:path*", "destination": "/pages/:path*" },
     { "source": "/:page", "destination": "/pages/:page" }
   ],
   "headers": [

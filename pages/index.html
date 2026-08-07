@@ -350,6 +350,7 @@ body {
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../assets/js/interactions.js?v=20260807b"></script>
     <style type="text/tailwindcss">
   @theme inline {
     --color-background: var(--love-background);
@@ -459,6 +460,43 @@ body {
         background-color: currentColor;
       }
 
+      html, body { overscroll-behavior-y: contain; }
+
+      /* 入场与滚动显隐动画 */
+      .page-enter, .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);
+      }
+      .page-enter.is-visible, .reveal.is-visible {
+        opacity: 1;
+        transform: none;
+      }
+
+      /* 倒计时数字变化弹跳 */
+      .timer-pop {
+        animation: timer-pop .35s cubic-bezier(.2,.8,.2,1);
+      }
+      @keyframes timer-pop {
+        0% { transform: scale(1); }
+        40% { transform: scale(1.18); }
+        100% { transform: scale(1); }
+      }
+
+      /* 中心爱心脉冲 */
+      .heart-pulse {
+        animation: heart-pulse 2.2s ease-in-out infinite;
+      }
+      @keyframes heart-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+      }
+
+      /* 按钮涟漪 */
+      @keyframes ripple {
+        to { transform: scale(2.4); opacity: 0; }
+      }
+
       @media (max-width: 640px) {
         .display {
           font-size: clamp(32px, 11vw, 52px);
@@ -547,16 +585,16 @@ body {
 
         <div class="relative z-10 w-full px-6 py-16 flex flex-col items-center text-center" style="max-width: 960px;">
           <div class="flex items-start justify-center mb-8" style="gap: 0;">
-            <div class="flex flex-col items-center" style="min-width: 96px;">
+            <div class="flex flex-col items-center page-enter" data-delay="0" style="min-width: 96px;">
               <div id="avatar-left" style="width: 96px; height: 96px; border-radius: 50%; background: var(--brand-100); border: 3px solid var(--brand-200); overflow: hidden; box-shadow: var(--shadow-2); flex-shrink: 0;">
                 <img id="avatar-left-img" src="" alt="嘉嘉小星星" style="width:100%;height:100%;object-fit:cover;display:none;" onerror="var p=this.parentElement;p.style.background='var(--brand-100)';this.style.display='none';var s=p.querySelector('span');if(!s){p.innerHTML+='<span style=display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:var(--brand);font-size:18px;font-weight:600>嘉嘉小星星</span>';}">
               </div>
               <span id="name-left" style="margin-top: 10px; font-size: 15px; font-weight: 600; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">嘉嘉小星星</span>
             </div>
-            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--brand); color: var(--brand-ink); display: flex; align-items: center; justify-content: center; margin: 26px -10px 0; z-index: 2; box-shadow: var(--shadow-1); flex-shrink: 0;">
+            <div class="page-enter heart-pulse" data-delay="120" style="width: 44px; height: 44px; border-radius: 50%; background: var(--brand); color: var(--brand-ink); display: flex; align-items: center; justify-content: center; margin: 26px -10px 0; z-index: 2; box-shadow: var(--shadow-1); flex-shrink: 0;">
               <i data-lucide="heart" style="width: 22px; height: 22px;"></i>
             </div>
-            <div class="flex flex-col items-center" style="min-width: 96px;">
+            <div class="flex flex-col items-center page-enter" data-delay="180" style="min-width: 96px;">
               <div id="avatar-right" style="width: 96px; height: 96px; border-radius: 50%; background: var(--brand-100); border: 3px solid var(--brand-200); overflow: hidden; box-shadow: var(--shadow-2); flex-shrink: 0;">
                 <img id="avatar-right-img" src="" alt="陈卓卓" style="width:100%;height:100%;object-fit:cover;display:none;" onerror="var p=this.parentElement;p.style.background='var(--brand-100)';this.style.display='none';var s=p.querySelector('span');if(!s){p.innerHTML+='<span style=display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:var(--brand);font-size:24px;font-weight:600>陈卓卓</span>';}">
               </div>
@@ -564,12 +602,12 @@ body {
             </div>
           </div>
 
-          <div class="glass w-full px-4 py-6 sm:px-6 sm:py-8 md:px-12 md:py-12" style="border-radius: var(--r-lg); box-shadow: var(--shadow-2);">
-            <p class="caption mb-4" data-contrast-text="caption" style="color: #444; text-shadow: none; font-weight: 500;">我们的故事，从 2026 年 4 月 12 日开始</p>
-            <h1 id="home-title" class="h1 mb-2" data-contrast-text="title" style="color: #000; text-shadow: none;" data-site-key="homeTitle">我们的小宇宙</h1>
-            <p id="home-subtitle" class="body-l mb-8" data-contrast-text="subtitle" style="color: #222; text-shadow: none;" data-site-key="homeSubtitle">从第一次见面，到未来的每一天</p>
+          <div class="glass w-full px-4 py-6 sm:px-6 sm:py-8 md:px-12 md:py-12 page-enter" data-delay="260" style="border-radius: var(--r-lg); box-shadow: var(--shadow-2);">
+            <p class="caption mb-4 page-enter" data-delay="360" data-contrast-text="caption" style="color: #444; text-shadow: none; font-weight: 500;">我们的故事，从 2026 年 4 月 12 日开始</p>
+            <h1 id="home-title" class="h1 mb-2 page-enter" data-delay="420" data-contrast-text="title" style="color: #000; text-shadow: none;" data-site-key="homeTitle">我们的小宇宙</h1>
+            <p id="home-subtitle" class="body-l mb-8 page-enter" data-delay="480" data-contrast-text="subtitle" style="color: #222; text-shadow: none;" data-site-key="homeSubtitle">从第一次见面，到未来的每一天</p>
 
-            <div id="timer-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6">
+            <div id="timer-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 page-enter" data-delay="540">
               <div class="flex flex-col items-center">
                 <span id="days" class="display tabular-nums" style="color: var(--brand);">0</span>
                 <span class="caption" style="color: var(--ink-3);">天</span>
@@ -595,13 +633,13 @@ body {
 
       <section class="w-full px-6 py-16" style="background: linear-gradient(rgba(255,245,247,0.15), rgba(255,245,247,0.15)), url('../assets/banner.jpg') center/cover no-repeat fixed;">
         <div style="max-width: 1200px; margin: 0 auto;">
-          <div class="text-center mb-10">
+          <div class="text-center mb-10 reveal" data-delay="0">
             <h2 class="h2 mb-3" data-contrast-text="title" style="color: #000; text-shadow: none;">记录我们的爱</h2>
             <p class="body" data-contrast-text="subtitle" style="color: #222; text-shadow: none;">每一个角落，都藏着属于我们的小幸福</p>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <a href="leaving.html" data-dom-id="cta-leaving" class="nav-card card p-6 text-left no-underline" style="color: var(--ink);">
+            <a href="leaving.html" data-dom-id="cta-leaving" class="nav-card card p-6 text-left no-underline reveal" data-delay="80" style="color: var(--ink);">
               <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand-700); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                 <i data-lucide="message-circle" style="width: 24px; height: 24px;"></i>
               </div>
@@ -609,7 +647,7 @@ body {
               <p class="body" style="color: var(--ink-3);">写下想对彼此说的话，把温柔都收藏在这里。</p>
             </a>
 
-            <a href="love-album.html" data-dom-id="cta-album" class="nav-card card p-6 text-left no-underline" style="color: var(--ink);">
+            <a href="love-album.html" data-dom-id="cta-album" class="nav-card card p-6 text-left no-underline reveal" data-delay="160" style="color: var(--ink);">
               <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand-700); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                 <i data-lucide="image" style="width: 24px; height: 24px;"></i>
               </div>
@@ -617,7 +655,7 @@ body {
               <p class="body" style="color: var(--ink-3);">一张张合照，拼出我们走过的风景与笑容。</p>
             </a>
 
-            <a href="love-list.html" data-dom-id="cta-list" class="nav-card card p-6 text-left no-underline" style="color: var(--ink);">
+            <a href="love-list.html" data-dom-id="cta-list" class="nav-card card p-6 text-left no-underline reveal" data-delay="240" style="color: var(--ink);">
               <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand-700); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                 <i data-lucide="check-square" style="width: 24px; height: 24px;"></i>
               </div>
@@ -625,7 +663,7 @@ body {
               <p class="body" style="color: var(--ink-3);">打卡想一起做的事，让未来充满期待。</p>
             </a>
 
-            <a href="little-things.html" data-dom-id="cta-little" class="nav-card card p-6 text-left no-underline" style="color: var(--ink);">
+            <a href="little-things.html" data-dom-id="cta-little" class="nav-card card p-6 text-left no-underline reveal" data-delay="320" style="color: var(--ink);">
               <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand-700); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                 <i data-lucide="coffee" style="width: 24px; height: 24px;"></i>
               </div>
@@ -633,7 +671,7 @@ body {
               <p class="body" style="color: var(--ink-3);">记录日常的小确幸，平凡日子里也有光。</p>
             </a>
 
-            <a href="about-us.html" data-dom-id="cta-about" class="nav-card card p-6 text-left no-underline" style="color: var(--ink);">
+            <a href="about-us.html" data-dom-id="cta-about" class="nav-card card p-6 text-left no-underline reveal" data-delay="400" style="color: var(--ink);">
               <div style="width: 48px; height: 48px; border-radius: var(--r-md); background: var(--brand-100); color: var(--brand-700); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                 <i data-lucide="users" style="width: 24px; height: 24px;"></i>
               </div>

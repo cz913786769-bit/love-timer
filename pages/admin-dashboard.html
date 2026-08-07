@@ -879,7 +879,14 @@ body.admin-page #love-admin-login-fab { display: none !important; }
 
             html +=
               '<div style="display:grid; grid-template-columns:1fr 1fr auto; gap:10px; align-items:end; border-top:1px solid var(--line); padding-top:14px;">' +
-                '<div class="admin-field" style="margin:0;"><label>照片地址</label><input type="text" class="input photo-src" data-group="' + esc(g.id) + '" placeholder="../assets/..."></div>' +
+                '<div class="admin-field" style="margin:0;">' +
+                  '<label>选择照片</label>' +
+                  '<input type="file" class="input photo-file" data-group="' + esc(g.id) + '" accept="image/*" style="display:none;">' +
+                  '<button type="button" class="btn-secondary photo-select-btn" data-group="' + esc(g.id) + '" style="width:100%;">从相册/文件选择</button>' +
+                  '<div class="photo-preview" data-group="' + esc(g.id) + '" style="margin-top:8px;display:none;max-width:160px;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--line);">' +
+                    '<img src="" alt="预览" style="width:100%;height:auto;display:block;">' +
+                  '</div>' +
+                '</div>' +
                 '<div class="admin-field" style="margin:0;"><label>说明</label><input type="text" class="input photo-caption" data-group="' + esc(g.id) + '" placeholder="照片说明"></div>' +
                 '<button class="btn-primary add-photo" data-group="' + esc(g.id) + '" style="padding:10px 14px; font-size:14px;">添加</button>' +
               '</div>' +
@@ -907,15 +914,54 @@ body.admin-page #love-admin-login-fab { display: none !important; }
             });
           });
 
+          content.querySelectorAll('.photo-select-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var gid = this.dataset.group;
+              var input = content.querySelector('.photo-file[data-group="' + gid + '"]');
+              if (input) input.click();
+            });
+          });
+
+          content.querySelectorAll('.photo-file').forEach(function (input) {
+            input.addEventListener('change', function () {
+              var gid = input.dataset.group;
+              var preview = content.querySelector('.photo-preview[data-group="' + gid + '"]');
+              var img = preview ? preview.querySelector('img') : null;
+              var file = input.files[0];
+              if (!preview || !img) return;
+              if (!file) {
+                preview.style.display = 'none';
+                if (img._objectUrl) URL.revokeObjectURL(img._objectUrl);
+                img.src = '';
+                img._objectUrl = null;
+                return;
+              }
+              if (img._objectUrl) URL.revokeObjectURL(img._objectUrl);
+              img._objectUrl = URL.createObjectURL(file);
+              img.src = img._objectUrl;
+              preview.style.display = 'block';
+            });
+          });
+
           content.querySelectorAll('.add-photo').forEach(function (btn) {
             btn.addEventListener('click', function () {
               var gid = this.dataset.group;
-              var src = content.querySelector('.photo-src[data-group="' + gid + '"]').value.trim();
+              var fileInput = content.querySelector('.photo-file[data-group="' + gid + '"]');
               var caption = content.querySelector('.photo-caption[data-group="' + gid + '"]').value.trim();
-              if (!src) return;
-              LoveData.addPhoto(gid, { src: src, caption: caption });
-              LoveAdmin.toast('照片已添加');
-              renderAlbum();
+              var file = fileInput ? fileInput.files[0] : null;
+              if (!file) {
+                LoveAdmin.toast('请选择一张照片');
+                return;
+              }
+              LoveData.readLocalImage(file, function (err, dataUrl) {
+                if (err) {
+                  LoveAdmin.toast(err.message || '读取图片失败');
+                  return;
+                }
+                LoveData.addPhoto(gid, { src: dataUrl, caption: caption });
+                LoveAdmin.toast('照片已添加');
+                renderAlbum();
+              });
             });
           });
         }

@@ -533,21 +533,23 @@ body.admin-page #love-admin-login-fab { display: none !important; }
     <script src="../assets/js/api-client.js?v=20260808b"></script>
     <script>
       (function () {
-        if (!window.LoveAdmin || !LoveAdmin.isLoggedIn()) {
-          window.location.href = 'admin-login.html';
-          return;
-        }
-
-        /* 当前账户信息 */
-        var currentAccount = LoveAdmin.getCurrentAccount();
-        var currentIdentity = LoveAdmin.getCurrentIdentity();
         var isApiMode = window.LoveData && window.LoveData.useApi;
 
+        function initDashboard() {
+          if (!window.LoveAdmin || !LoveAdmin.isLoggedIn()) {
+            window.location.href = preserveApiRedirect('admin-login.html');
+            return;
+          }
+
+          /* 当前账户信息 */
+          var currentAccount = LoveAdmin.getCurrentAccount();
+          var currentIdentity = LoveAdmin.getCurrentIdentity();
+
         if (!currentAccount) {
-          LoveAdmin.logout();
-          window.location.href = 'admin-login.html';
-          return;
-        }
+            LoveAdmin.logout();
+            window.location.href = preserveApiRedirect('admin-login.html');
+            return;
+          }
 
         function esc(str) {
           return String(str == null ? '' : str)
@@ -1330,7 +1332,7 @@ body.admin-page #love-admin-login-fab { display: none !important; }
         // 退出登录
         document.getElementById('admin-logout').addEventListener('click', function () {
           LoveAdmin.logout();
-          window.location.href = 'admin-login.html';
+          window.location.href = preserveApiRedirect('admin-login.html');
         });
 
         // 账号切换下拉菜单
@@ -1419,7 +1421,18 @@ body.admin-page #love-admin-login-fab { display: none !important; }
 
         LoveData.applySiteText(document);
         lucide.createIcons();
-      })();
+      }
+
+      // 等待 LoveAdmin.ready() 后再判断登录状态
+      if (window.LoveAdmin && window.LoveAdmin.ready) {
+        LoveAdmin.ready().then(initDashboard).catch(function (err) {
+          console.error('[Dashboard] 初始化失败:', err);
+          window.location.href = preserveApiRedirect('admin-login.html');
+        });
+      } else {
+        initDashboard();
+      }
+    })();
 
 </script>
 </body>

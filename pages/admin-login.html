@@ -493,89 +493,102 @@ body.admin-page #love-admin-login-fab {
     <script src="../assets/js/api-client.js?v=20260808b"></script>
     <script>
       (function () {
-        if (window.LoveAdmin && LoveAdmin.isLoggedIn()) {
-          window.location.href = 'admin-dashboard.html';
-          return;
-        }
-
-        var form = document.getElementById('login-form');
-        var input = document.getElementById('password');
-        var error = document.getElementById('error');
-        var submitBtn = document.getElementById('login-submit');
-        var leftLabel = document.getElementById('login-left-label');
-        var rightLabel = document.getElementById('login-right-label');
-        var leftRadio = leftLabel.querySelector('input[type="radio"]');
-        var rightRadio = rightLabel.querySelector('input[type="radio"]');
         var isApiMode = window.LoveData && window.LoveData.useApi;
 
-        /* 加载头像和昵称 */
-        var accounts = LoveAdmin.getAccounts();
-        var leftImg = document.getElementById('login-left-avatar').querySelector('img');
-        var rightImg = document.getElementById('login-right-avatar').querySelector('img');
-        leftLabel.querySelector('span').textContent = accounts.left.nickname;
-        rightLabel.querySelector('span').textContent = accounts.right.nickname;
-        if (accounts.left.avatar && leftImg) { leftImg.src = resolveMediaUrl(accounts.left.avatar); leftImg.style.display = ''; }
-        if (accounts.right.avatar && rightImg) { rightImg.src = resolveMediaUrl(accounts.right.avatar); rightImg.style.display = ''; }
+        function initLoginPage() {
+          if (window.LoveAdmin && LoveAdmin.isLoggedIn()) {
+            window.location.href = preserveApiRedirect('admin-dashboard.html');
+            return;
+          }
 
-        function selectLoginSide(val) {
-          var isLeft = val === 'left';
-          leftLabel.style.border = isLeft ? '2px solid var(--brand)' : '2px solid var(--line)';
-          leftLabel.style.background = isLeft ? 'var(--brand-100)' : 'transparent';
-          leftLabel.querySelector('span').style.color = isLeft ? 'var(--brand)' : 'var(--ink-2)';
-          rightLabel.style.border = isLeft ? '2px solid var(--line)' : '2px solid var(--brand)';
-          rightLabel.style.background = isLeft ? 'transparent' : 'var(--brand-100)';
-          rightLabel.querySelector('span').style.color = isLeft ? 'var(--ink-2)' : 'var(--brand)';
-        }
+          var form = document.getElementById('login-form');
+          var input = document.getElementById('password');
+          var error = document.getElementById('error');
+          var submitBtn = document.getElementById('login-submit');
+          var leftLabel = document.getElementById('login-left-label');
+          var rightLabel = document.getElementById('login-right-label');
+          var leftRadio = leftLabel.querySelector('input[type="radio"]');
+          var rightRadio = rightLabel.querySelector('input[type="radio"]');
 
-        leftLabel.addEventListener('click', function () { leftRadio.checked = true; selectLoginSide('left'); });
-        rightLabel.addEventListener('click', function () { rightRadio.checked = true; selectLoginSide('right'); });
+          /* 加载头像和昵称 */
+          var accounts = LoveAdmin.getAccounts();
+          var leftImg = document.getElementById('login-left-avatar').querySelector('img');
+          var rightImg = document.getElementById('login-right-avatar').querySelector('img');
+          leftLabel.querySelector('span').textContent = accounts.left.nickname;
+          rightLabel.querySelector('span').textContent = accounts.right.nickname;
+          if (accounts.left.avatar && leftImg) { leftImg.src = resolveMediaUrl(accounts.left.avatar); leftImg.style.display = ''; }
+          if (accounts.right.avatar && rightImg) { rightImg.src = resolveMediaUrl(accounts.right.avatar); rightImg.style.display = ''; }
 
-        form.addEventListener('submit', function (e) {
-          e.preventDefault();
-          error.style.display = 'none';
-          var pwd = input.value.trim();
-          if (!pwd) return;
+          function selectLoginSide(val) {
+            var isLeft = val === 'left';
+            leftLabel.style.border = isLeft ? '2px solid var(--brand)' : '2px solid var(--line)';
+            leftLabel.style.background = isLeft ? 'var(--brand-100)' : 'transparent';
+            leftLabel.querySelector('span').style.color = isLeft ? 'var(--brand)' : 'var(--ink-2)';
+            rightLabel.style.border = isLeft ? '2px solid var(--line)' : '2px solid var(--brand)';
+            rightLabel.style.background = isLeft ? 'transparent' : 'var(--brand-100)';
+            rightLabel.querySelector('span').style.color = isLeft ? 'var(--ink-2)' : 'var(--brand)';
+          }
 
-          var side = leftRadio.checked ? 'left' : 'right';
+          leftLabel.addEventListener('click', function () { leftRadio.checked = true; selectLoginSide('left'); });
+          rightLabel.addEventListener('click', function () { rightRadio.checked = true; selectLoginSide('right'); });
 
-          // API 模式：异步登录
-          if (isApiMode && window.LoveAdmin.loginAsync) {
-            if (submitBtn) {
-              submitBtn.disabled = true;
-              submitBtn.innerHTML = '<i data-lucide="loader" style="width:18px;height:18px;"></i> 登录中...';
-              lucide.createIcons();
-            }
-            window.LoveAdmin.loginAsync(side, pwd).then(function (success) {
-              if (success) {
-                window.location.href = 'admin-dashboard.html';
+          form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            error.style.display = 'none';
+            var pwd = input.value.trim();
+            if (!pwd) return;
+
+            var side = leftRadio.checked ? 'left' : 'right';
+
+            // API 模式：异步登录
+            if (isApiMode && window.LoveAdmin.loginAsync) {
+              if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i data-lucide="loader" style="width:18px;height:18px;"></i> 登录中...';
+                lucide.createIcons();
+              }
+              window.LoveAdmin.loginAsync(side, pwd).then(function (success) {
+                if (success) {
+                  window.location.href = preserveApiRedirect('admin-dashboard.html');
+                } else {
+                  error.textContent = '密码不正确';
+                  error.style.display = 'block';
+                  input.value = '';
+                  input.focus();
+                  if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i data-lucide="log-in" style="width:18px;height:18px;"></i> 登录';
+                  }
+                  lucide.createIcons();
+                }
+              });
+            } else {
+              // localStorage 模式：同步登录
+              if (window.LoveAdmin && LoveAdmin.login(side, pwd)) {
+                window.location.href = preserveApiRedirect('admin-dashboard.html');
               } else {
                 error.textContent = '密码不正确';
                 error.style.display = 'block';
                 input.value = '';
                 input.focus();
-                if (submitBtn) {
-                  submitBtn.disabled = false;
-                  submitBtn.innerHTML = '<i data-lucide="log-in" style="width:18px;height:18px;"></i> 登录';
-                }
-                lucide.createIcons();
               }
-            });
-          } else {
-            // localStorage 模式：同步登录
-            if (window.LoveAdmin && LoveAdmin.login(side, pwd)) {
-              window.location.href = 'admin-dashboard.html';
-            } else {
-              error.textContent = '密码不正确';
-              error.style.display = 'block';
-              input.value = '';
-              input.focus();
             }
-          }
-        });
+          });
 
-        lucide.createIcons();
+          lucide.createIcons();
+        }
+
+        // 等待 LoveAdmin.ready() 后再判断登录状态
+        if (window.LoveAdmin && window.LoveAdmin.ready) {
+          LoveAdmin.ready().then(initLoginPage).catch(function (err) {
+            console.error('[Login] 初始化失败:', err);
+            initLoginPage(); // 降级：即使失败也显示登录页面
+          });
+        } else {
+          initLoginPage();
+        }
       })();
     </script>
-    <script>LoveData.applySiteText(document);</script>
+    <script>if(window.LoveData&&window.LoveData.ready){LoveData.ready().then(function(){LoveData.applySiteText(document)})}else{LoveData.applySiteText(document)}</script>
 </body>
 </html>

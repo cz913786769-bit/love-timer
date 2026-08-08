@@ -1141,12 +1141,29 @@ body {
           }
         });
 
-        renderAlbum();
+        // 等待 API 数据加载完成后再渲染
+        if (window.LoveData && window.LoveData.ready) {
+          LoveData.ready().then(function () {
+            renderAlbum();
+            LoveData.applySiteText(document);
+            var c = LoveData.getCover();
+            if (c) {
+              var h = document.getElementById('hero-section');
+              if (h) h.style.background = 'linear-gradient(rgba(255,245,247,0.15), rgba(255,245,247,0.15)), url(' + resolveMediaUrl(c) + ') center/cover no-repeat fixed';
+            }
+          }).catch(function (err) {
+            console.error('[Album] 初始化失败:', err);
+            renderAlbum();
+            LoveData.applySiteText(document);
+          });
+        } else {
+          renderAlbum();
+        }
       })();
     </script>
     <script>lucide.createIcons();</script>
-    <script>LoveData.applySiteText(document);</script>
-<script>document.addEventListener('DOMContentLoaded',function(){var c=LoveData.getCover();if(c){var h=document.getElementById('hero-section');if(h)h.style.background='linear-gradient(rgba(255,245,247,0.15), rgba(255,245,247,0.15)), url('+resolveMediaUrl(c)+') center/cover no-repeat fixed';}});</script>
+    <script>if(window.LoveData&&window.LoveData.ready){LoveData.ready().then(function(){LoveData.applySiteText(document)})}else{LoveData.applySiteText(document)}</script>
+<script>document.addEventListener('DOMContentLoaded',function(){function s(){var c=LoveData.getCover();if(c){var h=document.getElementById('hero-section');if(h)h.style.background='linear-gradient(rgba(255,245,247,0.15), rgba(255,245,247,0.15)), url('+resolveMediaUrl(c)+') center/cover no-repeat fixed'}}if(window.LoveData&&window.LoveData.ready){LoveData.ready().then(s)}else{s()}});</script>
     <script src="../assets/js/cover-contrast.js?v=20260807d"></script>
 </body>
 </html>

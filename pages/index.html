@@ -771,12 +771,7 @@ body {
     <script src="../assets/js/api-client.js?v=20260808b"></script>
     <script>
       (function () {
-        LoveData.applySiteText(document);
-        document.title = LoveData.getSite().homeTitle || '我们的小宇宙';
-
         var coverImg = document.getElementById('hero-cover');
-        coverImg.src = resolveMediaUrl(LoveData.getCover());
-
         var toggleEl = document.getElementById('cover-edit-toggle');
         var formEl = document.getElementById('cover-edit-form');
         var cancelEl = document.getElementById('cover-edit-cancel');
@@ -814,27 +809,39 @@ body {
           closeEdit();
           if (window.LoveAdmin && LoveAdmin.toast) LoveAdmin.toast('封面已更新');
         });
-      })();
-    </script>
-    <script>
-      /* 加载头像 */
-      (function () {
-        var avatars = LoveAdmin.getAccounts();
-        var leftImg = document.getElementById('avatar-left-img');
-        var rightImg = document.getElementById('avatar-right-img');
-        var nameLeft = document.getElementById('name-left');
-        var nameRight = document.getElementById('name-right');
 
-        if (avatars.left && avatars.left.avatar && leftImg) {
-          leftImg.src = resolveMediaUrl(avatars.left.avatar);
-          leftImg.style.display = '';
+        // 等待 API 数据加载完成后再渲染
+        function initData() {
+          LoveData.applySiteText(document);
+          document.title = LoveData.getSite().homeTitle || '我们的小宇宙';
+          coverImg.src = resolveMediaUrl(LoveData.getCover());
+
+          var avatars = LoveAdmin.getAccounts();
+          var leftImg = document.getElementById('avatar-left-img');
+          var rightImg = document.getElementById('avatar-right-img');
+          var nameLeft = document.getElementById('name-left');
+          var nameRight = document.getElementById('name-right');
+
+          if (avatars.left && avatars.left.avatar && leftImg) {
+            leftImg.src = resolveMediaUrl(avatars.left.avatar);
+            leftImg.style.display = '';
+          }
+          if (avatars.right && avatars.right.avatar && rightImg) {
+            rightImg.src = resolveMediaUrl(avatars.right.avatar);
+            rightImg.style.display = '';
+          }
+          if (nameLeft && avatars.left) nameLeft.textContent = avatars.left.nickname;
+          if (nameRight && avatars.right) nameRight.textContent = avatars.right.nickname;
         }
-        if (avatars.right && avatars.right.avatar && rightImg) {
-          rightImg.src = resolveMediaUrl(avatars.right.avatar);
-          rightImg.style.display = '';
+
+        if (window.LoveData && window.LoveData.ready) {
+          LoveData.ready().then(initData).catch(function (err) {
+            console.error('[Index] 初始化失败:', err);
+            initData();
+          });
+        } else {
+          initData();
         }
-        if (nameLeft && avatars.left) nameLeft.textContent = avatars.left.nickname;
-        if (nameRight && avatars.right) nameRight.textContent = avatars.right.nickname;
       })();
     </script>
     <script>lucide.createIcons();</script>

@@ -23,6 +23,16 @@
     return url;
   };
 
+  /* ── 全局：保留 ?api=1 的重定向辅助函数（在所有模式下可用） ── */
+  window.preserveApiRedirect = function (targetUrl) {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('api') === '1') {
+      var sep = targetUrl.indexOf('?') >= 0 ? '&' : '?';
+      return targetUrl + sep + 'api=1';
+    }
+    return targetUrl;
+  };
+
   /* ── 清理 f7cbfdb 残留的 API 模式标记（仅移除 love-use-api，不影响其他数据） ── */
   try { localStorage.removeItem('love-use-api'); } catch (e) {}
 
@@ -37,6 +47,14 @@
   if (!API_ENABLED) {
     console.log('[API Client] API 模式未启用，使用 localStorage 模式');
     console.log('[API Client] 提示：在 URL 后添加 ?api=1 即可启用服务器模式');
+
+    // localStorage 模式：提供 ready() 兼容实现（直接 resolve）
+    if (window.LoveData) {
+      window.LoveData.ready = function () { return Promise.resolve(); };
+    }
+    if (window.LoveAdmin) {
+      window.LoveAdmin.ready = function () { return Promise.resolve(); };
+    }
     return;
   }
 
@@ -244,6 +262,41 @@
      LoveAdmin API 替换
      ═══════════════════════════════════════════════════════════════ */
 
+  /* ── 初始化和就绪 Promise ── */
+  var dataReadyPromise = null;
+  var adminReadyPromise = null;
+
+  function ensureDataReady() {
+    if (!dataReadyPromise) {
+      dataReadyPromise = loadAllCache().then(function () {
+        console.log('[API Client] LoveData.ready() 已完成');
+      }).catch(function (err) {
+        // 重置 Promise 以便后续重试
+        dataReadyPromise = null;
+        console.error('[API Client] LoveData.ready() 失败:', err);
+        throw err;
+      });
+    }
+    return dataReadyPromise;
+  }
+
+  function ensureAdminReady() {
+    if (!adminReadyPromise) {
+      adminReadyPromise = Promise.all([
+        refreshSession(),
+        loadAllCache()
+      ]).then(function () {
+        console.log('[API Client] LoveAdmin.ready() 已完成');
+      }).catch(function (err) {
+        // 重置 Promise 以便后续重试
+        adminReadyPromise = null;
+        console.error('[API Client] LoveAdmin.ready() 失败:', err);
+        throw err;
+      });
+    }
+    return adminReadyPromise;
+  }
+
   var LoveAdmin_API = {
     getAccounts: function () {
       if (cache.accounts) {
@@ -361,6 +414,10 @@
       if (window._originalLoveAdmin && window._originalLoveAdmin.initAdminUI) {
         window._originalLoveAdmin.initAdminUI();
       }
+    },
+
+    ready: function () {
+      return ensureAdminReady();
     }
   };
 
@@ -660,7 +717,11 @@
     // 轮询控制
     startPolling: startPolling,
     stopPolling: stopPolling,
-    onUpdate: onUpdate
+    onUpdate: onUpdate,
+
+    ready: function () {
+      return ensureDataReady();
+    }
   };
 
   /* ── 辅助函数 ── */

@@ -1,7 +1,8 @@
-/* 恋爱小站 - API 客户端（v2.2 生产默认 API）
- * 加载此脚本后，LoveData 和 LoveAdmin 将使用后端 API
+/* 恋爱小站 - API 客户端（v2.1 独立后端）
+ * 加载此脚本后，LoveData 和 LoveAdmin 将使用后端 API 而非 localStorage
  * 认证方式：HttpOnly Cookie（前端无需管理 token）
- * 默认进入 API 模式；?local=1 可紧急回退到 localStorage
+ * 通过 URL 参数 ?api=1 启用
+ * 向后兼容：未启用时保持 localStorage 模式
  * 正式后端地址：https://api.xiaoxingxing.love
  */
 (function () {
@@ -22,12 +23,12 @@
     return url;
   };
 
-  /* ── 全局：保留 ?local=1 的重定向辅助函数 ── */
+  /* ── 全局：保留 ?api=1 的重定向辅助函数（在所有模式下可用） ── */
   window.preserveApiRedirect = function (targetUrl) {
     var params = new URLSearchParams(window.location.search);
-    if (params.get('local') === '1') {
+    if (params.get('api') === '1') {
       var sep = targetUrl.indexOf('?') >= 0 ? '&' : '?';
-      return targetUrl + sep + 'local=1';
+      return targetUrl + sep + 'api=1';
     }
     return targetUrl;
   };
@@ -37,18 +38,15 @@
 
   /* ── 检测是否启用 API 模式 ── */
   var API_ENABLED = (function () {
-    // 默认启用 API 模式
-    // 仅 ?local=1 时回退到旧 localStorage 模式（紧急调试）
+    // 仅通过 URL 参数启用 API 模式
     var params = new URLSearchParams(window.location.search);
-    if (params.get('local') === '1') {
-      return false;
-    }
-    return true;
+    if (params.get('api') === '1') return true;
+    return false;
   })();
 
   if (!API_ENABLED) {
-    console.log('[API Client] 紧急 local 模式，使用 localStorage ');
-    console.log('[API Client] 提示：移除 ?local=1 即可恢复正常 API 模式');
+    console.log('[API Client] API 模式未启用，使用 localStorage 模式');
+    console.log('[API Client] 提示：在 URL 后添加 ?api=1 即可启用服务器模式');
 
     // localStorage 模式：提供 ready() 兼容实现（直接 resolve）
     if (window.LoveData) {

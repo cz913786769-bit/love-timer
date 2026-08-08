@@ -22,10 +22,35 @@
     return url;
   };
 
+  function getQueryParam(name) {
+    var query = window.location.search || '';
+    if (query.charAt(0) === '?') query = query.slice(1);
+    if (!query) return null;
+    var parts = query.split('&');
+    for (var i = 0; i < parts.length; i++) {
+      var pair = parts[i].split('=');
+      var key = decodeURIComponent((pair[0] || '').replace(/\+/g, ' '));
+      if (key === name) {
+        return decodeURIComponent((pair.slice(1).join('=') || '').replace(/\+/g, ' '));
+      }
+    }
+    return null;
+  }
+
+  function assign(target) {
+    target = target || {};
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i] || {};
+      Object.keys(source).forEach(function (key) {
+        target[key] = source[key];
+      });
+    }
+    return target;
+  }
+
   /* ── 全局：保留 ?local=1 的重定向辅助函数 ── */
   window.preserveApiRedirect = function (targetUrl) {
-    var params = new URLSearchParams(window.location.search);
-    if (params.get('local') === '1') {
+    if (getQueryParam('local') === '1') {
       var sep = targetUrl.indexOf('?') >= 0 ? '&' : '?';
       return targetUrl + sep + 'local=1';
     }
@@ -39,8 +64,7 @@
   var API_ENABLED = (function () {
     // 默认启用 API 模式
     // 仅 ?local=1 时回退到旧 localStorage 模式（紧急调试）
-    var params = new URLSearchParams(window.location.search);
-    if (params.get('local') === '1') {
+    if (getQueryParam('local') === '1') {
       return false;
     }
     return true;
@@ -178,14 +202,14 @@
 
   function normalizeMessage(msg) {
     msg = msg || {};
-    return Object.assign({}, msg, {
+    return assign({}, msg, {
       createdAt: msg.createdAt || msg.created_at || ''
     });
   }
 
   function normalizeAlbumGroup(group) {
     group = group || {};
-    return Object.assign({}, group, {
+    return assign({}, group, {
       createdBy: group.createdBy || group.created_by || null,
       createdAt: group.createdAt || group.created_at || '',
       photos: Array.isArray(group.photos) ? group.photos : []
@@ -194,7 +218,7 @@
 
   function normalizeTimelineItem(item) {
     item = item || {};
-    return Object.assign({}, item, {
+    return assign({}, item, {
       createdBy: item.createdBy || item.created_by || null,
       createdAt: item.createdAt || item.created_at || ''
     });
@@ -568,7 +592,7 @@
     updateAlbumGroup: function (id, updates) {
       if (cache.album) {
         var idx = cache.album.findIndex(function (g) { return g.id === id; });
-        if (idx >= 0) cache.album[idx] = Object.assign({}, cache.album[idx], updates);
+        if (idx >= 0) cache.album[idx] = assign({}, cache.album[idx], updates);
       }
       invalidateCache();
       return cache.album ? clone(cache.album) : [];
@@ -583,7 +607,7 @@
     },
     addPhoto: function (groupId, photo) {
       var self = this;
-      if (photo.src && photo.src.startsWith('data:')) {
+      if (photo.src && photo.src.indexOf('data:') === 0) {
         return this.uploadPhotoAsFile(photo.src, groupId, photo.caption);
       }
       return apiPost('/api/album/photo', { groupId: groupId, caption: photo.caption, src: photo.src }).then(function (newPhoto) {
@@ -675,7 +699,7 @@
     updateTimeline: function (id, updates) {
       if (cache.timeline) {
         var idx = cache.timeline.findIndex(function (i) { return i.id === id; });
-        if (idx >= 0) cache.timeline[idx] = Object.assign({}, cache.timeline[idx], updates);
+        if (idx >= 0) cache.timeline[idx] = assign({}, cache.timeline[idx], updates);
       }
       invalidateCache();
       return cache.timeline ? clone(cache.timeline) : [];

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -373,13 +373,18 @@
     function updateURL(page) {
       // 从 pages/xxx.html 提取页面名
       var name = page.replace(/^pages\//, '').replace(/\.html$/, '');
-      var newURL = window.location.pathname;
+      var base = window.location.pathname;
+      var params = new URLSearchParams(window.location.search);
+      var local = params.get('local');
+      var newSearch = '';
       if (name === 'index') {
-        newURL = newURL.replace(/(\?|#).*$/, '');
+        if (local === '1') newSearch = '?local=1';
       } else {
-        newURL = newURL.replace(/(\?|#).*$/, '') + '?page=' + name;
+        newSearch = '?page=' + name;
+        if (local === '1') newSearch += '&local=1';
       }
-      if (window.location.search !== (name === 'index' ? '' : '?page=' + name)) {
+      var newURL = base + newSearch;
+      if (window.location.search !== newSearch) {
         history.pushState({ page: page }, '', newURL);
       }
     }
@@ -389,7 +394,17 @@
       currentPage = page;
       updateURL(page);
       // 先移除旧 frame 的事件绑定，再加载新页面
-      frame.src = page;
+      frame.src = buildFrameSrc(page);
+    }
+
+    function buildFrameSrc(page) {
+      var params = new URLSearchParams(window.location.search);
+      var local = params.get('local');
+      if (local === '1') {
+        var sep = page.indexOf('?') >= 0 ? '&' : '?';
+        return page + sep + 'local=1';
+      }
+      return page;
     }
 
     // 注入样式到 iframe，隐藏其内部的音频元素和音乐按钮
@@ -483,14 +498,14 @@
       }
       if (page !== currentPage) {
         currentPage = page;
-        frame.src = page;
+        frame.src = buildFrameSrc(page);
       }
     });
 
     // 初始加载
     currentPage = getPageFromURL();
     if (currentPage !== BASE_PAGE) {
-      frame.src = currentPage;
+      frame.src = buildFrameSrc(currentPage);
       updateURL(currentPage);
     }
 

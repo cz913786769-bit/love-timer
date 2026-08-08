@@ -580,6 +580,18 @@ body {
           return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-2);padding:2px 8px;background:var(--surface-2);border-radius:var(--r-pill);">' + avatarHtml + escapeHtml(acc.nickname) + timeStr + '</span>';
         }
 
+        function commitWishlistDone(index, done, checkbox) {
+          if (checkbox) checkbox.disabled = true;
+          Promise.resolve(LoveData.updateWishlist(index, { done: done })).then(function () {
+            render();
+          }).catch(function (err) {
+            if (window.LoveAdmin && LoveAdmin.toast) {
+              LoveAdmin.toast(err.message || '同步失败，请重试');
+            }
+            render();
+          });
+        }
+
         function render() {
           const list = LoveData.getWishlist();
           const total = list.length;
@@ -608,8 +620,17 @@ body {
           wishlistEl.querySelectorAll('.wishlist-check').forEach(function (check) {
             check.addEventListener('change', function () {
               const idx = parseInt(check.getAttribute('data-index'), 10);
-              LoveData.updateWishlist(idx, { done: check.checked });
-              render();
+              const done = check.checked;
+              if (window.LoveAdmin && LoveAdmin.isLoggedIn && LoveAdmin.isLoggedIn()) {
+                commitWishlistDone(idx, done, check);
+              } else if (window.LoveAdmin && LoveAdmin.ensureLoggedIn) {
+                check.checked = !done;
+                LoveAdmin.ensureLoggedIn(function () {
+                  commitWishlistDone(idx, done, check);
+                });
+              } else {
+                commitWishlistDone(idx, done, check);
+              }
             });
           });
 

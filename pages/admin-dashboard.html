@@ -1116,9 +1116,16 @@ body.admin-page #love-admin-login-fab { display: none !important; }
 
           content.querySelectorAll('[data-wish-idx]').forEach(function (cb) {
             cb.addEventListener('change', function () {
-              LoveData.updateWishlist(Number(this.dataset.wishIdx), { done: this.checked });
-              LoveAdmin.toast(this.checked ? '已标记完成' : '已取消完成');
-              renderWishlist();
+              var checkbox = this;
+              var done = checkbox.checked;
+              checkbox.disabled = true;
+              Promise.resolve(LoveData.updateWishlist(Number(checkbox.dataset.wishIdx), { done: done })).then(function () {
+                LoveAdmin.toast(done ? '已标记完成' : '已取消完成');
+                renderWishlist();
+              }).catch(function (err) {
+                LoveAdmin.toast(err.message || '同步失败，请重试');
+                renderWishlist();
+              });
             });
           });
 

@@ -886,6 +886,17 @@ body {
           }).join('');
 
           bindAdminActions();
+          revealDynamicContent();
+        }
+
+        function revealDynamicContent() {
+          if (window.LoveInteractions && window.LoveInteractions.reveal) {
+            window.LoveInteractions.reveal(albumContainer);
+            return;
+          }
+          albumContainer.querySelectorAll('.reveal:not(.is-visible)').forEach(function (el) {
+            el.classList.add('is-visible');
+          });
         }
 
         function bindAdminActions() {

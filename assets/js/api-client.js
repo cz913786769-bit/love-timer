@@ -176,16 +176,49 @@
   var cacheLoading = false;
   var cacheLoadPromise = null;
 
+  function normalizeMessage(msg) {
+    msg = msg || {};
+    return Object.assign({}, msg, {
+      createdAt: msg.createdAt || msg.created_at || ''
+    });
+  }
+
+  function normalizeAlbumGroup(group) {
+    group = group || {};
+    return Object.assign({}, group, {
+      createdBy: group.createdBy || group.created_by || null,
+      createdAt: group.createdAt || group.created_at || '',
+      photos: Array.isArray(group.photos) ? group.photos : []
+    });
+  }
+
+  function normalizeTimelineItem(item) {
+    item = item || {};
+    return Object.assign({}, item, {
+      createdBy: item.createdBy || item.created_by || null,
+      createdAt: item.createdAt || item.created_at || ''
+    });
+  }
+
+  function normalizeSite(site) {
+    var normalized = {};
+    Object.keys(site || {}).forEach(function (key) {
+      var cleanKey = key.indexOf('site:') === 0 ? key.slice(5) : key;
+      normalized[cleanKey] = site[key];
+    });
+    return normalized;
+  }
+
   function loadAllCache() {
     if (cacheLoaded) return Promise.resolve();
     if (cacheLoading) return cacheLoadPromise;
     cacheLoading = true;
     cacheLoadPromise = apiGet('/api/data').then(function (data) {
-      cache.messages = data.messages || [];
-      cache.album = data.album || [];
+      cache.messages = (data.messages || []).map(normalizeMessage);
+      cache.album = (data.album || []).map(normalizeAlbumGroup);
       cache.wishlist = data.wishlist || [];
-      cache.timeline = data.timeline || [];
-      cache.site = data.site || {};
+      cache.timeline = (data.timeline || []).map(normalizeTimelineItem);
+      cache.site = normalizeSite(data.site || {});
       cache.cover = data.cover || '';
       cache.letter = data.letter || {};
       cache.accounts = data.accounts || { left: {}, right: {} };

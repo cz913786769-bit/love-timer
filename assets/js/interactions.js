@@ -13,17 +13,9 @@
     });
   }
 
-  ready(function () {
-    document.body.classList.add('page-ready');
-
-    // 入场动画：页面加载后直接显示
-    document.querySelectorAll('.page-enter').forEach(function (el) {
-      var delay = parseFloat(el.dataset.delay) || 0;
-      setTimeout(function () { setVisible(el); }, delay);
-    });
-
-    // 滚动显现
-    var revealEls = document.querySelectorAll('.reveal');
+  function reveal(root) {
+    root = root || document;
+    var revealEls = root.querySelectorAll('.reveal:not(.is-visible)');
     if ('IntersectionObserver' in window && revealEls.length) {
       var io = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
@@ -38,6 +30,22 @@
     } else {
       revealEls.forEach(function (el) { setVisible(el); });
     }
+  }
+
+  window.LoveInteractions = window.LoveInteractions || {};
+  window.LoveInteractions.reveal = reveal;
+
+  ready(function () {
+    document.body.classList.add('page-ready');
+
+    // 入场动画：页面加载后直接显示
+    document.querySelectorAll('.page-enter').forEach(function (el) {
+      var delay = parseFloat(el.dataset.delay) || 0;
+      setTimeout(function () { setVisible(el); }, delay);
+    });
+
+    // 滚动显现
+    reveal(document);
 
     // 按钮点击涟漪
     document.querySelectorAll('.btn-primary, .btn-secondary, .love-admin-btn').forEach(function (btn) {

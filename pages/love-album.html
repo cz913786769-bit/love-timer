@@ -761,7 +761,7 @@ body {
     <script src="../assets/js/music.js?v=20260807a"></script>
     <script src="../assets/js/admin-data.js?v=20260807"></script>
     <script src="../assets/js/admin-core.js?v=20260807"></script>
-    <script src="../assets/js/api-client.js?v=20260808b"></script>
+    <script src="../assets/js/api-client.js?v=20260808d"></script>
     <script>
       (function () {
         var lightbox = document.getElementById('lightbox');
@@ -1156,6 +1156,14 @@ body {
           });
         } else {
           renderAlbum();
+        }
+
+        /* ── API 模式：自动刷新监听 ── */
+        if (window.LoveData && window.LoveData.useApi && window.LoveData.onUpdate) {
+          window.LoveData.onUpdate(function () {
+            renderAlbum();
+            LoveData.applySiteText(document);
+          });
         }
       })();
     </script>

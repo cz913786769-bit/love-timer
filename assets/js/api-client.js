@@ -260,6 +260,21 @@
     return normalized;
   }
 
+  function normalizeImportPayload(json) {
+    var payload = json && typeof json === 'object' && json.data && typeof json.data === 'object'
+      ? json.data
+      : json;
+    if (!payload || typeof payload !== 'object' || !Object.keys(payload).length) {
+      throw new Error('备份文件为空，没有可恢复的数据');
+    }
+    var knownKeys = ['cover', 'site', 'messages', 'album', 'wishlist', 'timeline', 'letter', 'avatars', 'accounts'];
+    var hasKnownData = knownKeys.some(function (key) { return payload[key] !== undefined; });
+    if (!hasKnownData) {
+      throw new Error('备份文件格式不正确');
+    }
+    return payload;
+  }
+
   function loadAllCache() {
     if (cacheLoaded) return Promise.resolve();
     if (cacheLoading) return cacheLoadPromise;
@@ -763,7 +778,11 @@
       return apiGet('/api/export');
     },
     importAllData: function (json) {
-      return apiPost('/api/import', { data: json.data || json });
+      var payload = normalizeImportPayload(json);
+      return apiPost('/api/import', { data: payload }).then(function (result) {
+        invalidateCache();
+        return result;
+      });
     },
 
     generateId: generateId,

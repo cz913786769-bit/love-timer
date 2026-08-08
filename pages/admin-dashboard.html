@@ -528,7 +528,7 @@ body.admin-page #love-admin-login-fab { display: none !important; }
 
     <script src="../assets/js/admin-data.js?v=20260807"></script>
     <script src="../assets/js/admin-core.js?v=20260808e"></script>
-    <script src="../assets/js/api-client.js?v=20260808h"></script>
+    <script src="../assets/js/api-client.js?v=20260809a"></script>
     <script>
       (function () {
         var isApiMode = window.LoveData && window.LoveData.useApi;
@@ -620,6 +620,19 @@ body.admin-page #love-admin-login-fab { display: none !important; }
           if (confirm(msg || '确定要保存修改吗？')) {
             callback();
           }
+        }
+
+        function getImportPayload(json) {
+          var data = json && typeof json === 'object' ? (json.data && typeof json.data === 'object' ? json.data : json) : null;
+          if (!data || !Object.keys(data).length) {
+            throw new Error('备份文件为空，没有可恢复的数据');
+          }
+          var knownKeys = ['cover', 'site', 'messages', 'album', 'wishlist', 'timeline', 'letter', 'avatars', 'accounts'];
+          var hasKnownData = knownKeys.some(function (key) { return data[key] !== undefined; });
+          if (!hasKnownData) {
+            throw new Error('备份文件格式不正确');
+          }
+          return data;
         }
 
         function renderTab(id) {
@@ -931,7 +944,12 @@ body.admin-page #love-admin-login-fab { display: none !important; }
               g.photos.forEach(function (p) {
                 html +=
                   '<div style="border:1px solid var(--line); border-radius:var(--r-md); overflow:hidden;">' +
-                    '<img src="' + esc(resolveMediaUrl(p.src)) + '" style="width:100%; height:96px; object-fit:cover; display:block;" loading="lazy" onerror="this.style.display=\'none\'">' +
+                    '<div style="position:relative;">' +
+                      '<img src="' + esc(resolveMediaUrl(p.src)) + '" style="width:100%; height:96px; object-fit:cover; display:block;" loading="lazy" onerror="this.style.display=\'none\'">' +
+                      '<button type="button" class="btn-secondary album-photo-delete" data-del-photo-group="' + esc(g.id) + '" data-del-photo-src="' + esc(p.src) + '" title="删除这张照片" aria-label="删除这张照片" style="position:absolute; top:6px; right:6px; width:34px; height:34px; padding:0; justify-content:center; background:rgba(255,255,255,0.92); box-shadow:var(--shadow-sm);">' +
+                        '<i data-lucide="trash-2" style="width:16px;height:16px;"></i>' +
+                      '</button>' +
+                    '</div>' +
                     '<p class="caption" style="margin:0; padding:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + esc(p.caption) + '</p>' +
                   '</div>';
               });
@@ -972,6 +990,20 @@ body.admin-page #love-admin-login-fab { display: none !important; }
                 LoveAdmin.toast('分组已删除');
                 renderAlbum();
               }
+            });
+          });
+
+          content.querySelectorAll('[data-del-photo-group]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var groupId = this.dataset.delPhotoGroup;
+              var photoSrc = this.dataset.delPhotoSrc;
+              if (!confirm('确定删除这张照片？')) return;
+              Promise.resolve(LoveData.deletePhoto(groupId, photoSrc)).then(function () {
+                LoveAdmin.toast('照片已删除');
+                renderAlbum();
+              }).catch(function (err) {
+                LoveAdmin.toast('删除失败: ' + (err.message || '请重试'));
+              });
             });
           });
 
@@ -1287,7 +1319,15 @@ body.admin-page #love-admin-login-fab { display: none !important; }
           });
 
           var fileInput = document.getElementById('import-file');
-          document.getElementById('import-backup').addEventListener('click', function () {
+          var importBtn = document.getElementById('import-backup');
+          var importStatus = document.getElementById('import-status');
+          function setImportStatus(message, color) {
+            importStatus.style.display = 'block';
+            importStatus.style.color = color;
+            importStatus.textContent = message;
+          }
+
+          importBtn.addEventListener('click', function () {
             var file = fileInput.files && fileInput.files[0];
             if (!file) {
               LoveAdmin.toast('请先选择备份文件');
@@ -1298,19 +1338,25 @@ body.admin-page #love-admin-login-fab { display: none !important; }
               reader.onload = function (e) {
                 try {
                   var json = JSON.parse(e.target.result);
-                  LoveData.importAllData(json);
-                  var status = document.getElementById('import-status');
-                  status.style.display = 'block';
-                  status.style.color = 'var(--state-success)';
-                  status.textContent = '备份恢复成功！页面将刷新以应用更改。';
-                  LoveAdmin.toast('备份恢复成功');
-                  setTimeout(function () { window.location.reload(); }, 1500);
+                  getImportPayload(json);
+                  importBtn.disabled = true;
+                  importBtn.style.opacity = '0.72';
+                  setImportStatus('正在恢复备份，请稍候...', 'var(--ink-2)');
+                  Promise.resolve(LoveData.importAllData(json)).then(function () {
+                    setImportStatus('备份恢复成功！页面将刷新以应用更改。', 'var(--state-success)');
+                    LoveAdmin.toast('备份恢复成功');
+                    setTimeout(function () { window.location.reload(); }, 1500);
+                  }).catch(function (err) {
+                    importBtn.disabled = false;
+                    importBtn.style.opacity = '';
+                    setImportStatus('恢复失败：' + (err.message || '请重试'), 'var(--state-error)');
+                  });
                 } catch (err) {
-                  var status = document.getElementById('import-status');
-                  status.style.display = 'block';
-                  status.style.color = 'var(--state-error)';
-                  status.textContent = '恢复失败：' + err.message;
+                  setImportStatus('恢复失败：' + err.message, 'var(--state-error)');
                 }
+              };
+              reader.onerror = function () {
+                setImportStatus('恢复失败：无法读取备份文件', 'var(--state-error)');
               };
               reader.readAsText(file);
             });

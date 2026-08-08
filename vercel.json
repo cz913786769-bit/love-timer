@@ -1,4 +1,19 @@
 {
+  "redirects": [
+    {
+      "source": "/index.html",
+      "destination": "/pages/index.html?fresh=20260808g",
+      "permanent": false
+    },
+    {
+      "source": "/pages/index.html",
+      "destination": "/pages/index.html?fresh=20260808g",
+      "permanent": false,
+      "missing": [
+        { "type": "query", "key": "fresh" }
+      ]
+    }
+  ],
   "rewrites": [
     { "source": "/assets/:path*", "destination": "/assets/:path*" },
     { "source": "/", "destination": "/app.html" },

@@ -490,6 +490,7 @@ body.admin-page #love-admin-login-fab {
 
     <script src="../assets/js/admin-data.js?v=20260807"></script>
     <script src="../assets/js/admin-core.js?v=20260807"></script>
+    <script src="../assets/js/api-client.js?v=20260808a"></script>
     <script>
       (function () {
         if (window.LoveAdmin && LoveAdmin.isLoggedIn()) {
@@ -500,10 +501,12 @@ body.admin-page #love-admin-login-fab {
         var form = document.getElementById('login-form');
         var input = document.getElementById('password');
         var error = document.getElementById('error');
+        var submitBtn = document.getElementById('login-submit');
         var leftLabel = document.getElementById('login-left-label');
         var rightLabel = document.getElementById('login-right-label');
         var leftRadio = leftLabel.querySelector('input[type="radio"]');
         var rightRadio = rightLabel.querySelector('input[type="radio"]');
+        var isApiMode = window.LoveData && window.LoveData.useApi;
 
         /* 加载头像和昵称 */
         var accounts = LoveAdmin.getAccounts();
@@ -534,13 +537,39 @@ body.admin-page #love-admin-login-fab {
           if (!pwd) return;
 
           var side = leftRadio.checked ? 'left' : 'right';
-          if (window.LoveAdmin && LoveAdmin.login(side, pwd)) {
-            window.location.href = 'admin-dashboard.html';
+
+          // API 模式：异步登录
+          if (isApiMode && window.LoveAdmin.loginAsync) {
+            if (submitBtn) {
+              submitBtn.disabled = true;
+              submitBtn.innerHTML = '<i data-lucide="loader" style="width:18px;height:18px;"></i> 登录中...';
+              lucide.createIcons();
+            }
+            window.LoveAdmin.loginAsync(side, pwd).then(function (success) {
+              if (success) {
+                window.location.href = 'admin-dashboard.html';
+              } else {
+                error.textContent = '密码不正确';
+                error.style.display = 'block';
+                input.value = '';
+                input.focus();
+                if (submitBtn) {
+                  submitBtn.disabled = false;
+                  submitBtn.innerHTML = '<i data-lucide="log-in" style="width:18px;height:18px;"></i> 登录';
+                }
+                lucide.createIcons();
+              }
+            });
           } else {
-            error.textContent = '密码不正确';
-            error.style.display = 'block';
-            input.value = '';
-            input.focus();
+            // localStorage 模式：同步登录
+            if (window.LoveAdmin && LoveAdmin.login(side, pwd)) {
+              window.location.href = 'admin-dashboard.html';
+            } else {
+              error.textContent = '密码不正确';
+              error.style.display = 'block';
+              input.value = '';
+              input.focus();
+            }
           }
         });
 

@@ -8,8 +8,8 @@
   var IS_IN_IFRAME = window.self !== window.top;
   var ADMIN_FLOAT_POS = IS_IN_IFRAME ? 'left:20px' : 'right:20px';
   var DEFAULT_ACCOUNTS = {
-    left: { password: 'qixi2026', nickname: '嘉嘉小星星', avatar: '../assets/avatars/jiajia.png' },
-    right: { password: 'qixi2026', nickname: '陈卓卓', avatar: '../assets/avatars/chenzhuozhuo.png' }
+    left: { password: '', nickname: '嘉嘉小星星', avatar: '../assets/avatars/jiajia.png' },
+    right: { password: '', nickname: '陈卓卓', avatar: '../assets/avatars/chenzhuozhuo.png' }
   };
 
   /* ── 账户管理 ── */

@@ -517,12 +517,14 @@ body {
     <script src="../assets/js/music.js?v=20260807a"></script>
     <script src="../assets/js/admin-data.js?v=20260807"></script>
     <script src="../assets/js/admin-core.js?v=20260807"></script>
+    <script src="../assets/js/api-client.js?v=20260808a"></script>
     <script>
       (function () {
         const form = document.getElementById('message-form');
         const nicknameInput = document.getElementById('form-nickname');
         const messageInput = document.getElementById('form-message');
         const list = document.getElementById('message-list');
+        const isApiMode = window.LoveData && window.LoveData.useApi;
 
         function formatDate(dateStr) {
           const d = new Date(dateStr);
@@ -607,11 +609,39 @@ body {
           const text = messageInput.value.trim();
           if (!nickname || !text) return;
 
-          window.LoveData.addMessage(nickname, text);
-          nicknameInput.value = '';
-          messageInput.value = '';
-          window.LoveAdmin.toast('留言已保存');
-          render();
+          if (isApiMode) {
+            // API 模式：异步提交
+            var submitBtn = document.getElementById('submit-message');
+            if (submitBtn) {
+              submitBtn.disabled = true;
+              submitBtn.innerHTML = '<i data-lucide="loader" style="width:16px;height:16px;"></i> 提交中...';
+              lucide.createIcons();
+            }
+            window.LoveData.addMessage(nickname, text).then(function () {
+              nicknameInput.value = '';
+              messageInput.value = '';
+              if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i data-lucide="send" style="width:16px;height:16px;"></i> 提交留言';
+              }
+              window.LoveAdmin.toast('留言已保存，对方刷新即可看到');
+              render();
+              lucide.createIcons();
+            }).catch(function () {
+              if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i data-lucide="send" style="width:16px;height:16px;"></i> 提交留言';
+              }
+              window.LoveAdmin.toast('提交失败，请重试');
+              lucide.createIcons();
+            });
+          } else {
+            window.LoveData.addMessage(nickname, text);
+            nicknameInput.value = '';
+            messageInput.value = '';
+            window.LoveAdmin.toast('留言已保存');
+            render();
+          }
         }
 
         form.addEventListener('submit', function (e) {
@@ -625,11 +655,24 @@ body {
           const id = btn.getAttribute('data-delete-id');
           if (!id) return;
           if (!confirm('确定要删除这条留言吗？')) return;
-          window.LoveData.deleteMessage(id);
-          render();
+          if (isApiMode) {
+            window.LoveData.deleteMessage(id).then(function () {
+              render();
+            });
+          } else {
+            window.LoveData.deleteMessage(id);
+            render();
+          }
         });
 
         render();
+
+        /* ── API 模式：自动刷新监听 ── */
+        if (isApiMode && window.LoveData.onUpdate) {
+          window.LoveData.onUpdate(function () {
+            render();
+          });
+        }
       })();
     </script>
     <script>lucide.createIcons();</script>

@@ -1,4 +1,4 @@
-# TraeDesign generated metadata (not needed for deployment)
+# TraeDesign generated metadata
 .preflight/
 partials/
 generation-tree.json
@@ -8,9 +8,16 @@ validation-report.json
 love-timer.design
 colors_and_type.css
 
+# Dependencies
+node_modules/
+
 # System files
 .DS_Store
 Thumbs.db
+
+# Environment (contains real secrets)
+.env
+.env.*
 
 # Logs
 *.log

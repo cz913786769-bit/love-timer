@@ -530,6 +530,7 @@ body.admin-page #love-admin-login-fab { display: none !important; }
 
     <script src="../assets/js/admin-data.js?v=20260807"></script>
     <script src="../assets/js/admin-core.js?v=20260807"></script>
+    <script src="../assets/js/api-client.js?v=20260808a"></script>
     <script>
       (function () {
         if (!window.LoveAdmin || !LoveAdmin.isLoggedIn()) {
@@ -540,6 +541,7 @@ body.admin-page #love-admin-login-fab { display: none !important; }
         /* 当前账户信息 */
         var currentAccount = LoveAdmin.getCurrentAccount();
         var currentIdentity = LoveAdmin.getCurrentIdentity();
+        var isApiMode = window.LoveData && window.LoveData.useApi;
 
         if (!currentAccount) {
           LoveAdmin.logout();
@@ -767,23 +769,32 @@ body.admin-page #love-admin-login-fab { display: none !important; }
             }
 
             if (file) {
-              LoveData.readLocalImage(file, function (err, dataUrl) {
-                if (err) { LoveAdmin.toast(err.message); return; }
-                // 裁剪为正方形
-                var img = new Image();
-                img.onload = function () {
-                  var size = Math.min(img.width, img.height);
-                  var sx = (img.width - size) / 2;
-                  var sy = (img.height - size) / 2;
-                  var canvas = document.createElement('canvas');
-                  canvas.width = 200;
-                  canvas.height = 200;
-                  var ctx = canvas.getContext('2d');
-                  ctx.drawImage(img, sx, sy, size, size, 0, 0, 200, 200);
-                  doSave(canvas.toDataURL('image/jpeg', 0.85));
-                };
-                img.src = dataUrl;
-              });
+              if (isApiMode && window.LoveData.uploadAvatar) {
+                // API 模式：上传文件到服务器
+                window.LoveData.uploadAvatar(currentIdentity, file).then(function (url) {
+                  doSave(url);
+                }).catch(function (err) {
+                  LoveAdmin.toast('上传失败: ' + (err.message || '请重试'));
+                });
+              } else {
+                // localStorage 模式：转 base64
+                LoveData.readLocalImage(file, function (err, dataUrl) {
+                  if (err) { LoveAdmin.toast(err.message); return; }
+                  var img = new Image();
+                  img.onload = function () {
+                    var size = Math.min(img.width, img.height);
+                    var sx = (img.width - size) / 2;
+                    var sy = (img.height - size) / 2;
+                    var canvas = document.createElement('canvas');
+                    canvas.width = 200;
+                    canvas.height = 200;
+                    var ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, sx, sy, size, size, 0, 0, 200, 200);
+                    doSave(canvas.toDataURL('image/jpeg', 0.85));
+                  };
+                  img.src = dataUrl;
+                });
+              }
             } else {
               doSave(null);
             }
@@ -817,12 +828,24 @@ body.admin-page #love-admin-login-fab { display: none !important; }
           fileInput.addEventListener('change', function () {
             var file = this.files && this.files[0];
             if (!file) return;
-            LoveData.readLocalImage(file, function (err, dataUrl) {
-              if (err) { LoveAdmin.toast(err.message); return; }
-              preview.style.display = 'block';
-              preview.src = dataUrl;
-              input.value = dataUrl;
-            });
+            if (isApiMode && window.LoveData.uploadCover) {
+              // API 模式：上传到服务器
+              window.LoveData.uploadCover(file).then(function (url) {
+                preview.style.display = 'block';
+                preview.src = url;
+                input.value = url;
+              }).catch(function (err) {
+                LoveAdmin.toast('上传失败: ' + (err.message || '请重试'));
+              });
+            } else {
+              // localStorage 模式：转 base64
+              LoveData.readLocalImage(file, function (err, dataUrl) {
+                if (err) { LoveAdmin.toast(err.message); return; }
+                preview.style.display = 'block';
+                preview.src = dataUrl;
+                input.value = dataUrl;
+              });
+            }
           });
           document.getElementById('save-cover').addEventListener('click', function () {
             confirmSave('确定保存封面照片吗？', function () {
@@ -991,15 +1014,29 @@ body.admin-page #love-admin-login-fab { display: none !important; }
                 LoveAdmin.toast('请选择一张照片');
                 return;
               }
-              LoveData.readLocalImage(file, function (err, dataUrl) {
-                if (err) {
-                  LoveAdmin.toast(err.message || '读取图片失败');
-                  return;
-                }
-                LoveData.addPhoto(gid, { src: dataUrl, caption: caption });
-                LoveAdmin.toast('照片已添加');
-                renderAlbum();
-              });
+              if (isApiMode && window.LoveData.uploadPhotoAsFile) {
+                // API 模式：上传文件到服务器
+                LoveData.readLocalImage(file, function (err, dataUrl) {
+                  if (err) { LoveAdmin.toast(err.message); return; }
+                  window.LoveData.uploadPhotoAsFile(dataUrl, gid, caption).then(function () {
+                    LoveAdmin.toast('照片已添加');
+                    renderAlbum();
+                  }).catch(function (err) {
+                    LoveAdmin.toast('上传失败: ' + (err.message || '请重试'));
+                  });
+                });
+              } else {
+                // localStorage 模式：转 base64
+                LoveData.readLocalImage(file, function (err, dataUrl) {
+                  if (err) {
+                    LoveAdmin.toast(err.message || '读取图片失败');
+                    return;
+                  }
+                  LoveData.addPhoto(gid, { src: dataUrl, caption: caption });
+                  LoveAdmin.toast('照片已添加');
+                  renderAlbum();
+                });
+              }
             });
           });
         }
@@ -1135,12 +1172,24 @@ body.admin-page #love-admin-login-fab { display: none !important; }
           coverFile.addEventListener('change', function () {
             var file = this.files && this.files[0];
             if (!file) return;
-            LoveData.readLocalImage(file, function (err, dataUrl) {
-              if (err) { LoveAdmin.toast(err.message); return; }
-              coverPreview.style.display = 'block';
-              coverPreview.src = dataUrl;
-              coverInput.value = dataUrl;
-            });
+            if (isApiMode && window.LoveData.uploadFile) {
+              // API 模式：上传到服务器
+              window.LoveData.uploadFile(file).then(function (url) {
+                coverPreview.style.display = 'block';
+                coverPreview.src = url;
+                coverInput.value = url;
+              }).catch(function (err) {
+                LoveAdmin.toast('上传失败: ' + (err.message || '请重试'));
+              });
+            } else {
+              // localStorage 模式：转 base64
+              LoveData.readLocalImage(file, function (err, dataUrl) {
+                if (err) { LoveAdmin.toast(err.message); return; }
+                coverPreview.style.display = 'block';
+                coverPreview.src = dataUrl;
+                coverInput.value = dataUrl;
+              });
+            }
           });
 
           document.getElementById('add-timeline').addEventListener('click', function () {

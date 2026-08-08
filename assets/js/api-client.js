@@ -1,8 +1,8 @@
-/* 恋爱小站 - API 客户端（v2.2 独立后端）
+/* 恋爱小站 - API 客户端（v2.1 独立后端）
  * 加载此脚本后，LoveData 和 LoveAdmin 将使用后端 API 而非 localStorage
  * 认证方式：HttpOnly Cookie（前端无需管理 token）
- * 生产环境默认启用 API 模式，无需 ?api=1 参数
- * 使用 ?local=1 可切换回 localStorage 调试模式
+ * 通过 URL 参数 ?api=1 或 localStorage 标志 love-use-api=1 启用
+ * 向后兼容：未启用时保持 localStorage 模式
  * 正式后端地址：https://api.xiaoxingxing.love
  */
 (function () {
@@ -23,22 +23,24 @@
     return url;
   };
 
-  /* ── 检测是否启用 API 模式 ──
-   * 生产环境默认启用 API 模式，无需 ?api=1 参数
-   * 保留 ?local=1 用于开发调试 localStorage 模式
-   */
+  /* ── 检测是否启用 API 模式 ── */
   var API_ENABLED = (function () {
-    // ?local=1 强制使用 localStorage 模式（仅开发调试）
+    // 检查 URL 参数
     var params = new URLSearchParams(window.location.search);
-    if (params.get('local') === '1') return false;
-    // 生产环境默认启用 API 模式
-    return true;
+    if (params.get('api') === '1') return true;
+    // 检查 localStorage 标志
+    try { if (localStorage.getItem('love-use-api') === '1') return true; } catch (e) {}
+    return false;
   })();
 
   if (!API_ENABLED) {
-    console.log('[API Client] localStorage 调试模式（?local=1）');
+    console.log('[API Client] API 模式未启用，使用 localStorage 模式');
+    console.log('[API Client] 提示：在 URL 后添加 ?api=1 即可启用服务器模式');
     return;
   }
+
+  // 记住 API 模式，下次自动启用
+  try { localStorage.setItem('love-use-api', '1'); } catch (e) {}
 
   console.log('[API Client] API 模式已启用（Cookie Session）');
 

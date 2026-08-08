@@ -283,7 +283,7 @@
 
     var avatarHtml = '';
     if (account && account.avatar) {
-      avatarHtml = '<div style="width:32px;height:32px;border-radius:50%;overflow:hidden;border:2px solid var(--brand-200);flex-shrink:0;"><img src="' + esc(account.avatar) + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'"></div>';
+      avatarHtml = '<div style="width:32px;height:32px;border-radius:50%;overflow:hidden;border:2px solid var(--brand-200);flex-shrink:0;"><img src="' + esc((window.resolveMediaUrl || function(u){return u;})(account.avatar)) + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'"></div>';
     }
 
     bar.innerHTML =

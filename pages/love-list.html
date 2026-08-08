@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" class="light">
 <head>
     <meta charset="UTF-8">
@@ -551,7 +551,7 @@ body {
     <script src="../assets/js/music.js?v=20260807a"></script>
     <script src="../assets/js/admin-data.js?v=20260807"></script>
     <script src="../assets/js/admin-core.js?v=20260807"></script>
-    <script src="../assets/js/api-client.js?v=20260808a"></script>
+    <script src="../assets/js/api-client.js?v=20260808b"></script>
     <script>
       (function () {
         const wishlistEl = document.getElementById('wishlist');
@@ -576,7 +576,7 @@ body {
           if (!acc) return '';
           var avatarHtml = '';
           if (acc.avatar) {
-            avatarHtml = '<div style="width:16px;height:16px;border-radius:50%;overflow:hidden;border:1px solid var(--brand-200);flex-shrink:0;"><img src="' + escapeHtml(acc.avatar) + '" style="width:100%;height:100%;object-fit:cover;"></div>';
+            avatarHtml = '<div style="width:16px;height:16px;border-radius:50%;overflow:hidden;border:1px solid var(--brand-200);flex-shrink:0;"><img src="' + escapeHtml(resolveMediaUrl(acc.avatar)) + '" style="width:100%;height:100%;object-fit:cover;"></div>';
           }
           var timeStr = item.createdAt ? ' · ' + new Date(item.createdAt).toLocaleString('zh-CN') : '';
           return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-2);padding:2px 8px;background:var(--surface-2);border-radius:var(--r-pill);">' + avatarHtml + escapeHtml(acc.nickname) + timeStr + '</span>';

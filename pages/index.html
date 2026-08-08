@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" class="light">
 <head>
     <meta charset="UTF-8">
@@ -768,14 +768,14 @@ body {
     <script src="../assets/js/music.js?v=20260807a"></script>
     <script src="../assets/js/admin-data.js?v=20260807"></script>
     <script src="../assets/js/admin-core.js?v=20260807"></script>
-    <script src="../assets/js/api-client.js?v=20260808a"></script>
+    <script src="../assets/js/api-client.js?v=20260808b"></script>
     <script>
       (function () {
         LoveData.applySiteText(document);
         document.title = LoveData.getSite().homeTitle || '我们的小宇宙';
 
         var coverImg = document.getElementById('hero-cover');
-        coverImg.src = LoveData.getCover();
+        coverImg.src = resolveMediaUrl(LoveData.getCover());
 
         var toggleEl = document.getElementById('cover-edit-toggle');
         var formEl = document.getElementById('cover-edit-form');

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" class="light">
 <head>
     <meta charset="UTF-8">
@@ -550,7 +550,7 @@ body {
     <script src="../assets/js/music.js?v=20260807a"></script>
     <script src="../assets/js/admin-data.js?v=20260807"></script>
     <script src="../assets/js/admin-core.js?v=20260807"></script>
-    <script src="../assets/js/api-client.js?v=20260808a"></script>
+    <script src="../assets/js/api-client.js?v=20260808b"></script>
     <script>
       (function () {
         var listEl = document.getElementById('love-timeline-list');
@@ -579,7 +579,7 @@ body {
           if (!acc) return '';
           var avatarHtml = '';
           if (acc.avatar) {
-            avatarHtml = '<div style="width:16px;height:16px;border-radius:50%;overflow:hidden;border:1px solid var(--brand-200);flex-shrink:0;"><img src="' + escapeHtml(acc.avatar) + '" style="width:100%;height:100%;object-fit:cover;"></div>';
+            avatarHtml = '<div style="width:16px;height:16px;border-radius:50%;overflow:hidden;border:1px solid var(--brand-200);flex-shrink:0;"><img src="' + escapeHtml(resolveMediaUrl(acc.avatar)) + '" style="width:100%;height:100%;object-fit:cover;"></div>';
           }
           var timeStr = item.createdAt ? ' · ' + fmtDate(item.createdAt) : '';
           return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-2);padding:2px 8px;background:var(--surface-2);border-radius:var(--r-pill);">' + avatarHtml + escapeHtml(acc.nickname) + timeStr + '</span>';
@@ -600,7 +600,7 @@ body {
           items.forEach(function (item) {
             var coverHtml = item.cover
               ? '<div class="relative">' +
-                  '<img src="' + escapeHtml(item.cover) + '" alt="' + escapeHtml(item.title) + '" class="w-full h-48 md:h-full object-cover">' +
+                  '<img src="' + escapeHtml(resolveMediaUrl(item.cover)) + '" alt="' + escapeHtml(item.title) + '" class="w-full h-48 md:h-full object-cover">' +
                   '<div class="absolute bottom-0 left-0 right-0 px-3 py-2" style="background: linear-gradient(transparent, rgba(24,18,20,0.55));">' +
                     '<span class="text-sm font-medium" style="color: var(--brand-ink);">' + escapeHtml(item.title) + '</span>' +
                   '</div>' +

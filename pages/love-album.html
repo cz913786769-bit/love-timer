@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" class="light">
 <head>
     <meta charset="UTF-8">
@@ -763,7 +763,7 @@ body {
     <script src="../assets/js/music.js?v=20260807a"></script>
     <script src="../assets/js/admin-data.js?v=20260807"></script>
     <script src="../assets/js/admin-core.js?v=20260807"></script>
-    <script src="../assets/js/api-client.js?v=20260808a"></script>
+    <script src="../assets/js/api-client.js?v=20260808b"></script>
     <script>
       (function () {
         var lightbox = document.getElementById('lightbox');
@@ -797,7 +797,7 @@ body {
           if (!acc) return '';
           var avatarHtml = '';
           if (acc.avatar) {
-            avatarHtml = '<div style="width:16px;height:16px;border-radius:50%;overflow:hidden;border:1px solid var(--brand-200);flex-shrink:0;"><img src="' + escapeHtml(acc.avatar) + '" style="width:100%;height:100%;object-fit:cover;"></div>';
+            avatarHtml = '<div style="width:16px;height:16px;border-radius:50%;overflow:hidden;border:1px solid var(--brand-200);flex-shrink:0;"><img src="' + escapeHtml(resolveMediaUrl(acc.avatar)) + '" style="width:100%;height:100%;object-fit:cover;"></div>';
           }
           var timeStr = group.createdAt ? ' · ' + new Date(group.createdAt).toLocaleString('zh-CN') : '';
           return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-2);padding:2px 8px;background:var(--surface-2);border-radius:var(--r-pill);">' + avatarHtml + escapeHtml(acc.nickname) + timeStr + '</span>';
@@ -860,14 +860,15 @@ body {
               '<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">' +
                 group.photos.map(function (photo) {
                     var isDataUrl = photo.src && photo.src.indexOf('data:') === 0;
-                    var escapedSrc = escapeHtml(photo.src);
+                    var resolvedSrc = resolveMediaUrl(photo.src);
+                    var escapedSrc = escapeHtml(resolvedSrc);
                     var escapedCaption = escapeHtml(photo.caption || '');
                     var mediaHtml;
                     var onloadAttr = 'onload="this.classList.add(\'loaded\'); var s=this.closest(\'.album-thumb\').querySelector(\'.thumb-skeleton\'); if(s) s.style.display=\'none\';"';
                     if (isDataUrl) {
                       mediaHtml = '<img src="' + escapedSrc + '" alt="' + escapedCaption + '" data-caption="' + escapedCaption + '" loading="lazy" decoding="async" fetchpriority="low" width="400" height="300" style="width:100%;height:100%;object-fit:cover;" ' + onloadAttr + '>';
                     } else {
-                      var webpSrc = escapedSrc.replace(/\.jpg$/, '.webp');
+                      var webpSrc = resolvedSrc.replace(/\.jpg$/, '.webp');
                       mediaHtml = '<picture>' +
                         '<source srcset="' + webpSrc + '" type="image/webp">' +
                         '<img src="' + escapedSrc + '" alt="' + escapedCaption + '" data-caption="' + escapedCaption + '" data-webp-src="' + webpSrc + '" loading="lazy" decoding="async" fetchpriority="low" width="400" height="300" style="width:100%;height:100%;object-fit:cover;" ' + onloadAttr + '>' +
@@ -963,9 +964,18 @@ body {
                   window.LoveAdmin.toast(err.message || '读取图片失败');
                   return;
                 }
-                window.LoveData.addPhoto(groupId, { src: dataUrl, caption: caption });
-                renderAlbum();
-                window.LoveAdmin.toast('照片已添加');
+                var promise = window.LoveData.addPhoto(groupId, { src: dataUrl, caption: caption });
+                if (promise && promise.then) {
+                  promise.then(function () {
+                    renderAlbum();
+                    window.LoveAdmin.toast('照片已添加');
+                  }).catch(function (err) {
+                    window.LoveAdmin.toast('上传失败: ' + (err.message || '请重试'));
+                  });
+                } else {
+                  renderAlbum();
+                  window.LoveAdmin.toast('照片已添加');
+                }
               });
             });
           });
@@ -1135,7 +1145,7 @@ body {
     </script>
     <script>lucide.createIcons();</script>
     <script>LoveData.applySiteText(document);</script>
-<script>document.addEventListener('DOMContentLoaded',function(){var c=LoveData.getCover();if(c){var h=document.getElementById('hero-section');if(h)h.style.background='linear-gradient(rgba(255,245,247,0.15), rgba(255,245,247,0.15)), url('+c+') center/cover no-repeat fixed';}});</script>
+<script>document.addEventListener('DOMContentLoaded',function(){var c=LoveData.getCover();if(c){var h=document.getElementById('hero-section');if(h)h.style.background='linear-gradient(rgba(255,245,247,0.15), rgba(255,245,247,0.15)), url('+resolveMediaUrl(c)+') center/cover no-repeat fixed';}});</script>
     <script src="../assets/js/cover-contrast.js?v=20260807d"></script>
 </body>
 </html>

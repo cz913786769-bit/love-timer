@@ -8,6 +8,21 @@
 (function () {
   'use strict';
 
+  /* ── 全局媒体 URL 解析（在所有模式下可用） ── */
+  window.resolveMediaUrl = function (url) {
+    if (!url) return '';
+    // 已经是完整 URL 或 data URL，原样返回
+    if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0 || url.indexOf('data:') === 0) {
+      return url;
+    }
+    // 服务器上传文件（/uploads/...）→ 拼接到 API 服务器
+    if (url.indexOf('/uploads/') === 0) {
+      return 'https://api.xiaoxingxing.love' + url;
+    }
+    // 其他相对路径（前端静态资源如 ../assets/...）保持原样
+    return url;
+  };
+
   /* ── 检测是否启用 API 模式 ── */
   var API_ENABLED = (function () {
     // 检查 URL 参数
@@ -70,6 +85,7 @@
     return fetch(API_BASE + path, {
       method: 'GET',
       credentials: 'include',
+      cache: 'no-store',
       headers: { 'Accept': 'application/json' }
     }).then(function (r) {
       if (!r.ok) throw new Error('请求失败: ' + r.status);

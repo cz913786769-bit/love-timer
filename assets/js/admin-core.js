@@ -339,9 +339,27 @@
     fab.innerHTML =
       '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>' +
       '<span class="love-admin-login-text">管理登录</span>';
-    fab.addEventListener('click', function () { showLoginModal(); });
+    fab.addEventListener('click', function () {
+      if (isApiMode()) {
+        goToAdminLogin();
+        return;
+      }
+      showLoginModal();
+    });
     document.body.appendChild(fab);
     return fab;
+  }
+
+  function isApiMode() {
+    return !!(window.LoveData && window.LoveData.useApi);
+  }
+
+  function goToAdminLogin() {
+    var target = 'admin-login.html';
+    if (window.preserveApiRedirect) {
+      target = window.preserveApiRedirect(target);
+    }
+    window.location.href = target;
   }
 
   function bindFooterAdmin() {
@@ -349,6 +367,9 @@
     if (!footerAdmin || footerAdmin._bound) return;
     footerAdmin.addEventListener('click', function (e) {
       if (!isLoggedIn()) {
+        if (isApiMode()) {
+          return;
+        }
         e.preventDefault();
         showLoginModal();
       }

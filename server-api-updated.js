@@ -242,7 +242,20 @@ function migrateFromJSON() {
 
 function initAccounts() {
   const count = db.prepare('SELECT COUNT(*) as c FROM accounts').get();
-  if (count && count.c > 0) return;
+  if (count && count.c > 0) {
+    // 修复已有账户的空头像
+    const leftAcc = db.prepare('SELECT avatar FROM accounts WHERE side = ?').get('left');
+    const rightAcc = db.prepare('SELECT avatar FROM accounts WHERE side = ?').get('right');
+    if (leftAcc && !leftAcc.avatar) {
+      db.prepare('UPDATE accounts SET avatar = ? WHERE side = ?').run('../assets/avatars/jiajia.png', 'left');
+      console.log('[修复] 已为 left 账户设置默认头像');
+    }
+    if (rightAcc && !rightAcc.avatar) {
+      db.prepare('UPDATE accounts SET avatar = ? WHERE side = ?').run('../assets/avatars/chenzhuozhuo.png', 'right');
+      console.log('[修复] 已为 right 账户设置默认头像');
+    }
+    return;
+  }
   console.log('[初始化] 创建默认管理员账户...');
   // 安全要求：仅使用环境变量中预计算的 bcrypt 哈希，不接收明文密码
   const leftHash = process.env.ADMIN_LEFT_PASSWORD_HASH;
@@ -253,13 +266,41 @@ function initAccounts() {
     return;
   }
   const insert = db.prepare('INSERT INTO accounts (side, password_hash, nickname, avatar) VALUES (?, ?, ?, ?)');
-  insert.run('left', leftHash, '嘉嘉小星星', '');
-  insert.run('right', rightHash, '陈卓卓', '');
+  insert.run('left', leftHash, '嘉嘉小星星', '../assets/avatars/jiajia.png');
+  insert.run('right', rightHash, '陈卓卓', '../assets/avatars/chenzhuozhuo.png');
   console.log('[初始化] 默认账户已创建（使用 bcrypt 哈希）');
+}
+
+function repairAlbumData() {
+  // 如果相册为空但有 data.json 迁移文件，重新尝试迁移
+  const albumCount = db.prepare('SELECT COUNT(*) as c FROM album_groups').get();
+  if (albumCount && albumCount.c > 0) return;
+  const LEGACY_DATA_FILE = path.join(DATA_DIR, 'data.json');
+  const MIGRATED_FILE = LEGACY_DATA_FILE + '.migrated';
+  const sourceFile = fs.existsSync(LEGACY_DATA_FILE) ? LEGACY_DATA_FILE : (fs.existsSync(MIGRATED_FILE) ? MIGRATED_FILE : null);
+  if (!sourceFile) return;
+  console.log('[修复] 相册数据为空，尝试从 ' + path.basename(sourceFile) + ' 重新导入...');
+  try {
+    const raw = JSON.parse(fs.readFileSync(sourceFile, 'utf-8'));
+    if (Array.isArray(raw.album) && raw.album.length > 0) {
+      const insG = db.prepare('INSERT OR IGNORE INTO album_groups (id, date, title, created_by, created_at) VALUES (?, ?, ?, ?, ?)');
+      const insP = db.prepare('INSERT INTO album_photos (group_id, src, caption, sort_order) VALUES (?, ?, ?, ?)');
+      for (const g of raw.album) {
+        insG.run(g.id, g.date || '', g.title || '', g.createdBy || null, g.createdAt || new Date().toISOString());
+        if (Array.isArray(g.photos)) {
+          g.photos.forEach((p, i) => insP.run(g.id, p.src || '', p.caption || '', i));
+        }
+      }
+      console.log('[修复] 已导入 ' + raw.album.length + ' 个相册分组');
+    }
+  } catch (e) {
+    console.error('[修复] 相册数据导入失败:', e.message);
+  }
 }
 
 migrateFromJSON();
 initAccounts();
+repairAlbumData();
 
 /* ================================================================
    存储服务抽象
@@ -301,6 +342,7 @@ function sanitizeFilename(name) {
    Express 应用（纯 API 模式）
    ================================================================ */
 const app = express();
+app.set('trust proxy', true);
 app.disable('x-powered-by');
 app.use(cors(corsOptions));
 app.use(cookieParser());

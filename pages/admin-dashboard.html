@@ -808,7 +808,7 @@ body.admin-page #love-admin-login-fab { display: none !important; }
             '<p class="caption" style="margin:0 0 24px;">从本地上传或输入图片地址，设置首页封面</p>' +
             '<div class="card" style="padding:24px; max-width:640px;">' +
               '<div style="margin-bottom:16px;">' +
-                '<img id="cover-preview" src="' + esc(url) + '" style="max-width:100%; max-height:260px; border-radius:var(--r-md); border:1px solid var(--line); display:block;" onerror="this.style.display=\'none\'">' +
+                '<img id="cover-preview" src="' + esc(resolveMediaUrl(url)) + '" style="max-width:100%; max-height:260px; border-radius:var(--r-md); border:1px solid var(--line); display:block;" onerror="this.style.display=\'none\'">' +
               '</div>' +
               '<div class="admin-field">' +
                 '<label>图片 URL</label>' +

@@ -514,8 +514,8 @@ body.admin-page #love-admin-login-fab {
         var rightImg = document.getElementById('login-right-avatar').querySelector('img');
         leftLabel.querySelector('span').textContent = accounts.left.nickname;
         rightLabel.querySelector('span').textContent = accounts.right.nickname;
-        if (accounts.left.avatar && leftImg) { leftImg.src = accounts.left.avatar; leftImg.style.display = ''; }
-        if (accounts.right.avatar && rightImg) { rightImg.src = accounts.right.avatar; rightImg.style.display = ''; }
+        if (accounts.left.avatar && leftImg) { leftImg.src = resolveMediaUrl(accounts.left.avatar); leftImg.style.display = ''; }
+        if (accounts.right.avatar && rightImg) { rightImg.src = resolveMediaUrl(accounts.right.avatar); rightImg.style.display = ''; }
 
         function selectLoginSide(val) {
           var isLeft = val === 'left';

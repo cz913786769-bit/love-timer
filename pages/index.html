@@ -826,11 +826,11 @@ body {
         var nameRight = document.getElementById('name-right');
 
         if (avatars.left && avatars.left.avatar && leftImg) {
-          leftImg.src = avatars.left.avatar;
+          leftImg.src = resolveMediaUrl(avatars.left.avatar);
           leftImg.style.display = '';
         }
         if (avatars.right && avatars.right.avatar && rightImg) {
-          rightImg.src = avatars.right.avatar;
+          rightImg.src = resolveMediaUrl(avatars.right.avatar);
           rightImg.style.display = '';
         }
         if (nameLeft && avatars.left) nameLeft.textContent = avatars.left.nickname;

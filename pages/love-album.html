@@ -1030,9 +1030,10 @@ body {
           lightboxPrev.style.visibility = lightboxPhotos.length > 1 ? 'visible' : 'hidden';
           lightboxNext.style.visibility = lightboxPhotos.length > 1 ? 'visible' : 'hidden';
 
+          var resolvedPhotoSrc = resolveMediaUrl(photo.src);
           var preload = new Image();
           preload.onload = function () {
-            lightboxImg.src = photo.src;
+            lightboxImg.src = resolvedPhotoSrc;
             lightboxSpinner.style.display = 'none';
             lightboxImg.classList.add('loaded');
             preloadAdjacent(index);
@@ -1041,14 +1042,14 @@ body {
             lightboxSpinner.style.display = 'none';
             lightboxImg.classList.add('loaded');
           };
-          preload.src = photo.src;
+          preload.src = resolvedPhotoSrc;
         }
 
         function preloadAdjacent(index) {
           [-1, 1].forEach(function (offset) {
             var i = (index + offset + lightboxPhotos.length) % lightboxPhotos.length;
             var img = new Image();
-            img.src = lightboxPhotos[i].src;
+            img.src = resolveMediaUrl(lightboxPhotos[i].src);
           });
         }
 

@@ -1,0 +1,513 @@
+{
+  "version": 1,
+  "exportedAt": "2026-08-08",
+  "source": "admin-data.js DEFAULT_* constants",
+  "keys": {
+    "cover": "love-data-cover",
+    "site": "love-data-site",
+    "messages": "love-data-messages",
+    "album": "love-data-album",
+    "wishlist": "love-data-wishlist",
+    "timeline": "love-data-timeline",
+    "letter": "love-data-letter",
+    "avatars": "love-data-avatars"
+  },
+  "data": {
+    "cover": "../assets/banner.jpg",
+    "site": {
+      "homeTitle": "我们的小宇宙",
+      "homeSubtitle": "从第一次见面，到未来的每一天",
+      "footerTitle": "我们的小宇宙",
+      "footerWish": "祝你天天开心，快快乐乐，心有所想，皆有所成。",
+      "footerSign": "陈卓卓 致 嘉嘉小星星",
+      "leavingTitle": "甜蜜留言",
+      "leavingSubtitle": "留下一句想对 Ta 说的话吧。",
+      "albumTitle": "恋爱相册",
+      "albumSubtitle": "把一起走过的日子，都收进这一页。",
+      "listTitle": "恋爱清单",
+      "listSubtitle": "想和 Ta 一起完成的小事。",
+      "thingsTitle": "点点滴滴",
+      "thingsSubtitle": "记录我们慢慢靠近的每一天。",
+      "aboutTitle": "关于我们",
+      "aboutSubtitle": "从相遇到现在，慢慢讲述我们的故事。"
+    },
+    "messages": [],
+    "album": [
+      {
+        "id": "album-01",
+        "date": "2026-04-03",
+        "title": "相识 · 茫茫人海，此生至幸",
+        "photos": [
+          {
+            "src": "../assets/memories/01-meeting-2026-04-03/cover.jpg",
+            "caption": "茫茫人海，此生至幸"
+          },
+          {
+            "src": "../assets/memories/01-meeting-2026-04-03/photo-01.jpg",
+            "caption": "和嘉嘉在这个湖旁抱了十分钟"
+          },
+          {
+            "src": "../assets/memories/01-meeting-2026-04-03/photo-02.jpg",
+            "caption": "颐和园的湖景"
+          },
+          {
+            "src": "../assets/memories/01-meeting-2026-04-03/photo-03.jpg",
+            "caption": "颐和园拍花的嘉嘉"
+          }
+        ]
+      },
+      {
+        "id": "album-02",
+        "date": "2026-04-12",
+        "title": "告白 · 恋爱要从一束花开始",
+        "photos": [
+          {
+            "src": "../assets/memories/02-confession-2026-04-12/cover.jpg",
+            "caption": "定制的戒指"
+          },
+          {
+            "src": "../assets/memories/02-confession-2026-04-12/photo-01.jpg",
+            "caption": "互换手链"
+          },
+          {
+            "src": "../assets/memories/02-confession-2026-04-12/photo-02.jpg",
+            "caption": "恋爱要从一束花开始"
+          },
+          {
+            "src": "../assets/memories/02-confession-2026-04-12/photo-03.jpg",
+            "caption": "商场合照"
+          }
+        ]
+      },
+      {
+        "id": "album-03",
+        "date": "2026-04-18",
+        "title": "夜游 · 五公里的夜游",
+        "photos": [
+          {
+            "src": "../assets/memories/03-night-walk-2026-04-18/cover.jpg",
+            "caption": "餐厅"
+          },
+          {
+            "src": "../assets/memories/03-night-walk-2026-04-18/photo-01.jpg",
+            "caption": "夜游路上的花和树"
+          }
+        ]
+      },
+      {
+        "id": "album-04",
+        "date": "2026-04-24",
+        "title": "旅游 · 山河不问远近",
+        "photos": [
+          {
+            "src": "../assets/memories/04-trip-2026-04-24/cover.jpg",
+            "caption": "白云，海岸，晚风，夕阳，和你，美食，相伴"
+          },
+          {
+            "src": "../assets/memories/04-trip-2026-04-24/photo-01.jpg",
+            "caption": "白云，海岸，晚风，夕阳，和你，美食，相伴"
+          },
+          {
+            "src": "../assets/memories/04-trip-2026-04-24/photo-02.jpg",
+            "caption": "津门掠影，与你同游"
+          },
+          {
+            "src": "../assets/memories/04-trip-2026-04-24/photo-03.jpg",
+            "caption": "津门掠影，与你同游"
+          },
+          {
+            "src": "../assets/memories/04-trip-2026-04-24/photo-04.jpg",
+            "caption": "山河不问远近，所幸同行是你"
+          }
+        ]
+      },
+      {
+        "id": "album-05",
+        "date": "2026-05-04",
+        "title": "野餐 · 山野来信",
+        "photos": [
+          {
+            "src": "../assets/memories/05-picnic-2026-05-04/cover.jpg",
+            "caption": "公园"
+          },
+          {
+            "src": "../assets/memories/05-picnic-2026-05-04/photo-01.jpg",
+            "caption": "山野来信，邀我赴一场自然之约"
+          },
+          {
+            "src": "../assets/memories/05-picnic-2026-05-04/photo-02.jpg",
+            "caption": "野餐"
+          }
+        ]
+      },
+      {
+        "id": "album-06",
+        "date": "2026-05-09",
+        "title": "陪伴 · 本周生活实录",
+        "photos": [
+          {
+            "src": "../assets/memories/06-together-2026-05-09/cover.jpg",
+            "caption": "本周生活实录"
+          },
+          {
+            "src": "../assets/memories/06-together-2026-05-09/photo-01.jpg",
+            "caption": "猫咖"
+          },
+          {
+            "src": "../assets/memories/06-together-2026-05-09/photo-02.jpg",
+            "caption": "美滋滋"
+          },
+          {
+            "src": "../assets/memories/06-together-2026-05-09/photo-03.jpg",
+            "caption": "收到的第一束花"
+          },
+          {
+            "src": "../assets/memories/06-together-2026-05-09/photo-04.jpg",
+            "caption": "一起逛校园"
+          }
+        ]
+      },
+      {
+        "id": "album-08",
+        "date": "2026-05-19",
+        "title": "陪伴 · 静待相逢",
+        "photos": [
+          {
+            "src": "../assets/memories/08-together-2026-05-19/cover.jpg",
+            "caption": "520礼物"
+          },
+          {
+            "src": "../assets/memories/08-together-2026-05-19/photo-01.jpg",
+            "caption": "一起看电影"
+          },
+          {
+            "src": "../assets/memories/08-together-2026-05-19/photo-02.jpg",
+            "caption": "一起拼豆"
+          }
+        ]
+      },
+      {
+        "id": "album-09",
+        "date": "2026-05-20",
+        "title": "花束 · 520快乐",
+        "photos": [
+          {
+            "src": "../assets/memories/09-flowers-2026-05-20/cover.jpg",
+            "caption": "520快乐"
+          },
+          {
+            "src": "../assets/memories/09-flowers-2026-05-20/photo-01.jpg",
+            "caption": "520快乐"
+          }
+        ]
+      },
+      {
+        "id": "album-10",
+        "date": "2026-05-25",
+        "title": "陪伴 · 双份冰激凌",
+        "photos": [
+          {
+            "src": "../assets/memories/10-together-2026-05-25/cover.jpg",
+            "caption": "海底捞的演出"
+          },
+          {
+            "src": "../assets/memories/10-together-2026-05-25/photo-01.jpg",
+            "caption": "海底捞还有演出看"
+          },
+          {
+            "src": "../assets/memories/10-together-2026-05-25/photo-02.jpg",
+            "caption": "双份冰激凌"
+          },
+          {
+            "src": "../assets/memories/10-together-2026-05-25/photo-03.jpg",
+            "caption": "夜晚散步"
+          }
+        ]
+      },
+      {
+        "id": "album-11",
+        "date": "2026-06-02",
+        "title": "陪伴 · 小龙虾和一条街",
+        "photos": [
+          {
+            "src": "../assets/memories/11-together-2026-06-02/cover.jpg",
+            "caption": "吃小龙虾，之后有劲背着嘉嘉走了一条街"
+          },
+          {
+            "src": "../assets/memories/11-together-2026-06-02/photo-01.jpg",
+            "caption": "逛公园"
+          }
+        ]
+      },
+      {
+        "id": "album-12",
+        "date": "2026-06-08",
+        "title": "陪伴 · 白云像棉花糖",
+        "photos": [
+          {
+            "src": "../assets/memories/12-together-2026-06-08/photo-04.jpg",
+            "caption": "天边的白云假的像棉花糖"
+          },
+          {
+            "src": "../assets/memories/12-together-2026-06-08/photo-01.jpg",
+            "caption": "分别时的天色"
+          },
+          {
+            "src": "../assets/memories/12-together-2026-06-08/photo-02.jpg",
+            "caption": "剪刀手"
+          },
+          {
+            "src": "../assets/memories/12-together-2026-06-08/photo-03.jpg",
+            "caption": "路灯下的合照"
+          },
+          {
+            "src": "../assets/memories/12-together-2026-06-08/cover.jpg",
+            "caption": "大份小龙虾"
+          }
+        ]
+      },
+      {
+        "id": "album-13",
+        "date": "2026-06-13",
+        "title": "陪伴 · 雨夜披萨",
+        "photos": [
+          {
+            "src": "../assets/memories/13-together-2026-06-13/cover.jpg",
+            "caption": "窗外下着大雨，屋里吃着披萨，马上就要离别了"
+          },
+          {
+            "src": "../assets/memories/13-together-2026-06-13/photo-01.jpg",
+            "caption": "果园摘果子"
+          }
+        ]
+      },
+      {
+        "id": "album-14",
+        "date": "2026-07-03",
+        "title": "旅游 · 暴雨也挡不住同游",
+        "photos": [
+          {
+            "src": "../assets/memories/14-trip-2026-07-03/cover.jpg",
+            "caption": "暴雨"
+          },
+          {
+            "src": "../assets/memories/14-trip-2026-07-03/photo-01.jpg",
+            "caption": "高铁上雷霆大吃"
+          },
+          {
+            "src": "../assets/memories/14-trip-2026-07-03/photo-02.jpg",
+            "caption": "闪电"
+          },
+          {
+            "src": "../assets/memories/14-trip-2026-07-03/photo-03.jpg",
+            "caption": "温泉"
+          },
+          {
+            "src": "../assets/memories/14-trip-2026-07-03/photo-04.jpg",
+            "caption": "小龙虾畅吃"
+          },
+          {
+            "src": "../assets/memories/14-trip-2026-07-03/photo-05.jpg",
+            "caption": "艺术馆合照"
+          },
+          {
+            "src": "../assets/memories/14-trip-2026-07-03/photo-06.jpg",
+            "caption": "艺术馆合照"
+          },
+          {
+            "src": "../assets/memories/14-trip-2026-07-03/photo-07.jpg",
+            "caption": "云彩像一个大飞机"
+          }
+        ]
+      },
+      {
+        "id": "album-16",
+        "date": "2026-07-27",
+        "title": "旅游 · 月色真美",
+        "photos": [
+          {
+            "src": "../assets/memories/16-trip-2026-07-27/cover.jpg",
+            "caption": "第一次看4D版的蜘蛛侠"
+          },
+          {
+            "src": "../assets/memories/16-trip-2026-07-27/photo-01.jpg",
+            "caption": "海底捞超绝大碗"
+          },
+          {
+            "src": "../assets/memories/16-trip-2026-07-27/photo-02.jpg",
+            "caption": "海底捞的柠檬冰激凌"
+          },
+          {
+            "src": "../assets/memories/16-trip-2026-07-27/photo-03.jpg",
+            "caption": "廊坊的火锅店"
+          },
+          {
+            "src": "../assets/memories/16-trip-2026-07-27/photo-04.jpg",
+            "caption": "路灯下的合照"
+          },
+          {
+            "src": "../assets/memories/16-trip-2026-07-27/photo-05.jpg",
+            "caption": "用AI选榴莲"
+          },
+          {
+            "src": "../assets/memories/16-trip-2026-07-27/photo-06.jpg",
+            "caption": "月色真美"
+          },
+          {
+            "src": "../assets/memories/16-trip-2026-07-27/photo-07.jpg",
+            "caption": "自助餐的战友羁绊"
+          }
+        ]
+      }
+    ],
+    "wishlist": [
+      {
+        "text": "一起去更远的地方旅游",
+        "done": false
+      },
+      {
+        "text": "一起过平平淡淡的日子",
+        "done": false
+      },
+      {
+        "text": "最后走到最后",
+        "done": false
+      }
+    ],
+    "timeline": [
+      {
+        "id": "t-01",
+        "date": "2026-04-03",
+        "tag": "初见",
+        "title": "相识 · 茫茫人海，此生至幸",
+        "cover": "../assets/memories/01-meeting-2026-04-03/cover.jpg",
+        "text": "那天从颐和园的湖景开始，我们在湖旁抱了十分钟。后来再看“茫茫人海，此生至幸”这句话，才觉得它不是夸张，而是把那次相识留下些什么都说完了。拍花的嘉嘉，也成了故事最早的画面之一。"
+      },
+      {
+        "id": "t-02",
+        "date": "2026-04-12",
+        "tag": "告白",
+        "title": "告白 · 恋爱要从一束花开始",
+        "cover": "../assets/memories/02-confession-2026-04-12/cover.jpg",
+        "text": "“恋爱要从一束花开始”，那天还有定制的戒指、互换的手链和商场合照。“我以浪漫起笔，续写你这漫长旅途”，这句话很郑重，也很像那一天留下的心意。"
+      },
+      {
+        "id": "t-03",
+        "date": "2026-04-18",
+        "tag": "夜风",
+        "title": "夜游 · 五公里的夜游",
+        "cover": "../assets/memories/03-night-walk-2026-04-18/cover.jpg",
+        "text": "“第一次在晚上散步一个小时，走了五公里，聊了很多很多。”这比任何修饰都具体。餐厅、路上的花和树，都被那一小时连在一起，成了我们慢慢靠近的一段路。"
+      },
+      {
+        "id": "t-04",
+        "date": "2026-04-24",
+        "tag": "同游",
+        "title": "旅游 · 山河不问远近",
+        "cover": "../assets/memories/04-trip-2026-04-24/cover.jpg",
+        "text": "这一天的照片名字已经像一页游记：白云、海岸、晚风、夕阳、美食、相伴，还有“津门掠影，与你同游”。最想保留的是“山河不问远近，所幸同行是你”，它把这趟出发的意义说得很轻，也很准。"
+      },
+      {
+        "id": "t-05",
+        "date": "2026-05-04",
+        "tag": "自然",
+        "title": "野餐 · 山野来信",
+        "cover": "../assets/memories/05-picnic-2026-05-04/cover.jpg",
+        "text": "“山野来信，邀我赴一场自然之约。”这句话适合放在这一页的开头。公园和野餐没有复杂情节，却有很清楚的松弛感：我们从日程里走出来，把一段时间交给草地、风和彼此。"
+      },
+      {
+        "id": "t-06",
+        "date": "2026-05-09",
+        "tag": "日常",
+        "title": "陪伴 · 本周生活实录",
+        "cover": "../assets/memories/06-together-2026-05-09/cover.jpg",
+        "text": "这一组像“本周生活实录”：猫咖、美滋滋、收到的第一束花，还有一起逛校园。它们不是某一个盛大的节点，却把陪伴落到了日常里；回头看，很多被记住的瞬间，原来都很普通。"
+      },
+      {
+        "id": "t-08",
+        "date": "2026-05-19",
+        "tag": "陪伴",
+        "title": "陪伴 · 静待相逢",
+        "cover": "../assets/memories/08-together-2026-05-19/cover.jpg",
+        "text": "520礼物、一起看电影、一起拼豆，都是能安静放进同一页的片段。“相聚有期，别离匆匆”，所以这些小事显得更珍贵：能见面时，就认真把当下过好。"
+      },
+      {
+        "id": "t-09",
+        "date": "2026-05-20",
+        "tag": "花束",
+        "title": "花束 · 520快乐",
+        "cover": "../assets/memories/09-flowers-2026-05-20/cover.jpg",
+        "text": "两张“520快乐”像给这一天按下了保存键。它不需要写得很满，因为日期、花束和照片标题已经说明了心意。以后翻到这里，能想起的应该是那种直接又明亮的表达。"
+      },
+      {
+        "id": "t-10",
+        "date": "2026-05-25",
+        "tag": "烟火气",
+        "title": "陪伴 · 双份冰激凌",
+        "cover": "../assets/memories/10-together-2026-05-25/cover.jpg",
+        "text": "这一天的记忆很有烟火气：海底捞的演出、双份冰激凌，还有夜晚散步。它不是被精心排练出来的一天，却因为吃饭、看演出、走路这些细节，变得很适合被反复想起。"
+      },
+      {
+        "id": "t-11",
+        "date": "2026-06-02",
+        "tag": "一条街",
+        "title": "陪伴 · 小龙虾和一条街",
+        "cover": "../assets/memories/11-together-2026-06-02/cover.jpg",
+        "text": "“吃小龙虾，之后有劲背着嘉嘉走了一条街”这句话太具体了，几乎不用再改。逛公园、吃饭、走路，最后变成一条街的长度；有些回忆好像就是这样，被身体记住。"
+      },
+      {
+        "id": "t-12",
+        "date": "2026-06-08",
+        "tag": "分别前",
+        "title": "陪伴 · 白云像棉花糖",
+        "cover": "../assets/memories/12-together-2026-06-08/photo-04.jpg",
+        "text": "大份小龙虾、剪刀手、路灯下的合照，都很像分别前想多留一点的证据。最可爱的是“天边的白云假的像棉花糖”，一句话把那天的天色、心情和不舍都轻轻放在一起。"
+      },
+      {
+        "id": "t-13",
+        "date": "2026-06-13",
+        "tag": "雨声",
+        "title": "陪伴 · 雨夜披萨",
+        "cover": "../assets/memories/13-together-2026-06-13/cover.jpg",
+        "text": "“窗外下着大雨，屋里吃着披萨，马上就要离别了。”这句原文已经很完整。果园摘果子的明亮，和雨夜披萨的安静放在一起，像同一段陪伴里的两种天气。"
+      },
+      {
+        "id": "t-14",
+        "date": "2026-07-03",
+        "tag": "旅途",
+        "title": "旅游 · 暴雨也挡不住同游",
+        "cover": "../assets/memories/14-trip-2026-07-03/cover.jpg",
+        "text": "高铁上雷霆大吃，路上遇见暴雨和闪电，也有温泉、小龙虾、艺术馆合照。还有一句“云彩像一个大飞机”，让这趟旅行多了点随手记录的快乐；一路不算全都顺利，却很有真实感。"
+      },
+      {
+        "id": "t-16",
+        "date": "2026-07-27",
+        "tag": "夏日",
+        "title": "旅游 · 月色真美",
+        "cover": "../assets/memories/16-trip-2026-07-27/cover.jpg",
+        "text": "第一次看4D版的蜘蛛侠、海底捞超绝大碗、廊坊的火锅店、用AI选榴莲，还有“月色真美”。这一天的照片标题很跳脱，却正好说明：旅行里值得留下的，常常是这些小小的共同经历。"
+      }
+    ],
+    "letter": {
+      "greeting": "嘉嘉小星星：",
+      "paragraphs": [
+        "做这个网站的时候，我把相册从头翻了一遍，才发现我们已经一起走过了这么多日子。从颐和园湖边的那个拥抱，到告白那天定制的戒指和互换的手链，再到晚上五公里的散步、野餐、旅行、雨夜的披萨……很多当时觉得普通的瞬间，现在回头看都很亮。",
+        "我最喜欢那张“天边的白云假的像棉花糖”。你拍的云彩总是很天真，像你会说的话。和你在一起的时候，很多大事小事都变得很好笑、很值得记住。",
+        "我们也会有争执，有不那么顺利的时候。但我想记住的不是那些，而是每次吵完之后，我们还是愿意继续靠近。能遇见你，真的是我很大的幸运。",
+        "七夕快乐。愿你天天开心，快快乐乐，心有所想，皆有所成。也愿我们的小宇宙继续往前，从第一次见面，到未来的每一天。"
+      ],
+      "signOff": "陈卓卓 致 嘉嘉小星星",
+      "dateText": "2026 年七夕"
+    },
+    "avatars": {
+      "left": {
+        "name": "嘉嘉小星星",
+        "dataUrl": "../assets/avatars/jiajia.png"
+      },
+      "right": {
+        "name": "陈卓卓",
+        "dataUrl": "../assets/avatars/chenzhuozhuo.png"
+      }
+    }
+  }
+}

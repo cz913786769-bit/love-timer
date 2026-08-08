@@ -2,16 +2,13 @@
   "redirects": [
     {
       "source": "/index.html",
-      "destination": "/pages/index.html?fresh=20260808g",
+      "destination": "/pages/home-20260808h.html",
       "permanent": false
     },
     {
       "source": "/pages/index.html",
-      "destination": "/pages/index.html?fresh=20260808g",
-      "permanent": false,
-      "missing": [
-        { "type": "query", "key": "fresh" }
-      ]
+      "destination": "/pages/home-20260808h.html",
+      "permanent": false
     }
   ],
   "rewrites": [

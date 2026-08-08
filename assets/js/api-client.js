@@ -1,4 +1,4 @@
-/* 恋爱小站 - API 客户端（v2.2 生产默认 API）
+/* 恋爱小站 - API 客户端（v2.3 生产默认 API + XHR 兼容）
  * 加载此脚本后，LoveData 和 LoveAdmin 将使用后端 API
  * 认证方式：HttpOnly Cookie（前端无需管理 token）
  * 默认进入 API 模式；?local=1 可紧急回退到 localStorage
@@ -110,66 +110,93 @@
 
   /* ── HTTP 请求封装（Cookie 认证，credentials: 'include'） ── */
 
-  function fetchOpts(method, body) {
-    var opts = {
-      method: method,
-      credentials: 'include', // 关键：携带 HttpOnly Cookie
-      headers: { 'Accept': 'application/json' }
-    };
-    if (body) {
-      opts.headers['Content-Type'] = 'application/json';
-      opts.body = JSON.stringify(body);
+  function withCacheBuster(path) {
+    var sep = path.indexOf('?') >= 0 ? '&' : '?';
+    return path + sep + '_=' + Date.now();
+  }
+
+  function parseJson(text) {
+    if (!text) return {};
+    try {
+      return JSON.parse(text);
+    } catch (err) {
+      throw new Error('服务器返回不是 JSON');
     }
-    return opts;
+  }
+
+  function requestJson(method, path, data, isUpload) {
+    var requestPath = method === 'GET' ? withCacheBuster(path) : path;
+    var url = API_BASE + requestPath;
+
+    if (window.fetch) {
+      var opts = {
+        method: method,
+        credentials: 'include', // 关键：携带 HttpOnly Cookie
+        cache: 'no-store',
+        headers: { 'Accept': 'application/json' }
+      };
+      if (isUpload) {
+        opts.body = data;
+      } else if (data) {
+        opts.headers['Content-Type'] = 'application/json';
+        opts.body = JSON.stringify(data);
+      }
+      return window.fetch(url, opts).then(function (r) {
+        if (!r.ok) throw new Error((isUpload ? '上传失败: ' : '请求失败: ') + r.status);
+        return r.json();
+      });
+    }
+
+    return new Promise(function (resolve, reject) {
+      if (!window.XMLHttpRequest) {
+        reject(new Error('当前浏览器不支持网络请求'));
+        return;
+      }
+
+      var xhr = new XMLHttpRequest();
+      xhr.open(method, url, true);
+      xhr.withCredentials = true;
+      xhr.timeout = 15000;
+      xhr.setRequestHeader('Accept', 'application/json');
+      if (!isUpload && data) {
+        xhr.setRequestHeader('Content-Type', 'application/json');
+      }
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4) return;
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            resolve(parseJson(xhr.responseText));
+          } catch (err) {
+            reject(err);
+          }
+          return;
+        }
+        reject(new Error((isUpload ? '上传失败: ' : '请求失败: ') + xhr.status));
+      };
+      xhr.onerror = function () { reject(new Error('网络请求失败')); };
+      xhr.ontimeout = function () { reject(new Error('网络请求超时')); };
+      xhr.send(isUpload ? data : (data ? JSON.stringify(data) : null));
+    });
   }
 
   function apiGet(path) {
-    return fetch(API_BASE + path, {
-      method: 'GET',
-      credentials: 'include',
-      cache: 'no-store',
-      headers: { 'Accept': 'application/json' }
-    }).then(function (r) {
-      if (!r.ok) throw new Error('请求失败: ' + r.status);
-      return r.json();
-    });
+    return requestJson('GET', path);
   }
 
   function apiPost(path, data) {
-    return fetch(API_BASE + path, fetchOpts('POST', data)).then(function (r) {
-      if (!r.ok) throw new Error('请求失败: ' + r.status);
-      return r.json();
-    });
+    return requestJson('POST', path, data);
   }
 
   function apiPut(path, data) {
-    return fetch(API_BASE + path, fetchOpts('PUT', data)).then(function (r) {
-      if (!r.ok) throw new Error('请求失败: ' + r.status);
-      return r.json();
-    });
+    return requestJson('PUT', path, data);
   }
 
   function apiDelete(path, data) {
-    return fetch(API_BASE + path, {
-      method: 'DELETE',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: data ? JSON.stringify(data) : undefined
-    }).then(function (r) {
-      if (!r.ok) throw new Error('请求失败: ' + r.status);
-      return r.json();
-    });
+    return requestJson('DELETE', path, data);
   }
 
   function apiUpload(path, formData) {
-    return fetch(API_BASE + path, {
-      method: 'POST',
-      credentials: 'include',
-      body: formData
-    }).then(function (r) {
-      if (!r.ok) throw new Error('上传失败: ' + r.status);
-      return r.json();
-    });
+    return requestJson('POST', path, formData, true);
   }
 
   /* ── Session 管理 ── */

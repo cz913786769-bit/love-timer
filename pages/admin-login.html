@@ -9,8 +9,6 @@
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
     <link rel="dns-prefetch" href="https://unpkg.com" />
     <style id="theme-vars">
-@import "tailwindcss";
-
 :root {
   --love-background: #fff5f7;
   --love-foreground: #4a3f41;
@@ -545,7 +543,7 @@ body.admin-page #love-admin-login-fab {
               if (submitBtn) {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i data-lucide="loader" style="width:18px;height:18px;"></i> 登录中...';
-                lucide.createIcons();
+                if (window.lucide) window.lucide.createIcons();
               }
               window.LoveAdmin.loginAsync(side, pwd).then(function (success) {
                 if (success) {
@@ -559,7 +557,7 @@ body.admin-page #love-admin-login-fab {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<i data-lucide="log-in" style="width:18px;height:18px;"></i> 登录';
                   }
-                  lucide.createIcons();
+                  if (window.lucide) window.lucide.createIcons();
                 }
               });
             } else {
@@ -575,7 +573,7 @@ body.admin-page #love-admin-login-fab {
             }
           });
 
-          lucide.createIcons();
+          if (window.lucide) window.lucide.createIcons();
         }
 
         // 等待 LoveAdmin.ready() 后再判断登录状态

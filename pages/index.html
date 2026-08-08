@@ -12,8 +12,6 @@
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
     <link rel="dns-prefetch" href="https://unpkg.com" />
     <style id="theme-vars">
-@import "tailwindcss";
-
 :root {
   --love-background: #fff5f7;
   --love-foreground: #4a3f41;
@@ -571,7 +569,7 @@ body {
     </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
-    <audio id="bg-music" src="../assets/music/there-is-romance.mp3" loop preload="auto"></audio>
+    <audio id="bg-music" src="../assets/music/there-is-romance.mp3?v=20260808d" loop preload="auto"></audio>
 
     <header style="position: sticky; top: 0; z-index: 50; background: rgba(255, 245, 247, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);">
       <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: nowrap;">
@@ -844,7 +842,7 @@ body {
         }
       })();
     </script>
-    <script>lucide.createIcons();</script>
+    <script>window.lucide&&lucide.createIcons();</script>
     <script src="../assets/js/cover-contrast.js?v=20260807d"></script>
 </body>
 </html>

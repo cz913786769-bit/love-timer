@@ -9,8 +9,6 @@
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
     <link rel="dns-prefetch" href="https://unpkg.com" />
     <style id="theme-vars">
-@import "tailwindcss";
-
 :root {
   --love-background: #fff5f7;
   --love-foreground: #4a3f41;
@@ -331,8 +329,8 @@ body {
   }
 }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js" defer></script>
-    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.1/dist/index.global.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="../assets/js/interactions.js?v=20260807b" defer></script>
     <style type="text/tailwindcss">
   @theme inline {
@@ -680,7 +678,7 @@ body {
     </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
-    <audio id="bg-music" src="../assets/music/there-is-romance.mp3" loop preload="auto"></audio>
+    <audio id="bg-music" src="../assets/music/there-is-romance.mp3?v=20260808d" loop preload="auto"></audio>
     <header style="position: sticky; top: 0; z-index: 50; background: rgba(255, 245, 247, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);">
       <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: nowrap;">
         <a href="index.html" data-dom-id="nav-index" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 20px; flex-shrink: 0;">
@@ -1161,7 +1159,7 @@ body {
         }
       })();
     </script>
-    <script>lucide.createIcons();</script>
+    <script>window.lucide&&lucide.createIcons();</script>
     <script>if(window.LoveData&&window.LoveData.ready){LoveData.ready().then(function(){LoveData.applySiteText(document)})}else{LoveData.applySiteText(document)}</script>
 <script>document.addEventListener('DOMContentLoaded',function(){function s(){var c=LoveData.getCover();if(c){var h=document.getElementById('hero-section');if(h)h.style.background='linear-gradient(rgba(255,245,247,0.15), rgba(255,245,247,0.15)), url('+resolveMediaUrl(c)+') center/cover no-repeat fixed'}}if(window.LoveData&&window.LoveData.ready){LoveData.ready().then(s)}else{s()}});</script>
     <script src="../assets/js/cover-contrast.js?v=20260807d"></script>

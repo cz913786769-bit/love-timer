@@ -9,8 +9,6 @@
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
     <link rel="dns-prefetch" href="https://unpkg.com" />
     <style id="theme-vars">
-@import "tailwindcss";
-
 :root {
   --love-background: #fff5f7;
   --love-foreground: #4a3f41;
@@ -1420,7 +1418,7 @@ body.admin-page #love-admin-login-fab { display: none !important; }
         renderTab('site');
 
         LoveData.applySiteText(document);
-        lucide.createIcons();
+        if (window.lucide) window.lucide.createIcons();
       }
 
       // 等待 LoveAdmin.ready() 后再判断登录状态

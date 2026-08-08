@@ -211,7 +211,25 @@
       e.preventDefault();
       var pwd = input.value.trim();
       var side = leftRadio.checked ? 'left' : 'right';
-      if (login(side, pwd)) {
+
+      if (window.LoveData && window.LoveData.useApi) {
+        // API 模式：使用异步登录
+        window.LoveAdmin.loginAsync(side, pwd).then(function (success) {
+          if (success) {
+            hideLoginModal();
+            refreshAdminUI();
+            if (pendingCallback) {
+              var cb = pendingCallback;
+              pendingCallback = null;
+              cb();
+            }
+          } else {
+            error.style.display = 'block';
+            input.value = '';
+            input.focus();
+          }
+        });
+      } else if (login(side, pwd)) {
         hideLoginModal();
         refreshAdminUI();
         if (pendingCallback) {

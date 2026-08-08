@@ -501,7 +501,7 @@
         return clone(cache.messages);
       }).catch(function (err) {
         console.error('[API Client] 添加留言失败:', err);
-        return self.getMessages();
+        throw err;
       });
     },
     deleteMessage: function (id) {

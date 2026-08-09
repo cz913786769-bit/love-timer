@@ -1,0 +1,7 @@
+{
+  "ICP_REVIEW_MODE": true,
+  "ICP_NUMBER": "",
+  "ICP_URL": "https://beian.miit.gov.cn/",
+  "review_page": "/icp-review.html",
+  "purpose": "Temporarily pause public internet information services during first ICP filing review."
+}

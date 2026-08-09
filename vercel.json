@@ -1,53 +1,14 @@
 {
-  "redirects": [
-    {
-      "source": "/index.html",
-      "destination": "/pages/home-20260808h.html",
-      "permanent": false
-    },
-    {
-      "source": "/pages/index.html",
-      "destination": "/pages/home-20260808h.html",
-      "permanent": false
-    }
-  ],
   "rewrites": [
-    { "source": "/assets/:path*", "destination": "/assets/:path*" },
-    { "source": "/", "destination": "/app.html" },
-    { "source": "/app.html", "destination": "/app.html" },
-    { "source": "/qrcode.html", "destination": "/qrcode.html" },
-    { "source": "/pages/:path*", "destination": "/pages/:path*" },
-    { "source": "/:page", "destination": "/pages/:page" }
+    { "source": "/robots.txt", "destination": "/robots.txt" },
+    { "source": "/(.*)", "destination": "/icp-review.html" }
   ],
   "headers": [
     {
-      "source": "/",
+      "source": "/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }
-      ]
-    },
-    {
-      "source": "/assets/music/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/assets/memories/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/assets/(.*)\\.(jpg|webp|png|svg|ico)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/(.*)\\.html",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }
+        { "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" },
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
       ]
     }
   ]

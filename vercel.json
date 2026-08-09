@@ -1,15 +1,21 @@
 {
-  "rewrites": [
-    { "source": "/robots.txt", "destination": "/robots.txt" },
-    { "source": "/(.*)", "destination": "/icp-review.html" }
-  ],
-  "headers": [
+  "version": 2,
+  "routes": [
     {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" },
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
-      ]
+      "src": "/robots\\.txt",
+      "dest": "/robots.txt",
+      "headers": {
+        "Cache-Control": "no-store, max-age=0, must-revalidate",
+        "X-Robots-Tag": "noindex, nofollow"
+      }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/icp-review.html",
+      "headers": {
+        "Cache-Control": "no-store, max-age=0, must-revalidate",
+        "X-Robots-Tag": "noindex, nofollow"
+      }
     }
   ]
 }

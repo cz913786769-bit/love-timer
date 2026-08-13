@@ -15,7 +15,7 @@ if (window.top === window.self) (function () {
   var KEY_VOLUME = 'love-music-volume';
 
   music.loop = true;
-  music.preload = 'auto';
+  music.preload = 'none';
   music.volume = parseFloat(localStorage.getItem(KEY_VOLUME)) || 0.35;
   music.muted = false;
 

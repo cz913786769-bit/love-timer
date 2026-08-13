@@ -112,7 +112,7 @@
   </style>
 </head>
 <body>
-  <audio id="bg-music" src="assets/music/there-is-romance.mp3" loop preload="auto"></audio>
+  <audio id="bg-music" src="assets/music/there-is-romance.mp3" loop preload="metadata"></audio>
 
   <iframe id="content-frame" src="pages/home-20260808h.html" title="内容区"></iframe>
 
@@ -153,7 +153,7 @@
     var KEY_VOLUME = 'love-music-volume';
 
     music.loop = true;
-    music.preload = 'auto';
+    music.preload = 'metadata';
     music.volume = parseFloat(localStorage.getItem(KEY_VOLUME)) || 0.35;
     music.muted = false;
 

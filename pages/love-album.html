@@ -678,7 +678,7 @@ body {
     </style>
 </head>
 <body class="min-h-screen font-sans antialiased">
-    <audio id="bg-music" src="../assets/music/there-is-romance.mp3?v=20260808d" loop preload="auto"></audio>
+    <audio id="bg-music" src="../assets/music/there-is-romance.mp3?v=20260808d" loop preload="none"></audio>
     <header style="position: sticky; top: 0; z-index: 50; background: rgba(255, 245, 247, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);">
       <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: nowrap;">
         <a href="index.html" data-dom-id="nav-index" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 20px; flex-shrink: 0;">
@@ -753,7 +753,7 @@ body {
       </div>
     </footer>
 
-    <script src="../assets/js/music.js?v=20260807a"></script>
+    <script src="../assets/js/music.js?v=20260813-perf1"></script>
     <script src="../assets/js/admin-data.js?v=20260807"></script>
     <script src="../assets/js/api-client.js?v=20260813-icp1"></script>
     <script>
@@ -793,6 +793,13 @@ body {
           }
           var timeStr = group.createdAt ? ' · ' + new Date(group.createdAt).toLocaleString('zh-CN') : '';
           return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-2);padding:2px 8px;background:var(--surface-2);border-radius:var(--r-pill);">' + avatarHtml + escapeHtml(acc.nickname) + timeStr + '</span>';
+        }
+
+        function getAlbumThumbSrc(src) {
+          if (!src || src.indexOf('data:') === 0) return src || '';
+          return src.replace(/\/([^\/]+)\.(?:jpe?g|png|webp)(?:\?.*)?$/i, function (match, name) {
+            return '/thumbs/' + name + '.webp';
+          });
         }
 
         function closeLightbox() {
@@ -857,14 +864,12 @@ body {
                     var escapedCaption = escapeHtml(photo.caption || '');
                     var mediaHtml;
                     var onloadAttr = 'onload="this.classList.add(\'loaded\'); var s=this.closest(\'.album-thumb\').querySelector(\'.thumb-skeleton\'); if(s) s.style.display=\'none\';"';
+                    var thumbSrc = getAlbumThumbSrc(resolvedSrc);
+                    var escapedThumbSrc = escapeHtml(thumbSrc);
                     if (isDataUrl) {
-                      mediaHtml = '<img src="' + escapedSrc + '" alt="' + escapedCaption + '" data-caption="' + escapedCaption + '" loading="lazy" decoding="async" fetchpriority="low" width="400" height="300" style="width:100%;height:100%;object-fit:cover;" ' + onloadAttr + '>';
+                      mediaHtml = '<img src="' + escapedSrc + '" alt="' + escapedCaption + '" data-caption="' + escapedCaption + '" data-full-src="' + escapedSrc + '" loading="lazy" decoding="async" fetchpriority="low" width="400" height="300" style="width:100%;height:100%;object-fit:cover;" ' + onloadAttr + '>';
                     } else {
-                      var webpSrc = resolvedSrc.replace(/\.jpg$/, '.webp');
-                      mediaHtml = '<picture>' +
-                        '<source srcset="' + webpSrc + '" type="image/webp">' +
-                        '<img src="' + escapedSrc + '" alt="' + escapedCaption + '" data-caption="' + escapedCaption + '" data-webp-src="' + webpSrc + '" loading="lazy" decoding="async" fetchpriority="low" width="400" height="300" style="width:100%;height:100%;object-fit:cover;" ' + onloadAttr + '>' +
-                      '</picture>';
+                      mediaHtml = '<img src="' + escapedThumbSrc + '" alt="' + escapedCaption + '" data-caption="' + escapedCaption + '" data-full-src="' + escapedSrc + '" loading="lazy" decoding="async" fetchpriority="low" width="400" height="300" style="width:100%;height:100%;object-fit:cover;" ' + onloadAttr + '>';
                     }
                     return '<div class="album-thumb love-admin-row" data-group-id="' + escapeHtml(group.id) + '" data-src="' + escapedSrc + '">' +
                       '<div class="aspect-[4/3] overflow-hidden" style="border-radius: var(--r-md) var(--r-md) 0 0; position:relative;">' +
@@ -1013,7 +1018,7 @@ body {
           lightboxPhotos = thumbs.map(function (thumb) {
             var img = thumb.querySelector('img');
             return {
-              src: img ? (img.dataset.webpSrc || img.src) : '',
+              src: img ? (img.dataset.fullSrc || img.src) : '',
               alt: img ? img.alt : '',
               caption: img ? (img.dataset.caption || img.alt) : ''
             };

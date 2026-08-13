@@ -148,47 +148,96 @@
 
     if (!music || !toggle || !label || !frame) return;
 
-    var KEY_ENABLED = 'love-music-enabled';
     var KEY_TIME = 'love-music-time';
     var KEY_VOLUME = 'love-music-volume';
+    var KEY_USER_PAUSED = 'love-music-user-paused';
+    var SAVE_INTERVAL = 5000;
 
     music.loop = true;
     music.preload = 'metadata';
-    music.volume = parseFloat(localStorage.getItem(KEY_VOLUME)) || 0.35;
+    music.volume = readNumber(KEY_VOLUME, 0.35);
     music.muted = false;
 
     var loadFailed = false;
     var isPending = false;
-    var userInteracted = false;
+    var unlockRegistered = false;
+    var autoplayAttempted = false;
     var hintTimer = null;
     var lastSavedTime = 0;
-    var SAVE_INTERVAL = 5000;      /* 每 5 秒写入一次播放进度，减少 localStorage 压力 */
+    var userPaused = readStorage(KEY_USER_PAUSED) === '1';
+    var userGesturePlayInFlight = false;
 
-    /* ── 状态持久化 ── */
+    function readStorage(key) {
+      try { return sessionStorage.getItem(key); } catch (err) { return null; }
+    }
+
+    function writeStorage(key, value) {
+      try { sessionStorage.setItem(key, value); } catch (err) {}
+    }
+
+    function removeStorage(key) {
+      try { sessionStorage.removeItem(key); } catch (err) {}
+    }
+
+    function readNumber(key, fallback) {
+      var value = parseFloat(readStorage(key));
+      return Number.isFinite(value) ? value : fallback;
+    }
+
+    function getSavedTime() {
+      return Math.max(0, parseInt(readStorage(KEY_TIME), 10) || 0);
+    }
 
     function saveTime(force) {
-      if (music.paused && !force) return;
       if (music.currentTime <= 0) return;
       var now = Date.now();
       if (!force && now - lastSavedTime < SAVE_INTERVAL) return;
       lastSavedTime = now;
-      localStorage.setItem(KEY_TIME, Math.floor(music.currentTime));
+      writeStorage(KEY_TIME, String(Math.floor(music.currentTime)));
     }
 
-    function wasEnabled() {
-      return localStorage.getItem(KEY_ENABLED) === '1';
-    }
+    function restoreTimeWhenReady() {
+      var savedTime = getSavedTime();
+      if (!savedTime) return;
 
-    function getSavedTime() {
-      return parseInt(localStorage.getItem(KEY_TIME), 10) || 0;
-    }
+      function seekToSaved() {
+        if (music.duration > 0 && Math.abs(music.currentTime - savedTime) > 2) {
+          music.currentTime = Math.min(savedTime, Math.max(0, music.duration - 1));
+        }
+      }
 
-    /* ── UI 更新 ── */
+      if (music.readyState >= 1) {
+        seekToSaved();
+      } else {
+        music.addEventListener('loadedmetadata', function once() {
+          seekToSaved();
+          music.removeEventListener('loadedmetadata', once);
+        });
+      }
+    }
 
     function updateIcon() {
       if (!iconOn || !iconOff) return;
       iconOn.style.display = music.paused ? 'none' : '';
       iconOff.style.display = music.paused ? '' : 'none';
+    }
+
+    function getMusicState() {
+      return {
+        type: 'music:state',
+        paused: music.paused,
+        loadFailed: loadFailed,
+        userPaused: userPaused,
+        currentTime: music.currentTime || 0
+      };
+    }
+
+    function syncFrameMusicUI() {
+      try {
+        if (frame && frame.contentWindow) {
+          frame.contentWindow.postMessage(getMusicState(), '*');
+        }
+      } catch (err) {}
     }
 
     function updateLabel() {
@@ -206,94 +255,11 @@
         toggle.style.opacity = '1';
       }
       updateIcon();
+      syncFrameMusicUI();
     }
-
-    /* ── 播放控制 ── */
-
-    function tryPlay() {
-      if (loadFailed || isPending) return;
-      if (!music.paused) return;
-      isPending = true;
-
-      music.play().then(function () {
-        localStorage.setItem(KEY_ENABLED, '1');
-        isPending = false;
-        updateLabel();
-        saveTime();
-      }).catch(function () {
-        isPending = false;
-        updateLabel();
-      });
-    }
-
-    function pauseMusic() {
-      saveTime();
-      music.pause();
-      updateLabel();
-    }
-
-    function toggleMusic() {
-      if (isPending) return;
-
-      if (loadFailed) {
-        music.load();
-        loadFailed = false;
-        updateLabel();
-        tryPlay();
-        return;
-      }
-
-      if (music.paused) {
-        tryPlay();
-      } else {
-        pauseMusic();
-      }
-    }
-
-    /* ── 事件监听 ── */
-
-    music.addEventListener('error', function () {
-      loadFailed = true;
-      isPending = false;
-      updateLabel();
-    });
-
-    music.addEventListener('canplay', function () {
-      if (loadFailed) {
-        loadFailed = false;
-        updateLabel();
-      }
-    });
-
-    music.addEventListener('play', function () {
-      updateLabel();
-      saveTime();
-    });
-
-    music.addEventListener('pause', function () {
-      updateLabel();
-      saveTime();
-    });
-
-    music.addEventListener('timeupdate', function () {
-      saveTime();
-    });
-
-    music.addEventListener('volumechange', function () {
-      localStorage.setItem(KEY_VOLUME, music.volume);
-    });
-
-    // 音乐按钮切换
-    toggle.addEventListener('click', function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleMusic();
-    });
-
-    /* ── 全局首次交互：点击页面任意位置激活音乐 ── */
 
     function showHint() {
-      if (!hint || userInteracted) return;
+      if (!hint || userPaused || !music.paused) return;
       hint.classList.add('visible');
       clearTimeout(hintTimer);
       hintTimer = setTimeout(function () {
@@ -307,49 +273,142 @@
       hint.classList.remove('visible');
     }
 
-    function onFirstInteraction() {
-      if (userInteracted) return;
-      userInteracted = true;
-      hideHint();
-      localStorage.setItem(KEY_ENABLED, '1');
-      tryPlay();
+    function removeUnlockListeners() {
+      if (!unlockRegistered) return;
+      unlockRegistered = false;
+      document.removeEventListener('pointerdown', onUnlockEvent, true);
+      document.removeEventListener('touchstart', onUnlockEvent, true);
+      document.removeEventListener('click', onUnlockEvent, true);
+      document.removeEventListener('keydown', onUnlockEvent, true);
     }
 
-    document.addEventListener('click', onFirstInteraction);
-    document.addEventListener('touchstart', onFirstInteraction);
+    function registerUnlockListeners() {
+      if (unlockRegistered || userPaused || !music.paused) return;
+      unlockRegistered = true;
+      document.addEventListener('pointerdown', onUnlockEvent, { capture: true, passive: true });
+      document.addEventListener('touchstart', onUnlockEvent, { capture: true, passive: true });
+      document.addEventListener('click', onUnlockEvent, { capture: true, passive: true });
+      document.addEventListener('keydown', onUnlockEvent, true);
+    }
 
-    // 页面加载后短暂显示播放提示
-    setTimeout(showHint, 800);
+    function onUnlockEvent(e) {
+      if (e && e.target && e.target.closest && e.target.closest('#music-toggle')) return;
+      unlockFromInteraction();
+    }
 
-    /* ── 页面加载时恢复 ── */
+    function attemptPlay(reason) {
+      if (isPending) {
+        if (reason !== 'manual' && reason !== 'unlock') return Promise.resolve(false);
+        if (userGesturePlayInFlight) return Promise.resolve(false);
+        userGesturePlayInFlight = true;
+      }
+      if (userPaused && reason !== 'manual') return Promise.resolve(false);
+      if (!music.paused) {
+        userGesturePlayInFlight = false;
+        removeUnlockListeners();
+        hideHint();
+        updateLabel();
+        return Promise.resolve(true);
+      }
 
-    updateLabel();
-
-    if (wasEnabled()) {
-      var savedTime = getSavedTime();
-
-      function seekToSaved() {
-        if (savedTime > 0 && music.duration > 0 && Math.abs(music.currentTime - savedTime) > 2) {
-          music.currentTime = savedTime;
+      restoreTimeWhenReady();
+      isPending = true;
+      return music.play().then(function () {
+        isPending = false;
+        loadFailed = false;
+        userPaused = false;
+        if (reason === 'manual' || reason === 'unlock') userGesturePlayInFlight = false;
+        removeStorage(KEY_USER_PAUSED);
+        removeUnlockListeners();
+        hideHint();
+        saveTime(true);
+        updateLabel();
+        return true;
+      }).catch(function () {
+        isPending = false;
+        if (reason === 'manual' || reason === 'unlock') userGesturePlayInFlight = false;
+        if (!userPaused) {
+          registerUnlockListeners();
+          showHint();
         }
-      }
-
-      if (music.readyState >= 1) {
-        seekToSaved();
-      } else {
-        music.addEventListener('loadedmetadata', function once() {
-          seekToSaved();
-          music.removeEventListener('loadedmetadata', once);
-        });
-      }
-
-      music.addEventListener('canplay', function once() {
-        seekToSaved();
-        music.removeEventListener('canplay', once);
+        updateLabel();
+        return false;
       });
-
-      tryPlay();
     }
+
+    function attemptAutoplay() {
+      if (autoplayAttempted || userPaused) return;
+      autoplayAttempted = true;
+      attemptPlay('autoplay');
+    }
+
+    function unlockFromInteraction() {
+      if (userPaused) return;
+      attemptPlay('unlock');
+    }
+
+    function pauseMusicByUser() {
+      userPaused = true;
+      writeStorage(KEY_USER_PAUSED, '1');
+      removeUnlockListeners();
+      hideHint();
+      saveTime(true);
+      music.pause();
+      updateLabel();
+    }
+
+    function toggleMusic() {
+      if (music.paused) {
+        userPaused = false;
+        removeStorage(KEY_USER_PAUSED);
+        attemptPlay('manual');
+      } else {
+        pauseMusicByUser();
+      }
+    }
+
+    music.addEventListener('error', function () {
+      loadFailed = true;
+      isPending = false;
+      updateLabel();
+    });
+
+    music.addEventListener('canplay', function () {
+      if (loadFailed) loadFailed = false;
+      updateLabel();
+    });
+
+    music.addEventListener('play', function () {
+      saveTime(true);
+      updateLabel();
+    });
+
+    music.addEventListener('pause', function () {
+      saveTime(true);
+      updateLabel();
+    });
+
+    music.addEventListener('timeupdate', function () {
+      saveTime(false);
+    });
+
+    music.addEventListener('volumechange', function () {
+      writeStorage(KEY_VOLUME, String(music.volume));
+    });
+
+    window.addEventListener('pagehide', function () {
+      saveTime(true);
+    });
+
+    toggle.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleMusic();
+    });
+
+    restoreTimeWhenReady();
+    updateLabel();
+    attemptAutoplay();
 
     /* ══════════════════════════════════════════════
        iframe 内容管理：导航拦截 + 样式注入 + URL 同步
@@ -426,7 +485,7 @@
       return page;
     }
 
-    // 注入样式到 iframe，隐藏其内部的音频元素和音乐按钮
+    // 注入样式到 iframe，隐藏历史页面内残留的音频元素
     function injectHideStyles() {
       try {
         var doc = frame.contentDocument;
@@ -436,7 +495,7 @@
         if (existing) return;
         var style = doc.createElement('style');
         style.id = 'shell-hide-style';
-        style.textContent = '#bg-music, #music-toggle { display: none !important; }';
+        style.textContent = '#bg-music { display: none !important; }';
         doc.head.appendChild(style);
       } catch (e) { /* 跨域或其他错误，忽略 */ }
     }
@@ -484,6 +543,18 @@
 
     // 监听来自 iframe 的导航消息
     window.addEventListener('message', function (e) {
+      if (e.data && e.data.type === 'music:user-interaction') {
+        unlockFromInteraction();
+        return;
+      }
+      if (e.data && e.data.type === 'music:toggle') {
+        toggleMusic();
+        return;
+      }
+      if (e.data && e.data.type === 'music:request-state') {
+        syncFrameMusicUI();
+        return;
+      }
       if (e.data && e.data.type === 'navigate' && e.data.page) {
         var page = e.data.page;
         // 确保是 pages/ 下的页面
@@ -498,6 +569,7 @@
     frame.addEventListener('load', function () {
       injectHideStyles();
       injectNavHandler();
+      syncFrameMusicUI();
       // 更新 iframe 内页面的标题到壳层
       try {
         var doc = frame.contentDocument;
@@ -531,8 +603,11 @@
     // 暴露 API
     window.LoveMusic = {
       toggle: toggleMusic,
+      play: function () { return attemptPlay('manual'); },
+      pause: pauseMusicByUser,
       isPlaying: function () { return !music.paused; },
-      getCurrentTime: function () { return music.currentTime; }
+      getCurrentTime: function () { return music.currentTime; },
+      getAudio: function () { return music; }
     };
 
   })();

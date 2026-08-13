@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>本地信件管理</title>
+  <style>
+    :root {
+      --bg: #fff5f7;
+      --surface: #ffffff;
+      --surface-2: #fef0f3;
+      --ink: #4a3f41;
+      --ink-2: #6d5e62;
+      --ink-3: #9e8f94;
+      --line: #f3d8e0;
+      --brand: #f47298;
+      --brand-ink: #ffffff;
+      --r-md: 8px;
+      --shadow-2: 0 8px 24px -8px rgba(74, 63, 65, 0.15);
+      --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-body);
+      line-height: 1.6;
+    }
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 32px auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);
+      gap: 20px;
+    }
+    section {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-2);
+      padding: 24px;
+    }
+    h1, h2 {
+      margin: 0 0 16px;
+      letter-spacing: 0;
+      line-height: 1.2;
+    }
+    h1 { color: var(--brand); font-size: 28px; }
+    h2 { font-size: 20px; }
+    label {
+      display: block;
+      margin: 14px 0 6px;
+      color: var(--ink-2);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--r-md);
+      background: var(--surface);
+      color: var(--ink);
+      font: inherit;
+      padding: 10px 12px;
+      outline: none;
+    }
+    textarea {
+      min-height: 260px;
+      resize: vertical;
+    }
+    input:focus, textarea:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 2px #fec6d6;
+    }
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      border: 0;
+      border-radius: var(--r-md);
+      background: var(--brand);
+      color: var(--brand-ink);
+      font: inherit;
+      font-weight: 700;
+      padding: 0 18px;
+      cursor: pointer;
+    }
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 18px;
+    }
+    #status {
+      color: var(--ink-3);
+      font-size: 13px;
+    }
+    .letter {
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: var(--r-md);
+      padding: 22px;
+    }
+    .letter p {
+      margin: 0 0 14px;
+      color: var(--ink-2);
+    }
+    .sign {
+      margin-top: 22px;
+      text-align: right;
+      color: var(--ink);
+      font-weight: 600;
+    }
+    @media (max-width: 860px) {
+      main { grid-template-columns: 1fr; margin-top: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section>
+      <h1>本地信件管理</h1>
+      <form id="letter-form">
+        <label for="greeting">称呼</label>
+        <input id="greeting" name="greeting" autocomplete="off">
+
+        <label for="paragraphs">正文</label>
+        <textarea id="paragraphs" name="paragraphs"></textarea>
+
+        <label for="signOff">落款</label>
+        <input id="signOff" name="signOff" autocomplete="off">
+
+        <label for="dateText">日期</label>
+        <input id="dateText" name="dateText" autocomplete="off">
+
+        <div class="actions">
+          <button type="submit">保存到静态数据</button>
+          <span id="status"></span>
+        </div>
+      </form>
+    </section>
+
+    <section>
+      <h2>本地预览</h2>
+      <div id="preview" class="letter"></div>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById('letter-form');
+    const statusEl = document.getElementById('status');
+    const preview = document.getElementById('preview');
+    const fields = {
+      greeting: document.getElementById('greeting'),
+      paragraphs: document.getElementById('paragraphs'),
+      signOff: document.getElementById('signOff'),
+      dateText: document.getElementById('dateText')
+    };
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function getLetterFromForm() {
+      return {
+        greeting: fields.greeting.value.trim(),
+        paragraphs: fields.paragraphs.value.split(/\n\s*\n/).map((item) => item.trim()).filter(Boolean),
+        signOff: fields.signOff.value.trim(),
+        dateText: fields.dateText.value.trim()
+      };
+    }
+
+    function renderPreview() {
+      const letter = getLetterFromForm();
+      preview.innerHTML =
+        '<p style="color:var(--ink);font-weight:700;">' + escapeHtml(letter.greeting) + '</p>' +
+        letter.paragraphs.map((item) => '<p>' + escapeHtml(item) + '</p>').join('') +
+        '<div class="sign">' +
+          '<div>' + escapeHtml(letter.signOff) + '</div>' +
+          '<div style="color:var(--ink-3);font-weight:500;">' + escapeHtml(letter.dateText) + '</div>' +
+        '</div>';
+    }
+
+    async function loadLetter() {
+      const response = await fetch('/api/letter', { cache: 'no-store' });
+      const letter = await response.json();
+      fields.greeting.value = letter.greeting || '';
+      fields.paragraphs.value = (letter.paragraphs || []).join('\n\n');
+      fields.signOff.value = letter.signOff || '';
+      fields.dateText.value = letter.dateText || '';
+      renderPreview();
+    }
+
+    Object.values(fields).forEach((field) => field.addEventListener('input', renderPreview));
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      statusEl.textContent = '保存中...';
+      const response = await fetch('/api/letter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(getLetterFromForm())
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        statusEl.textContent = error.error || '保存失败';
+        return;
+      }
+      statusEl.textContent = '已保存';
+      setTimeout(() => { statusEl.textContent = ''; }, 1800);
+    });
+
+    loadLetter().catch((error) => {
+      statusEl.textContent = error.message || '读取失败';
+    });
+  </script>
+</body>
+</html>

@@ -5,16 +5,66 @@
       "src": "/robots\\.txt",
       "dest": "/robots.txt",
       "headers": {
+        "Cache-Control": "no-store, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "src": "/pages/(admin-login|admin-dashboard)\\.html",
+      "dest": "/pages/closed.html",
+      "headers": {
         "Cache-Control": "no-store, max-age=0, must-revalidate",
         "X-Robots-Tag": "noindex, nofollow"
       }
     },
     {
-      "src": "/(.*)",
-      "dest": "/icp-review.html",
+      "src": "/pages/leaving\\.html",
+      "dest": "/pages/leaving.html",
       "headers": {
         "Cache-Control": "no-store, max-age=0, must-revalidate",
         "X-Robots-Tag": "noindex, nofollow"
+      }
+    },
+    {
+      "src": "/(admin-login|admin-dashboard|login|admin|upload)(.*)",
+      "dest": "/pages/closed.html",
+      "headers": {
+        "Cache-Control": "no-store, max-age=0, must-revalidate",
+        "X-Robots-Tag": "noindex, nofollow"
+      }
+    },
+    {
+      "src": "/$",
+      "dest": "/app.html",
+      "headers": {
+        "Cache-Control": "no-store, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "src": "/app\\.html",
+      "dest": "/app.html",
+      "headers": {
+        "Cache-Control": "no-store, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "src": "/pages/(.*)\\.html",
+      "dest": "/pages/$1.html",
+      "headers": {
+        "Cache-Control": "no-store, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/app.html",
+      "headers": {
+        "Cache-Control": "no-store, max-age=0, must-revalidate"
       }
     }
   ]

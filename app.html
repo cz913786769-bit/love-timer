@@ -356,16 +356,34 @@
        ══════════════════════════════════════════════ */
 
     var BASE_PAGE = 'pages/home-20260808h.html';
+    var ALLOWED_PAGES = {
+      'pages/home-20260808h.html': true,
+      'pages/index.html': true,
+      'pages/love-album.html': true,
+      'pages/love-list.html': true,
+      'pages/little-things.html': true,
+      'pages/about-us.html': true,
+      'pages/leaving.html': true
+    };
     var currentPage = BASE_PAGE;
+
+    function normalizeAllowedPage(page) {
+      if (!page) return BASE_PAGE;
+      if (page.indexOf('/') === 0) page = page.slice(1);
+      if (page.indexOf('pages/') !== 0) page = 'pages/' + page;
+      if (!/\.html(?:$|\?)/.test(page)) page += '.html';
+      var clean = page.split('?')[0];
+      return ALLOWED_PAGES[clean] ? clean : BASE_PAGE;
+    }
 
     // 从 URL 读取初始页面
     function getPageFromURL() {
       var params = new URLSearchParams(window.location.search);
       var p = params.get('page');
-      if (p) return 'pages/' + p;
+      if (p) return normalizeAllowedPage('pages/' + p);
       var hash = window.location.hash;
       if (hash && hash.startsWith('#/')) {
-        return 'pages/' + hash.slice(2);
+        return normalizeAllowedPage('pages/' + hash.slice(2));
       }
       return BASE_PAGE;
     }
@@ -390,6 +408,7 @@
     }
 
     function navigateTo(page) {
+      page = normalizeAllowedPage(page);
       if (page === currentPage) return;
       currentPage = page;
       updateURL(page);

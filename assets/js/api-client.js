@@ -1,40 +1,41 @@
-/* 恋爱小站 - API 客户端（v2.3 生产默认 API + XHR 兼容）
- * 加载此脚本后，LoveData 和 LoveAdmin 将使用后端 API
- * 认证方式：HttpOnly Cookie（前端无需管理 token）
- * 默认进入 API 模式；?local=1 可紧急回退到 localStorage
- * 正式后端地址：https://api.xiaoxingxing.love
+/* 恋爱小站 - ICP Safe 静态数据客户端（v20260813-icp1）
+ * ICP_SAFE_MODE = true：生产展示只读取 assets/data/icp-safe-data.json。
  */
 (function () {
   'use strict';
 
-  /* ── 全局媒体 URL 解析（在所有模式下可用） ── */
-  window.resolveMediaUrl = function (url) {
-    if (!url) return '';
-    // 已经是完整 URL 或 data URL，原样返回
-    if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0 || url.indexOf('data:') === 0) {
-      return url;
+  var ICP_SAFE_MODE = true;
+  var SAFE_DATA_URL = '../assets/data/icp-safe-data.json?v=20260813-icp1';
+
+  window.ICP_SAFE_MODE = ICP_SAFE_MODE;
+
+  function injectSafeModeStyles() {
+    if (document.getElementById('icp-safe-mode-styles')) return;
+    var style = document.createElement('style');
+    style.id = 'icp-safe-mode-styles';
+    style.textContent = [
+      '.love-admin-only,.love-admin-form,.love-admin-actions,#love-admin-bar,#love-admin-login-fab,#footer-admin{display:none!important;}',
+      '.wishlist-check{pointer-events:none;}'
+    ].join('');
+    document.head.appendChild(style);
+  }
+
+  var cache = {
+    loaded: false,
+    loading: null,
+    data: {
+      site: {},
+      cover: '',
+      avatars: {},
+      album: [],
+      timeline: [],
+      wishlist: [],
+      letter: {}
     }
-    // 服务器上传文件（/uploads/...）→ 拼接到 API 服务器
-    if (url.indexOf('/uploads/') === 0) {
-      return 'https://api.xiaoxingxing.love' + url;
-    }
-    // 其他相对路径（前端静态资源如 ../assets/...）保持原样
-    return url;
   };
 
-  function getQueryParam(name) {
-    var query = window.location.search || '';
-    if (query.charAt(0) === '?') query = query.slice(1);
-    if (!query) return null;
-    var parts = query.split('&');
-    for (var i = 0; i < parts.length; i++) {
-      var pair = parts[i].split('=');
-      var key = decodeURIComponent((pair[0] || '').replace(/\+/g, ' '));
-      if (key === name) {
-        return decodeURIComponent((pair.slice(1).join('=') || '').replace(/\+/g, ' '));
-      }
-    }
-    return null;
+  function clone(value) {
+    return JSON.parse(JSON.stringify(value === undefined ? null : value));
   }
 
   function assign(target) {
@@ -48,483 +49,103 @@
     return target;
   }
 
-  /* ── 全局：保留 ?local=1 的重定向辅助函数 ── */
-  window.preserveApiRedirect = function (targetUrl) {
-    if (getQueryParam('local') === '1') {
-      var sep = targetUrl.indexOf('?') >= 0 ? '&' : '?';
-      return targetUrl + sep + 'local=1';
+  function normalizePath(url) {
+    if (!url) return '';
+    if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0 || url.indexOf('data:') === 0) {
+      return url;
     }
+    if (url.indexOf('/assets/') === 0) return '..' + url;
+    if (url.indexOf('/uploads/') === 0) return url.replace('/uploads/', '../assets/icp-media/');
+    return url;
+  }
+
+  window.resolveMediaUrl = function (url) {
+    return normalizePath(url);
+  };
+
+  window.preserveApiRedirect = function (targetUrl) {
     return targetUrl;
   };
 
-  /* ── 清理 f7cbfdb 残留的 API 模式标记（仅移除 love-use-api，不影响其他数据） ── */
-  try { localStorage.removeItem('love-use-api'); } catch (e) {}
-
-  /* ── 检测是否启用 API 模式 ── */
-  var API_ENABLED = (function () {
-    // 默认启用 API 模式
-    // 仅 ?local=1 时回退到旧 localStorage 模式（紧急调试）
-    if (getQueryParam('local') === '1') {
-      return false;
-    }
-    return true;
-  })();
-
-  if (!API_ENABLED) {
-    console.log('[API Client] 紧急 local 模式，使用 localStorage ');
-    console.log('[API Client] 提示：移除 ?local=1 即可恢复正常 API 模式');
-
-    // localStorage 模式：提供 ready() 兼容实现（直接 resolve）
-    if (window.LoveData) {
-      window.LoveData.ready = function () { return Promise.resolve(); };
-    }
-    if (window.LoveAdmin) {
-      window.LoveAdmin.ready = function () { return Promise.resolve(); };
-    }
-    return;
-  }
-
-  console.log('[API Client] API 模式已启用（Cookie Session）');
-
-  /* ── 配置 ── */
-  var API_BASE = (function () {
-    // 正式后端 API 地址
-    return 'https://api.xiaoxingxing.love';
-  })();
-
-  var POLL_INTERVAL = 5000; // 5 秒轮询
-  var pollTimer = null;
-  var lastHash = null;
-  var updateCallbacks = [];
-  var sessionInfo = null; // { loggedIn, side, nickname, avatar }
-
-  /* ── 工具函数 ── */
-
-  function clone(obj) {
-    return JSON.parse(JSON.stringify(obj));
-  }
-
-  function generateId(prefix) {
-    return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
-  }
-
-  /* ── HTTP 请求封装（Cookie 认证，credentials: 'include'） ── */
-
-  function withCacheBuster(path) {
-    var sep = path.indexOf('?') >= 0 ? '&' : '?';
-    return path + sep + '_=' + Date.now();
-  }
-
-  function parseJson(text) {
-    if (!text) return {};
-    try {
-      return JSON.parse(text);
-    } catch (err) {
-      throw new Error('服务器返回不是 JSON');
-    }
-  }
-
-  function requestJson(method, path, data, isUpload) {
-    var requestPath = method === 'GET' ? withCacheBuster(path) : path;
-    var url = API_BASE + requestPath;
-
-    if (window.fetch) {
-      var opts = {
-        method: method,
-        credentials: 'include', // 关键：携带 HttpOnly Cookie
-        cache: 'no-store',
-        headers: { 'Accept': 'application/json' }
-      };
-      if (isUpload) {
-        opts.body = data;
-      } else if (data) {
-        opts.headers['Content-Type'] = 'application/json';
-        opts.body = JSON.stringify(data);
+  function normalizeAvatars(avatars) {
+    avatars = avatars || {};
+    return {
+      left: {
+        nickname: (avatars.left && (avatars.left.nickname || avatars.left.name)) || '嘉嘉小星星',
+        name: (avatars.left && (avatars.left.name || avatars.left.nickname)) || '嘉嘉小星星',
+        avatar: normalizePath(avatars.left && (avatars.left.avatar || avatars.left.dataUrl)),
+        dataUrl: normalizePath(avatars.left && (avatars.left.dataUrl || avatars.left.avatar))
+      },
+      right: {
+        nickname: (avatars.right && (avatars.right.nickname || avatars.right.name)) || '陈卓卓',
+        name: (avatars.right && (avatars.right.name || avatars.right.nickname)) || '陈卓卓',
+        avatar: normalizePath(avatars.right && (avatars.right.avatar || avatars.right.dataUrl)),
+        dataUrl: normalizePath(avatars.right && (avatars.right.dataUrl || avatars.right.avatar))
       }
-      return window.fetch(url, opts).then(function (r) {
-        if (!r.ok) throw new Error((isUpload ? '上传失败: ' : '请求失败: ') + r.status);
-        return r.json();
+    };
+  }
+
+  function normalizeAlbum(album) {
+    return (Array.isArray(album) ? album : []).map(function (group) {
+      var normalized = assign({}, group);
+      normalized.photos = (Array.isArray(group.photos) ? group.photos : []).map(function (photo) {
+        return assign({}, photo, { src: normalizePath(photo.src) });
       });
-    }
-
-    return new Promise(function (resolve, reject) {
-      if (!window.XMLHttpRequest) {
-        reject(new Error('当前浏览器不支持网络请求'));
-        return;
-      }
-
-      var xhr = new XMLHttpRequest();
-      xhr.open(method, url, true);
-      xhr.withCredentials = true;
-      xhr.timeout = 15000;
-      xhr.setRequestHeader('Accept', 'application/json');
-      if (!isUpload && data) {
-        xhr.setRequestHeader('Content-Type', 'application/json');
-      }
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState !== 4) return;
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            resolve(parseJson(xhr.responseText));
-          } catch (err) {
-            reject(err);
-          }
-          return;
-        }
-        reject(new Error((isUpload ? '上传失败: ' : '请求失败: ') + xhr.status));
-      };
-      xhr.onerror = function () { reject(new Error('网络请求失败')); };
-      xhr.ontimeout = function () { reject(new Error('网络请求超时')); };
-      xhr.send(isUpload ? data : (data ? JSON.stringify(data) : null));
+      return normalized;
     });
   }
 
-  function apiGet(path) {
-    return requestJson('GET', path);
-  }
-
-  function apiPost(path, data) {
-    return requestJson('POST', path, data);
-  }
-
-  function apiPut(path, data) {
-    return requestJson('PUT', path, data);
-  }
-
-  function apiDelete(path, data) {
-    return requestJson('DELETE', path, data);
-  }
-
-  function apiUpload(path, formData) {
-    return requestJson('POST', path, formData, true);
-  }
-
-  /* ── Session 管理 ── */
-
-  function refreshSession() {
-    return apiGet('/api/session').then(function (data) {
-      sessionInfo = data;
-      return data;
-    }).catch(function () {
-      sessionInfo = { loggedIn: false };
-      return sessionInfo;
+  function normalizeTimeline(timeline) {
+    return (Array.isArray(timeline) ? timeline : []).map(function (item) {
+      return assign({}, item, { cover: normalizePath(item.cover) });
     });
   }
 
-  /* ── 缓存 ── */
-  var cache = {
-    messages: null,
-    album: null,
-    wishlist: null,
-    timeline: null,
-    site: null,
-    cover: null,
-    letter: null,
-    accounts: null
-  };
+  function normalizeSafeData(raw) {
+    raw = raw || {};
+    return {
+      site: raw.site || {},
+      cover: normalizePath(raw.cover || ''),
+      avatars: normalizeAvatars(raw.avatars),
+      album: normalizeAlbum(raw.album),
+      timeline: normalizeTimeline(raw.timeline),
+      wishlist: Array.isArray(raw.wishlist) ? raw.wishlist : [],
+      letter: raw.letter || {}
+    };
+  }
 
-  var cacheLoaded = false;
-  var cacheLoading = false;
-  var cacheLoadPromise = null;
+  function loadSafeData() {
+    if (cache.loaded) return Promise.resolve();
+    if (cache.loading) return cache.loading;
 
-  function normalizeMessage(msg) {
-    msg = msg || {};
-    return assign({}, msg, {
-      createdAt: msg.createdAt || msg.created_at || ''
+    cache.loading = window.fetch(SAFE_DATA_URL, {
+      method: 'GET',
+      cache: 'no-store',
+      credentials: 'same-origin',
+      headers: { 'Accept': 'application/json' }
+    }).then(function (response) {
+      if (!response.ok) throw new Error('静态数据加载失败: ' + response.status);
+      return response.json();
+    }).then(function (json) {
+      cache.data = normalizeSafeData(json);
+      cache.loaded = true;
+      return cache.data;
+    }).catch(function (error) {
+      cache.loading = null;
+      console.error('[ICP Safe] 静态数据加载失败:', error);
+      throw error;
     });
+
+    return cache.loading;
   }
 
-  function normalizeAlbumGroup(group) {
-    group = group || {};
-    return assign({}, group, {
-      createdBy: group.createdBy || group.created_by || null,
-      createdAt: group.createdAt || group.created_at || '',
-      photos: Array.isArray(group.photos) ? group.photos : []
-    });
+  function rejectReadonly() {
+    return Promise.reject(new Error('页面暂未开放'));
   }
 
-  function normalizeTimelineItem(item) {
-    item = item || {};
-    return assign({}, item, {
-      createdBy: item.createdBy || item.created_by || null,
-      createdAt: item.createdAt || item.created_at || ''
-    });
+  function noopReadonly() {
+    return false;
   }
-
-  function normalizeSite(site) {
-    var normalized = {};
-    Object.keys(site || {}).forEach(function (key) {
-      var cleanKey = key.indexOf('site:') === 0 ? key.slice(5) : key;
-      normalized[cleanKey] = site[key];
-    });
-    return normalized;
-  }
-
-  function normalizeImportPayload(json) {
-    var payload = json && typeof json === 'object' && json.data && typeof json.data === 'object'
-      ? json.data
-      : json;
-    if (!payload || typeof payload !== 'object' || !Object.keys(payload).length) {
-      throw new Error('备份文件为空，没有可恢复的数据');
-    }
-    var knownKeys = ['cover', 'site', 'messages', 'album', 'wishlist', 'timeline', 'letter', 'avatars', 'accounts'];
-    var hasKnownData = knownKeys.some(function (key) { return payload[key] !== undefined; });
-    if (!hasKnownData) {
-      throw new Error('备份文件格式不正确');
-    }
-    return payload;
-  }
-
-  function loadAllCache() {
-    if (cacheLoaded) return Promise.resolve();
-    if (cacheLoading) return cacheLoadPromise;
-    cacheLoading = true;
-    cacheLoadPromise = apiGet('/api/data').then(function (data) {
-      cache.messages = (data.messages || []).map(normalizeMessage);
-      cache.album = (data.album || []).map(normalizeAlbumGroup);
-      cache.wishlist = data.wishlist || [];
-      cache.timeline = (data.timeline || []).map(normalizeTimelineItem);
-      cache.site = normalizeSite(data.site || {});
-      cache.cover = data.cover || '';
-      cache.letter = data.letter || {};
-      cache.accounts = data.accounts || { left: {}, right: {} };
-      cacheLoaded = true;
-      cacheLoading = false;
-    }).catch(function (err) {
-      cacheLoading = false;
-      console.error('[API Client] 加载数据失败:', err);
-      throw err;
-    });
-    return cacheLoadPromise;
-  }
-
-  function invalidateCache() {
-    cacheLoaded = false;
-    cacheLoading = false;
-    cacheLoadPromise = null;
-  }
-
-  /* ── 轮询更新（含 Visibility API 优化） ── */
-
-  function startPolling() {
-    if (pollTimer) return;
-    pollTimer = setInterval(checkUpdates, POLL_INTERVAL);
-    console.log('[API Client] 实时更新轮询已启动（每 ' + (POLL_INTERVAL / 1000) + ' 秒）');
-
-    // Visible API：页面隐藏时暂停轮询，节省资源
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) {
-        stopPolling();
-        console.log('[API Client] 页面隐藏，暂停轮询');
-      } else {
-        startPolling();
-        console.log('[API Client] 页面可见，恢复轮询');
-        // 恢复后立即检查一次
-        checkUpdates();
-      }
-    });
-  }
-
-  function stopPolling() {
-    if (pollTimer) {
-      clearInterval(pollTimer);
-      pollTimer = null;
-    }
-  }
-
-  function checkUpdates() {
-    apiGet('/api/check-updates').then(function (info) {
-      if (lastHash && lastHash !== info.hash) {
-        console.log('[API Client] 检测到数据更新，刷新缓存');
-        invalidateCache();
-        loadAllCache().then(function () {
-          lastHash = info.hash;
-          notifyCallbacks();
-        });
-      } else if (!lastHash) {
-        lastHash = info.hash;
-      }
-    }).catch(function () {
-      // 静默失败
-    });
-  }
-
-  function onUpdate(callback) {
-    updateCallbacks.push(callback);
-  }
-
-  function notifyCallbacks() {
-    updateCallbacks.forEach(function (cb) {
-      try { cb(); } catch (e) {}
-    });
-  }
-
-  /* ═══════════════════════════════════════════════════════════════
-     LoveAdmin API 替换
-     ═══════════════════════════════════════════════════════════════ */
-
-  /* ── 初始化和就绪 Promise ── */
-  var dataReadyPromise = null;
-  var adminReadyPromise = null;
-
-  function ensureDataReady() {
-    if (!dataReadyPromise) {
-      dataReadyPromise = loadAllCache().then(function () {
-        console.log('[API Client] LoveData.ready() 已完成');
-      }).catch(function (err) {
-        // 重置 Promise 以便后续重试
-        dataReadyPromise = null;
-        console.error('[API Client] LoveData.ready() 失败:', err);
-        throw err;
-      });
-    }
-    return dataReadyPromise;
-  }
-
-  function ensureAdminReady() {
-    if (!adminReadyPromise) {
-      adminReadyPromise = Promise.all([
-        refreshSession(),
-        loadAllCache()
-      ]).then(function () {
-        console.log('[API Client] LoveAdmin.ready() 已完成');
-      }).catch(function (err) {
-        // 重置 Promise 以便后续重试
-        adminReadyPromise = null;
-        console.error('[API Client] LoveAdmin.ready() 失败:', err);
-        throw err;
-      });
-    }
-    return adminReadyPromise;
-  }
-
-  var LoveAdmin_API = {
-    getAccounts: function () {
-      if (cache.accounts) {
-        return clone(cache.accounts);
-      }
-      return { left: { nickname: '左', password: '', avatar: '' }, right: { nickname: '右', password: '', avatar: '' } };
-    },
-
-    saveAccounts: function (accounts) {
-      if (accounts.left) {
-        apiPut('/api/accounts/left', { nickname: accounts.left.nickname, avatar: accounts.left.avatar }).catch(function () {});
-      }
-      if (accounts.right) {
-        apiPut('/api/accounts/right', { nickname: accounts.right.nickname, avatar: accounts.right.avatar }).catch(function () {});
-      }
-    },
-
-    getAccount: function (side) {
-      var accounts = this.getAccounts();
-      return accounts[side] || { nickname: '', password: '', avatar: '' };
-    },
-
-    updateAccount: function (side, data) {
-      apiPut('/api/accounts/' + side, data).then(function (acc) {
-        if (!cache.accounts) cache.accounts = { left: {}, right: {} };
-        cache.accounts[side] = cache.accounts[side] || {};
-        cache.accounts[side].nickname = acc.nickname;
-        cache.accounts[side].avatar = acc.avatar;
-      }).catch(function (err) {
-        console.error('[API Client] 更新账户失败:', err);
-      });
-      return this.getAccount(side);
-    },
-
-    verifyPassword: function (side, password) {
-      return false; // 同步返回 false，异步验证通过 loginAsync
-    },
-
-    isLoggedIn: function () {
-      return sessionInfo && sessionInfo.loggedIn;
-    },
-
-    getCurrentIdentity: function () {
-      return (sessionInfo && sessionInfo.side) || null;
-    },
-
-    getCurrentAccount: function () {
-      var side = (sessionInfo && sessionInfo.side) || null;
-      if (!side) return null;
-      var accounts = this.getAccounts();
-      return accounts[side] || null;
-    },
-
-    login: function (side, password) {
-      return false; // 同步返回 false，异步通过 loginAsync
-    },
-
-    loginAsync: function (side, password) {
-      return apiPost('/api/login', { side: side, password: password }).then(function (result) {
-        if (result.success) {
-          sessionInfo = { loggedIn: true, side: result.side, nickname: result.nickname, avatar: result.avatar };
-          invalidateCache();
-          return true;
-        }
-        return false;
-      }).catch(function () {
-        return false;
-      });
-    },
-
-    logout: function () {
-      apiPost('/api/logout', {}).catch(function () {});
-      sessionInfo = { loggedIn: false };
-      invalidateCache();
-    },
-
-    switchAccount: function (side) {
-      // 在 Cookie 模式下不支持切换，需重新登录
-      return false;
-    },
-
-    ensureLoggedIn: function (callback) {
-      if (this.isLoggedIn()) {
-        if (callback) callback();
-        return;
-      }
-      this.showLoginModal(callback);
-    },
-
-    showLoginModal: function (onSuccess) {
-      if (window._originalLoveAdmin && window._originalLoveAdmin.showLoginModal) {
-        window._originalLoveAdmin.showLoginModal(onSuccess);
-      }
-    },
-
-    hideLoginModal: function () {
-      if (window._originalLoveAdmin && window._originalLoveAdmin.hideLoginModal) {
-        window._originalLoveAdmin.hideLoginModal();
-      }
-    },
-
-    toast: function (message) {
-      if (window._originalLoveAdmin && window._originalLoveAdmin.toast) {
-        window._originalLoveAdmin.toast(message);
-      }
-    },
-
-    refreshAdminUI: function () {
-      if (window._originalLoveAdmin && window._originalLoveAdmin.refreshAdminUI) {
-        window._originalLoveAdmin.refreshAdminUI();
-      }
-    },
-
-    initAdminUI: function () {
-      if (window._originalLoveAdmin && window._originalLoveAdmin.initAdminUI) {
-        window._originalLoveAdmin.initAdminUI();
-      }
-    },
-
-    ready: function () {
-      return ensureAdminReady();
-    }
-  };
-
-  /* ═══════════════════════════════════════════════════════════════
-     LoveData API 替换
-     ═══════════════════════════════════════════════════════════════ */
 
   function readLocalImage(file, callback) {
     if (!file || !file.type.match(/^image\//)) {
@@ -537,45 +158,49 @@
     reader.readAsDataURL(file);
   }
 
-  var LoveData_API = {
+  var LoveAdmin_Static = {
+    ready: loadSafeData,
+    getAccounts: function () {
+      return clone(cache.data.avatars);
+    },
+    getAccount: function (side) {
+      var accounts = this.getAccounts();
+      return accounts[side] || { nickname: '', name: '', avatar: '', dataUrl: '' };
+    },
+    saveAccounts: noopReadonly,
+    updateAccount: function (side) {
+      return this.getAccount(side);
+    },
+    verifyPassword: noopReadonly,
+    isLoggedIn: noopReadonly,
+    getCurrentIdentity: function () { return null; },
+    getCurrentAccount: function () { return null; },
+    login: noopReadonly,
+    loginAsync: function () { return Promise.resolve(false); },
+    logout: noopReadonly,
+    switchAccount: noopReadonly,
+    ensureLoggedIn: noopReadonly,
+    showLoginModal: noopReadonly,
+    hideLoginModal: noopReadonly,
+    initAdminUI: noopReadonly,
+    refreshAdminUI: noopReadonly,
+    toast: function () {}
+  };
+
+  var LoveData_Static = {
     KEYS: {},
-    useApi: true,
-
-    // 头像
-    getAvatars: function () { return LoveAdmin_API.getAccounts(); },
-    setAvatars: function (avatars) { LoveAdmin_API.saveAccounts(avatars); },
-    setAvatar: function (side, dataUrl) {
-      LoveAdmin_API.updateAccount(side, { avatar: dataUrl });
-      return LoveAdmin_API.getAccounts();
-    },
-    getAvatar: function (side) { return LoveAdmin_API.getAccount(side); },
-    getCurrentIdentity: function () { return LoveAdmin_API.getCurrentIdentity(); },
-
-    // 封面
-    getCover: function () {
-      if (cache.cover !== null && cache.cover !== undefined) return cache.cover;
-      loadAllCache();
-      return '';
-    },
-    setCover: function (src) {
-      cache.cover = src;
-      apiPost('/api/cover', { url: src }).catch(function (err) {
-        console.error('[API Client] 保存封面失败:', err);
-      });
-    },
-
-    // 网站设置
-    getSite: function () {
-      if (cache.site) return clone(cache.site);
-      loadAllCache();
-      return {};
-    },
-    setSite: function (site) {
-      cache.site = site;
-      apiPost('/api/site', site).catch(function (err) {
-        console.error('[API Client] 保存设置失败:', err);
-      });
-    },
+    useApi: false,
+    icpSafeMode: true,
+    ready: loadSafeData,
+    getAvatars: function () { return LoveAdmin_Static.getAccounts(); },
+    setAvatars: noopReadonly,
+    setAvatar: function (side) { return LoveAdmin_Static.getAccounts(); },
+    getAvatar: function (side) { return LoveAdmin_Static.getAccount(side); },
+    getCurrentIdentity: function () { return null; },
+    getCover: function () { return cache.data.cover || ''; },
+    setCover: noopReadonly,
+    getSite: function () { return clone(cache.data.site); },
+    setSite: noopReadonly,
     applySiteText: function (root) {
       root = root || document;
       var site = this.getSite();
@@ -584,285 +209,50 @@
         if (site[key] !== undefined) el.textContent = site[key];
       });
     },
-
     readLocalImage: readLocalImage,
-
-    // 留言
-    getMessages: function () {
-      if (cache.messages) return clone(cache.messages);
-      loadAllCache();
-      return [];
+    getMessages: function () { return []; },
+    addMessage: rejectReadonly,
+    deleteMessage: rejectReadonly,
+    getAlbum: function () { return clone(cache.data.album); },
+    saveAlbum: noopReadonly,
+    addAlbumGroup: rejectReadonly,
+    updateAlbumGroup: function () { return this.getAlbum(); },
+    deleteAlbumGroup: rejectReadonly,
+    addPhoto: rejectReadonly,
+    uploadPhotoAsFile: rejectReadonly,
+    deletePhoto: rejectReadonly,
+    getWishlist: function () { return clone(cache.data.wishlist); },
+    saveWishlist: noopReadonly,
+    addWishlist: rejectReadonly,
+    updateWishlist: rejectReadonly,
+    deleteWishlist: rejectReadonly,
+    getTimeline: function () { return clone(cache.data.timeline); },
+    saveTimeline: noopReadonly,
+    addTimeline: rejectReadonly,
+    updateTimeline: function () { return this.getTimeline(); },
+    deleteTimeline: rejectReadonly,
+    getLetter: function () { return clone(cache.data.letter); },
+    saveLetter: noopReadonly,
+    resetAll: rejectReadonly,
+    exportAllData: function () { return clone(cache.data); },
+    importAllData: rejectReadonly,
+    uploadCover: rejectReadonly,
+    uploadAvatar: rejectReadonly,
+    uploadFile: rejectReadonly,
+    generateId: function (prefix) {
+      return (prefix || 'id') + '-icp-safe';
     },
-    addMessage: function (nickname, text) {
-      var self = this;
-      return apiPost('/api/messages', { nickname: nickname, text: text }).then(function (msg) {
-        if (!cache.messages) cache.messages = [];
-        cache.messages.unshift(msg);
-        invalidateCache();
-        return clone(cache.messages);
-      }).catch(function (err) {
-        console.error('[API Client] 添加留言失败:', err);
-        throw err;
-      });
-    },
-    deleteMessage: function (id) {
-      return apiDelete('/api/messages/' + id).then(function () {
-        if (cache.messages) {
-          cache.messages = cache.messages.filter(function (m) { return m.id !== id; });
-        }
-        invalidateCache();
-      });
-    },
-
-    // 相册
-    getAlbum: function () {
-      if (cache.album) return clone(cache.album);
-      loadAllCache();
-      return [];
-    },
-    saveAlbum: function (album) {
-      cache.album = album;
-    },
-    addAlbumGroup: function (group) {
-      return apiPost('/api/album/group', { date: group.date, title: group.title }).then(function (newGroup) {
-        if (!cache.album) cache.album = [];
-        cache.album.push(newGroup);
-        invalidateCache();
-        return clone(cache.album);
-      });
-    },
-    updateAlbumGroup: function (id, updates) {
-      if (cache.album) {
-        var idx = cache.album.findIndex(function (g) { return g.id === id; });
-        if (idx >= 0) cache.album[idx] = assign({}, cache.album[idx], updates);
-      }
-      invalidateCache();
-      return cache.album ? clone(cache.album) : [];
-    },
-    deleteAlbumGroup: function (id) {
-      return apiDelete('/api/album/group/' + id).then(function () {
-        if (cache.album) {
-          cache.album = cache.album.filter(function (g) { return g.id !== id; });
-        }
-        invalidateCache();
-      });
-    },
-    addPhoto: function (groupId, photo) {
-      var self = this;
-      if (photo.src && photo.src.indexOf('data:') === 0) {
-        return this.uploadPhotoAsFile(photo.src, groupId, photo.caption);
-      }
-      return apiPost('/api/album/photo', { groupId: groupId, caption: photo.caption, src: photo.src }).then(function (newPhoto) {
-        if (cache.album) {
-          var group = cache.album.find(function (g) { return g.id === groupId; });
-          if (group) group.photos.push(newPhoto);
-        }
-        invalidateCache();
-        return clone(cache.album);
-      });
-    },
-    uploadPhotoAsFile: function (dataUrl, groupId, caption) {
-      var self = this;
-      return new Promise(function (resolve, reject) {
-        var blob = dataURLtoBlob(dataUrl);
-        var formData = new FormData();
-        formData.append('photo', blob, 'photo.jpg');
-        formData.append('groupId', groupId);
-        formData.append('caption', caption || '');
-        apiUpload('/api/album/photo', formData).then(function (newPhoto) {
-          if (cache.album) {
-            var group = cache.album.find(function (g) { return g.id === groupId; });
-            if (group) group.photos.push(newPhoto);
-          }
-          invalidateCache();
-          resolve(clone(cache.album));
-        }).catch(reject);
-      });
-    },
-    deletePhoto: function (groupId, photoSrc) {
-      return apiDelete('/api/album/photo', { groupId: groupId, photoSrc: photoSrc }).then(function () {
-        if (cache.album) {
-          var group = cache.album.find(function (g) { return g.id === groupId; });
-          if (group) {
-            group.photos = group.photos.filter(function (p) { return p.src !== photoSrc; });
-          }
-        }
-        invalidateCache();
-      });
-    },
-
-    // 清单
-    getWishlist: function () {
-      if (cache.wishlist) return clone(cache.wishlist);
-      loadAllCache();
-      return [];
-    },
-    saveWishlist: function (list) { cache.wishlist = list; },
-    addWishlist: function (text) {
-      return apiPost('/api/wishlist', { text: text }).then(function (item) {
-        if (!cache.wishlist) cache.wishlist = [];
-        cache.wishlist.push(item);
-        invalidateCache();
-        return clone(cache.wishlist);
-      });
-    },
-    updateWishlist: function (index, updates) {
-      return apiPut('/api/wishlist/' + index, updates).then(function () {
-        if (cache.wishlist && cache.wishlist[index]) {
-          if (updates.text !== undefined) cache.wishlist[index].text = updates.text;
-          if (updates.done !== undefined) cache.wishlist[index].done = updates.done;
-        }
-        invalidateCache();
-        return clone(cache.wishlist);
-      });
-    },
-    deleteWishlist: function (index) {
-      return apiDelete('/api/wishlist/' + index).then(function () {
-        if (cache.wishlist) cache.wishlist.splice(index, 1);
-        invalidateCache();
-      });
-    },
-
-    // 点滴
-    getTimeline: function () {
-      if (cache.timeline) return clone(cache.timeline);
-      loadAllCache();
-      return [];
-    },
-    saveTimeline: function (list) { cache.timeline = list; },
-    addTimeline: function (item) {
-      return apiPost('/api/timeline', item).then(function (newItem) {
-        if (!cache.timeline) cache.timeline = [];
-        cache.timeline.push(newItem);
-        invalidateCache();
-        return clone(cache.timeline);
-      });
-    },
-    updateTimeline: function (id, updates) {
-      if (cache.timeline) {
-        var idx = cache.timeline.findIndex(function (i) { return i.id === id; });
-        if (idx >= 0) cache.timeline[idx] = assign({}, cache.timeline[idx], updates);
-      }
-      invalidateCache();
-      return cache.timeline ? clone(cache.timeline) : [];
-    },
-    deleteTimeline: function (id) {
-      return apiDelete('/api/timeline/' + id).then(function () {
-        if (cache.timeline) {
-          cache.timeline = cache.timeline.filter(function (t) { return t.id !== id; });
-        }
-        invalidateCache();
-      });
-    },
-
-    // 信件
-    getLetter: function () {
-      if (cache.letter) return clone(cache.letter);
-      loadAllCache();
-      return {};
-    },
-    saveLetter: function (letter) {
-      cache.letter = letter;
-      apiPost('/api/letter', letter).catch(function (err) {
-        console.error('[API Client] 保存信件失败:', err);
-      });
-    },
-
-    // 备份与恢复
-    resetAll: function () {
-      return apiPost('/api/reset', {}).then(function () {
-        invalidateCache();
-      });
-    },
-    exportAllData: function () {
-      return apiGet('/api/export');
-    },
-    importAllData: function (json) {
-      var payload = normalizeImportPayload(json);
-      return apiPost('/api/import', { data: payload }).then(function (result) {
-        invalidateCache();
-        return result;
-      });
-    },
-
-    generateId: generateId,
-
-    // 上传封面文件
-    uploadCover: function (file) {
-      var formData = new FormData();
-      formData.append('cover', file);
-      return apiUpload('/api/cover', formData).then(function (result) {
-        cache.cover = result.cover;
-        return result.cover;
-      });
-    },
-
-    // 上传头像文件
-    uploadAvatar: function (side, file) {
-      var formData = new FormData();
-      formData.append('avatar', file);
-      formData.append('side', side);
-      return apiUpload('/api/upload/avatar', formData).then(function (result) {
-        if (!cache.accounts) cache.accounts = { left: {}, right: {} };
-        if (!cache.accounts[side]) cache.accounts[side] = {};
-        cache.accounts[side].avatar = result.url;
-        return result.url;
-      });
-    },
-
-    // 通用上传
-    uploadFile: function (file) {
-      var formData = new FormData();
-      formData.append('file', file);
-      return apiUpload('/api/upload', formData).then(function (result) {
-        return result.url;
-      });
-    },
-
-    // 轮询控制
-    startPolling: startPolling,
-    stopPolling: stopPolling,
-    onUpdate: onUpdate,
-
-    ready: function () {
-      return ensureDataReady();
-    }
+    startPolling: noopReadonly,
+    stopPolling: noopReadonly,
+    onUpdate: noopReadonly
   };
-
-  /* ── 辅助函数 ── */
-
-  function dataURLtoBlob(dataURL) {
-    var parts = dataURL.split(',');
-    var mime = parts[0].match(/:(.*?);/)[1];
-    var bytes = atob(parts[1]);
-    var arr = new Uint8Array(bytes.length);
-    for (var i = 0; i < bytes.length; i++) {
-      arr[i] = bytes.charCodeAt(i);
-    }
-    return new Blob([arr], { type: mime });
-  }
-
-  /* ── 替换全局对象 ── */
 
   window._originalLoveData = window.LoveData;
   window._originalLoveAdmin = window.LoveAdmin;
+  window.LoveData = LoveData_Static;
+  window.LoveAdmin = LoveAdmin_Static;
 
-  window.LoveData = LoveData_API;
-  window.LoveAdmin = LoveAdmin_API;
-
-  /* ── 初始化：检查 session + 预加载缓存 ── */
-
-  refreshSession().then(function () {
-    console.log('[API Client] Session 已检查:', sessionInfo.loggedIn ? '已登录 (' + sessionInfo.side + ')' : '未登录');
-    return loadAllCache();
-  }).then(function () {
-    console.log('[API Client] 数据缓存已加载');
-    startPolling();
-  }).catch(function (err) {
-    console.warn('[API Client] 初始数据加载失败，将使用空缓存:', err.message);
-  });
-
-  console.log('[API Client] API 客户端已就绪');
-  console.log('[API Client] 服务器地址:', API_BASE);
-  console.log('[API Client] 认证方式: HttpOnly Cookie');
+  injectSafeModeStyles();
+  loadSafeData().catch(function () {});
+  console.log('[ICP Safe] 静态展示模式已启用');
 })();
